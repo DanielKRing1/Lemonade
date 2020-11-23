@@ -1,0 +1,38 @@
+{
+  "accessToken": {
+    "jwtToken": "eyJraWQiOiIwXC90bmR4UkdyTWtheEthM2ZWM0pnbFNsZjlDMm5VbHJoMkFyVGQ0bFZhbz0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI0MDA1NDEzOC1jZTdmLTQ1YzUtOWMyNC1lNmJiYTVlYzllN2UiLCJldmVudF9pZCI6ImQ1ZjBmZjc3LWI3MDUtNDIxYy1hODBmLWI5YTExMzA1NTA2ZCIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE2MDI0NjA0OTAsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy1lYXN0LTEuYW1hem9uYXdzLmNvbVwvdXMtZWFzdC0xX0d0Ynh4WlRONyIsImV4cCI6MTYwMjQ3NjAyMiwiaWF0IjoxNjAyNDcyNDIyLCJqdGkiOiIyNTIyZTE5OS05N2M4LTQ2MjktOWMzNC0xNjA5ZjhhOGJiYzgiLCJjbGllbnRfaWQiOiI1dGJrb2NrZGRoOHRvNXZpdjdrazJzYmQ5byIsInVzZXJuYW1lIjoiZGFuaWVsIn0.XZ-VAkij6MEAGdZrw9er7Bo6gcCufQ6XnighhtOG0kteWQ5OZ7HPMiokOkFJEqrGxNbThoiz4zycG3vRNUiFszvFdHesANE-i52PuRGi-rJ7Q50hJHIrLAGuL9A7ETCOz235pQ1GgIZIJlGb3oro2aC0n-Fui5PKGU4eZWFQsinTggCb35ZVJLeg4CFGUwcP7Z4kgBAL-Ed5_824KB_NRa4joc0BhCE_6GMkU_UkPdhwoTW3qeTMqTMxX0U-e6_OliJQOoZ4ywY78jIFUzdy78qFjlFuD_T1p7mRMsts9_65Y2gRfgjBPkawso4_Sd9FRuUVF354V-WYd0wHe23Lxg",
+    "payload": {
+      "auth_time": 1602460490,
+      "client_id": "5tbkockddh8to5viv7kk2sbd9o",
+      "event_id": "d5f0ff77-b705-421c-a80f-b9a11305506d",
+      "exp": 1602476022,
+      "iat": 1602472422,
+      "iss": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_GtbxxZTN7",
+      "jti": "2522e199-97c8-4629-9c34-1609f8a8bbc8",
+      "scope": "aws.cognito.signin.user.admin",
+      "sub": "40054138-ce7f-45c5-9c24-e6bba5ec9e7e",
+      "token_use": "access",
+      "username": "daniel"
+    }
+  },
+  "clockDrift": -3,
+  "idToken": {
+    "jwtToken": "eyJraWQiOiJxUVJwK2twXC8rMXU4MVwvcGxQSGZXdHl4MFZWN1wvQzdKUjJjRThMWjIwMXZnPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI0MDA1NDEzOC1jZTdmLTQ1YzUtOWMyNC1lNmJiYTVlYzllN2UiLCJhdWQiOiI1dGJrb2NrZGRoOHRvNXZpdjdrazJzYmQ5byIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJldmVudF9pZCI6ImQ1ZjBmZjc3LWI3MDUtNDIxYy1hODBmLWI5YTExMzA1NTA2ZCIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNjAyNDYwNDkwLCJpc3MiOiJodHRwczpcL1wvY29nbml0by1pZHAudXMtZWFzdC0xLmFtYXpvbmF3cy5jb21cL3VzLWVhc3QtMV9HdGJ4eFpUTjciLCJjb2duaXRvOnVzZXJuYW1lIjoiZGFuaWVsIiwiZXhwIjoxNjAyNDc2MDIyLCJpYXQiOjE2MDI0NzI0MjIsImVtYWlsIjoiRGFuaWVsS1JpbmcxQGdtYWlsLmNvbSJ9.XuQonbcRKm24SqMQBIVso2Ij-2lB9xexb7dbdiX9nho1Kb9PAkVT-mo_xkdY76I0J1ZK7eZGdrdY8kwT8dU8rlokXPRLQz94UVCMAErzBADgVs8X10i0Pc3ri-O69lbyU8Qv7d3R1qigauGbNLrHtyhRajUPSmE0af2AmlvhiT3PAqfptF7-vvEXU9Ksg1HPiCjSY1l3aoZv3Qp6Ykq1QV1zO-jdWgRuM0g70gvfsdL6x5b6SPXJQLCadYLf1Y8PKAgWNAOZqhjw38bmdzsn6i9dPXiODafONJrGv67KHJ1v5wv3m_VuGsFZ5iznco9m3g7g5s-xm5WROfDykI2R8Q",
+    "payload": {
+      "aud": "5tbkockddh8to5viv7kk2sbd9o",
+      "auth_time": 1602460490,
+      "cognito:username": "daniel",
+      "email": "DanielKRing1@gmail.com",
+      "email_verified": true,
+      "event_id": "d5f0ff77-b705-421c-a80f-b9a11305506d",
+      "exp": 1602476022,
+      "iat": 1602472422,
+      "iss": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_GtbxxZTN7",
+      "sub": "40054138-ce7f-45c5-9c24-e6bba5ec9e7e",
+      "token_use": "id"
+    }
+  },
+  "refreshToken": {
+    "token": "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.MaMqM5N_i5kDbwjb2UMSzIar7SC5H48zCdPoAg_nND9vBlrwgeBG6BL5fmK2v59Gb9H_2jPWBeH5qU75lCp4aEBan7H5wUexO4FmuEmTGnOLvjVtaRIgs3whN_vIu5iq3tLEbvul0gsW3APHMl_H0BBc5sDVMpPmOjo4LRrHn8PJvNsQGSnHrgCGAWBXj3DcR-cvKWYG7lRvsHhib6qEkDeNtIQszdYGB9K21FROnQhxLeLATP62RDn4G_5r4TvlF-vvdldVOf6h1mWay3xbH0XdloJIg8ojB9ecpRo5UZ3TbkKWdNGz4mNKGxCoZ6gBK-BvqVT0h90hid8CKahKfQ.LHoPAPx4KdYjd1nx.xik1_g2eB3NRDMai4Nw-sOtoSQQIED5gcYyyUxXaRtBR3zLxr9qz-Dk2FHTB_oZnfUCp1_NHmg4y4O5l_CSzrNqr4Oa1dbyy4tStVolwRQobq--tp8rZ4_kKNE-nCvDUCKIICmOYQ85lnhwXDkM-sOxXwqueZeOO-xzNN-vKJWwI1JoQ2Vj4PtYwam85D6bq7gRzLFXgniEJtVBvyVW9cdmfY29ktKLbRzW0M5c6tZk-AWyxiLnLOAimLxnTkJq2c-X6N98KJ-UFvaI9kAtHCmOw9ilRfkR8eXEaj0zxUKaOUaVm0VmPXcvGFKMZKjrHx34xKgjPuznvjoSxEE-mtSc7mH3ghKTApfJR4ikI6-aXalvAmLA9lwtxh1nPKuS8JN4_QUc4ei2bM65wYjTxLqhlkIdbyGf_4QgC2bNSsWxCOuPV9BLqjsnw_dJq3JnpVGTEs19COE8CKaz9JnJhxXHtW0P4Szy16AdxqeJah-r9cih-ov_eiwydKfpSTUgTVMM8zXlpZzQ0pp5CsygZAtMs5Z6TNRJbqA5TbRzj7uPUEUzDcdddJGshcpu8aXpGzULRvY8zSqifmCv90c4-enDv0bvGa0lRu8Szsh7Z76NQLXNGRdbuqJ0e-M-sM5swWDL_NBsdUiEgAUMlhFTJkbkd37eu__qORmdUgaCbtCzghzaRjHEOM3ipXl95SQKWlhNxEO9XJNuwMB9dKPWH-Thrq0dTX2CfSmjtxMcUmdjwIjBjZVpA7BfoGmi6VyvdzoHKOl1q_DYUGng4R8BGkoQd0V5rHAmMj1MMVG-1B6hqkbnyvVaDPWsHhNs0hSNWn_9tV-nl-rShCasxjEKjkTrCkra4rXMZXv66REqBge3IhSNvY2sX01b3aaK8dfiXzouAOZiaeyWbtjtDvWNOlGvaLHIXEgMWCtEMOI1vWxXrLlbGXPYeWXQxhsuopgBQ63VPQf1nwxpM9umnv122iwriJZ18tNu9WI5iB0ejDkUyWyhubeIuHji3NwGPqXxHuDBipWBCabL3gRpGQx9CZXSthJ1dRGWAJl0mS1SsK3mqNI2A6tydEtZ3U2O46_y3rK0kxAakFI_pWU2q3kzs0FtHCp1rjk07SMYexF4CcTKgI2cyqXVhwLkARh2yq1gbLEw7VLyHrXnlWMfa53hvbI4SzzfMFxCN9xtwKwliieOj7bM_39JOMhbcFkSNzCqMoCE09dxpSRkauQQVhxdfJFewLPyASqnguMaL5IsCsP0f-toRzjOOJUSNUP7GN4u4BOql.8tpl41qBdoIJrIS8q-rXlA"
+  }
+}
