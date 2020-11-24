@@ -22,7 +22,8 @@ export default class CategoryRelQuerent extends RelQuerent {
             entity2: {
                 id: categoryName2,
             },
-            totalRatings: 0
+            totalRatings: 0,
+            happiness: categoryName1 !== '1' ? Math.random() : 0.0001
         };
 
         const realmRel = this._create(relObj);

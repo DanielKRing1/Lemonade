@@ -11,8 +11,9 @@ declare type MoodRatingType = {
 }
 
 // Realm Tables
-declare interface CategoryType extends RealmEntity, MoodRatingType { }
-declare interface ActivityType extends RealmEntity, CategoryType {
+declare interface RelationshipEntity extends RealmEntity, MoodRatingType { }
+declare interface CategoryType extends RelationshipEntity { }
+declare interface ActivityType extends CategoryType {
     category: Category;
 }
 

@@ -52,7 +52,8 @@ export const Home: FunctionComponent<HomeProps> = (props) => {
     };
     getJwtWrapper();
 
-    Test.createTest();
+    Test.test();
+
   }, []);
 
 

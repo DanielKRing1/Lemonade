@@ -1,7 +1,7 @@
 import realm from '../../';
 import RealmSchema from '../../schemaNames';
 
-import { Category } from '../enum';
+import { Mood } from '../enum';
 
 import ARQuerent from '../../Querents/ActivityRelQuerent';
 import CRQuerent from '../../Querents/CategoryRelQuerent';
@@ -15,37 +15,49 @@ const SeqCategoryRelQuerent = QuerentFactory.getRelQuerent(RealmSchema.Sequentia
 
 
 export const createTest = () => {
-    // for (let i = 0; i < 100; i++) {
-    //     for (let j = 0; j < 100; j++) {
+
+    for (let i = 0; i < 20; i++) {
+        for (let j = 21; j < 40; j++) {
+            if (i === j) continue;
+
+            // @ts-ignore
+            CategoryRelQuerent.create(`${i}`, `${j}`);
+        }
+    }
+};
+
+export const executeTest = () => {
+
+    let startId = '2';
+
+    const reflectiveEntities = CategoryRelQuerent.getMostRelectiveEntities(startId, Mood.Happiness, 2);
+
+    console.log('Reflective Entities');
+    console.log(reflectiveEntities);
+
+};
+
+
+export const test = () => {
 
     realm.write(() => {
-        console.log('ABC');
-        console.log(CategoryRelQuerent);
-        const rel = CategoryRelQuerent.create(Category.Academics, Category.Accomplishment);
-        console.log(rel);
+        realm.deleteAll();
+
+        console.log('Create find closest - Time elapsed!!!!!!!!!!!!!----------------------')
+        let start = Date.now();
+        createTest();
+        let end = Date.now();
+        console.log((end - start) / 1000);
+
+        console.log('Execute find closest - Time elapsed!!!!!!!!!!!!!----------------------')
+        start = Date.now();
+        executeTest();
+        end = Date.now();
+        console.log((end - start) / 1000);
+
     });
-    // }
-    // }
+
 };
-// console.log(CategoryRelQuerent.getAll()[0]);
-// const executeTest = () => {
-//     for (let i = 0; i < 1000; i++) {
-
-//     }
-// };
-// console.log('Create find closest - Time elapsed!!!!!!!!!!!!!----------------------')
-// let start = Date.now();
-// createTest();
-// let end = Date.now();
-// console.log((end - start) / 1000);
-
-// console.log('Execute find closest - Time elapsed!!!!!!!!!!!!!----------------------')
-// start = Date.now();
-// executeTest();
-// end = Date.now();
-// console.log((end - start) / 1000);
-
-// realm.deleteAll();
 
 
 // Utils

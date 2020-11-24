@@ -1,9 +1,11 @@
 import Realm from 'realm';
+import Heap from 'heap';
 
 import RealmSchema from '../schemaNames';
 
 import { InstantiateAbstractClassError, NotImplementedError } from '../../Errors';
 import Querent from './Querent';
+import realm from '..';
 
 
 export default class RelQuerent extends Querent {
@@ -39,7 +41,7 @@ export default class RelQuerent extends Querent {
 
         return allRels;
     };
-    getCombos = (entities: string[]): RelationshipType<any>[] => {
+    getCombos(entities: string[]): RelationshipType<any>[] {
         const allRels = [];
 
         for (let e1 of entities) {
@@ -53,6 +55,11 @@ export default class RelQuerent extends Querent {
 
         return allRels;
     };
+
+    getByEntityId(id: string): Realm.Results<RelationshipEntity & Realm.Object> {
+        return realm.objects(this.schema).filtered(`entity1.id = "${id}" OR entity2.id = "${id}"`);
+    };
+
     create(n1: string, n2: string): RelationshipType<any> {
         throw new NotImplementedError('RelQuerent.create');
     };
@@ -62,6 +69,80 @@ export default class RelQuerent extends Querent {
         if (rel === undefined) rel = this.create(n1, n2);
 
         return rel;
+    };
+
+
+    // Trend Algos
+
+    /**
+     * Branch out to n most [Category] Entities
+     * The Most Reflective Entities are ones who's branches reflect back to themselves most often
+     * 
+     * @param startId Which Entity id to start branching from
+     * @param branchCount Number of times to branhch out from each Entity (More will take longer to compute; also, branches out in ascending order)
+     * 
+     */
+    getMostRelectiveEntities = (startId: string, mood: Mood, branchCount: number): Array<RelationshipEntity> => {
+
+        const reflectivityMap: Record<string, number> = {
+            [startId]: 1
+        };
+
+
+        const run = (startId: string) => {
+
+            const allRel: Realm.Results<RelationshipEntity> = this.getByEntityId(startId);
+
+            const heap = new Heap((a: RelationshipEntity, b: RelationshipEntity) => {
+                if (a !== undefined && b !== undefined) return a[mood] - b[mood];
+                else return a === undefined ? 1 : -1;
+            });
+
+
+            allRel.forEach(rel => heap.push(rel));
+
+            const closestRels = [];
+            for (let i = 0; i < branchCount; i++) {
+                if (heap.empty()) break;
+
+                const nextClosest = heap.pop();
+                closestRels.push(nextClosest);
+            }
+
+            // console.log('closest relationships')
+            // console.log(closestRels)
+
+            for (let closestRel of closestRels) {
+
+                const otherEntityId = (startId !== closestRel.entity1.id) ? closestRel.entity1.id : closestRel.entity2.id;
+
+                if (!reflectivityMap[otherEntityId]) {
+                    reflectivityMap[otherEntityId] = 1;
+                    run(otherEntityId);
+                }
+                else reflectivityMap[otherEntityId]++;
+            }
+
+        };
+        run(startId);
+
+
+        type IdCountType = {
+            id: string;
+            count: number;
+        }
+        const reflectivityMaxHeap = new Heap((a: IdCountType, b: IdCountType) => b.count - a.count);
+        for (let id in reflectivityMap) {
+            const count = reflectivityMap[id];
+            const idCount: IdCountType = {
+                id,
+                count
+            };
+
+            reflectivityMaxHeap.push(idCount);
+        }
+
+        return reflectivityMaxHeap.toArray();
     };
 
 };
