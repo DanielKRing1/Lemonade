@@ -59,15 +59,32 @@ export default class RelQuerent extends Querent {
     );
   }
 
-  create(n1: string, n2: string): RelationshipType<any> {
+  create(n1: string, n2: string): AnyRel {
     throw new NotImplementedError('RelQuerent.create');
   }
 
-  getOrCreate(n1: string, n2: string): RelationshipType<any> {
+  update(n1: string, n2: string): AnyRel {
+    throw new NotImplementedError('RelQuerent.update');
+  }
+
+  getOrCreate(n1: string, n2: string): AnyRel {
     let rel = this.get(n1, n2);
     if (rel === undefined) rel = this.create(n1, n2);
 
     return rel;
+  }
+
+  rate(c1: Category, c2: Category, mood: Mood, rating: number, weight: number) {
+    const rel = this.getOrCreate(c1, c2);
+
+    const weightedRating = rating * weight;
+    const prevRating = rel[mood]!;
+    const newRating =
+      (prevRating * rel.totalRatings + weightedRating) /
+      (rel.totalRatings + weight);
+
+    rel[mood] = newRating;
+    rel.totalRatings += weight;
   }
 
   // Trend Algos

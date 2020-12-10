@@ -208,6 +208,7 @@ const BaseDailyInput: FC<BaseDailyInputProps> = (props) => {
   return (
     <CycleList
       placeholder={placeholder}
+      component={}
       input={input}
       handleChangeInput={handleChangeInput}
       onCycle={handleCyclePress}
