@@ -1,24 +1,64 @@
-import RealmSchema from '../../realm/schemaNames';
-import { Querent, RelQuerent } from './';
+import Realm from 'realm';
 
+import {
+  ActivitySchema,
+  CategorySchema,
+  CategoryRelationshipSchema,
+  ActivityRelationshipSchema,
+} from '../Activity';
+
+import RealmSchema from '../../realm/schemaNames';
+import {Querent, RelQuerent} from './';
 
 export default class QuerentFactory {
+  static realmInstanceMap: Record<RealmPath, Realm> = {};
+  static querentInstanceMap: Record<
+    RealmPath,
+    {[key in RealmSchema]?: Querent}
+  > = {};
 
+  static getRelQuerent(
+    realmPath: RealmPath,
+    schema: RealmSchema,
+    classType: AnyRel | any,
+  ): RelQuerent {
+    let realmInstance = QuerentFactory.getRealm(realmPath);
+    let querentInstance =
+      QuerentFactory.querentInstanceMap[schema]?.[realmPath];
 
-    static instanceMap: { [key in RealmSchema]?: Querent } = {};
+    if (querentInstance === undefined) {
+      querentInstance = new RelQuerent(realmInstance, schema);
+      querentInstance.create = classType.prototype.create;
+      // TODO Add update logic
+      // querentInstance.update = classType.prototype.update;
 
-    static getRelQuerent(schema: RealmSchema, classType: any): RelQuerent {
+      QuerentFactory.querentInstanceMap[realmPath][schema] = querentInstance;
+    }
 
-        let instance = QuerentFactory.instanceMap[schema];
+    return querentInstance as RelQuerent;
+  }
 
-        if (instance === undefined) {
-            instance = new RelQuerent(schema)
-            instance.create = classType.prototype.create;
+  static getRealm(realmPath: RealmPath) {
+    let realmInstance = QuerentFactory.realmInstanceMap[realmPath];
 
-            QuerentFactory.instanceMap[schema] = instance;
-        }
+    // Open new Realm
+    if (realmInstance === undefined) {
+      realmInstance = new Realm({
+        path: realmPath,
+        schema: [
+          ActivitySchema,
+          CategorySchema,
+          CategoryRelationshipSchema,
+          ActivityRelationshipSchema,
+        ],
+        deleteRealmIfMigrationNeeded: true,
+      });
 
-        return instance as RelQuerent;
-    };
+      // Add to maps
+      QuerentFactory.realmInstanceMap[realmPath] = realmInstance;
+      QuerentFactory.querentInstanceMap[realmPath] = {};
+    }
 
-};
+    return realmInstance;
+  }
+}

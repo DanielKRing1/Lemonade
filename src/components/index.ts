@@ -5,5 +5,6 @@ export * from './Button';
 export * from './Container';
 export * from './ExpandableInput';
 export * from './List';
+export * from './RatingInput';
 export * from './TrieAutoComplete';
 export * from './Space';
