@@ -1,4 +1,10 @@
 enum RealmSchema {
+  SchemaDeclaration = 'SchemaDeclaration',
+
+  // Daily
+  Day = 'Day',
+  DayPart = 'DayPart',
+
   // Enitities
   Activity = 'Activity',
   ActivityCategory = 'ActivityCategory',

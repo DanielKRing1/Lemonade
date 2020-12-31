@@ -1,5 +1,8 @@
 import Realm from 'realm';
 
+import RealmSchema from '../../realm/schemaNames';
+import {Querent, DayQuerent, RelQuerent} from './';
+
 import {
   ActivitySchema,
   CategorySchema,
@@ -7,8 +10,7 @@ import {
   ActivityRelationshipSchema,
 } from '../Activity';
 
-import RealmSchema from '../../realm/schemaNames';
-import {Querent, RelQuerent} from './';
+import {DEFAULT_PATH} from '../../constants/Realm/paths';
 
 export default class QuerentFactory {
   static realmInstanceMap: Record<RealmPath, Realm> = {};
@@ -17,14 +19,30 @@ export default class QuerentFactory {
     {[key in RealmSchema]?: Querent}
   > = {};
 
+  static getDayQuerent(
+    realmPath: RealmPath = DEFAULT_PATH,
+    schema: RealmSchema = RealmSchema.Day,
+  ) {
+    let realmInstance = QuerentFactory.getRealm(DEFAULT_PATH);
+    let querentInstance =
+      QuerentFactory.querentInstanceMap[DEFAULT_PATH][schema];
+
+    if (querentInstance === undefined) {
+      querentInstance = new DayQuerent(realmInstance, schema);
+
+      QuerentFactory.querentInstanceMap[realmPath][schema] = querentInstance;
+    }
+
+    return querentInstance as DayQuerent;
+  }
+
   static getRelQuerent(
-    realmPath: RealmPath,
+    realmPath: RealmPath = DEFAULT_PATH,
     schema: RealmSchema,
     classType: AnyRel | any,
   ): RelQuerent {
     let realmInstance = QuerentFactory.getRealm(realmPath);
-    let querentInstance =
-      QuerentFactory.querentInstanceMap[schema]?.[realmPath];
+    let querentInstance = QuerentFactory.querentInstanceMap[realmPath][schema];
 
     if (querentInstance === undefined) {
       querentInstance = new RelQuerent(realmInstance, schema);

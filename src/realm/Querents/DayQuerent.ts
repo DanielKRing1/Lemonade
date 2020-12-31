@@ -1,26 +1,13 @@
-import Heap from 'heap';
-
 import RealmSchema from '../schemaNames';
 
-import {InstantiateAbstractClassError, NotImplementedError} from '../../Errors';
 import Querent from './Querent';
 
-export default class RelQuerent extends Querent {
-  static sortNamePair(n1: string, n2: string): string[] {
-    return [n1, n2].sort((a, b) => (a < b ? -1 : 1));
-  }
-  static getRelId(a1: string, a2: string): string {
-    return this.constructor.sortNamePair(a1, a2).join('-');
-  }
-
+export default class DayQuerent extends Querent {
   constructor(realm: Realm, schema: RealmSchema) {
     super(realm, schema);
-
-    if (this.constructor === RelQuerent)
-      throw new InstantiateAbstractClassError('RelQuerent');
   }
 
-  get(a1: string, a2: string): RelationshipType<any> {
+  getDay(date: ): RelationshipType<any> {
     const id = RelQuerent.getRelId(a1, a2);
     return this.getById(id) as RelationshipType<any>;
   }
@@ -59,27 +46,12 @@ export default class RelQuerent extends Querent {
     );
   }
 
-  // create(n1: string, n2: string): AnyRel {
-  //   throw new NotImplementedError('RelQuerent.create');
-  // }
-  create(e1: string, e2: string): RelationshipType<any> {
-    const [entityName1, entityName2] = RelQuerent.sortNamePair(e1, e2);
-    const id = RelQuerent.getRelId(e1, e2);
+  create(n1: string, n2: string): AnyRel {
+    throw new NotImplementedError('RelQuerent.create');
+  }
 
-    const relObj: RelationshipType<any> = {
-      id,
-      entity1: {
-        id: entityName1,
-      },
-      entity2: {
-        id: entityName2,
-      },
-      totalRatings: 0,
-    };
-
-    const realmRel = this._create(relObj);
-
-    return realmRel as RelationshipType<any>;
+  update(n1: string, n2: string): AnyRel {
+    throw new NotImplementedError('RelQuerent.update');
   }
 
   getOrCreate(n1: string, n2: string): AnyRel {
@@ -89,8 +61,8 @@ export default class RelQuerent extends Querent {
     return rel;
   }
 
-  rate(e1: string, e2: string, mood: string, rating: number, weight: number) {
-    const rel = this.getOrCreate(e1, e2);
+  rate(c1: Category, c2: Category, mood: Mood, rating: number, weight: number) {
+    const rel = this.getOrCreate(c1, c2);
 
     const weightedRating = rating * weight;
     const prevRating = rel[mood]!;
@@ -100,27 +72,6 @@ export default class RelQuerent extends Querent {
 
     rel[mood] = newRating;
     rel.totalRatings += weight;
-
-    return newRating;
-  }
-
-  // update(entities: Array<string>, mood: string, rating: number) {
-  //   throw new NotImplementedError('RelQuerent.update');
-  // }
-
-  update(
-    entities: Array<string>,
-    mood: string,
-    rating: number,
-    other: Object = {},
-  ) {
-    for (let i = 0; i < entities.length - 2; i++) {
-      const entity1 = entities[i];
-      for (let j = i + 1; j < entities.length - 1; j++) {
-        const entity2 = entities[j];
-        this.rate(entity1, entity2, mood, rating, 1 / entities.length);
-      }
-    }
   }
 
   // Trend Algos
