@@ -3,6 +3,8 @@ import Realm from 'realm';
 import {DEFAULT_PATH} from '../../constants/Realm';
 import RealmSchemaName from '../schemaNames';
 import {RealmSchema, TrendSchema} from './RealmSchema';
+
+import SchemaCache from './SchemaCache';
 import TrendCache from './TrendCache';
 
 type RealmPath = string;
@@ -22,7 +24,7 @@ type TrendSchemaMap = Record<RealmPath, Array<TrendSchema>>;
 
 class RealmCache {
   static realmMap: Record<string, Realm> = {};
-  static trendSchemaMap: TrendSchemaMap = {};
+  // static trendSchemaMap: TrendSchemaMap = {};
 
   static init() {
     RealmCache._loadSchemaBlueprints();
@@ -76,34 +78,24 @@ class RealmCache {
 
   /**
    * Load all Blueprints defined in Default Realm
-   */
-  static _loadSchemaBlueprints() {
-    RealmCache._loadTrendBlueprints();
-  }
-
-  /**
+   *
    * Load the TrendBlueprints stored in the Default Realm
    * Then parse each TrendBlueprint's 'trendSchema' string into a usable TrendSchema object
    *
    * Save to RealmCache.trendSchemaMap as { realmPath: TrendSchema[] }
    */
-
-  // TODO Replace with map, put in plural method ^
-  static _loadTrendBlueprints() {
+  static _loadSchemaBlueprints() {
     // Load
     const defaultRealm = RealmCache.getDefaultRealm();
-    const blueprints: Realm.Results<SchemaBlueprintRow> = defaultRealm.objects(RealmSchemaName.SchemaBlueprint);
+    const schemaBlueprints: Realm.Results<SchemaBlueprintRow> = defaultRealm.objects(RealmSchemaName.SchemaBlueprint);
 
-    // Map to realmPath keys
-    RealmCache.trendSchemaMap = blueprints.reduce((map: TrendSchemaMap, bp: SchemaBlueprintRow) => {
+    // Add to SchemaCache
+    schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprintRow) => {
       // Deserialize
-      const trendSchema: TrendSchema = RealmSchema.fromSchemaStr(bp);
+      const schema = RealmSchema.fromSchemaStr(schemaBlueprint);
 
-      if (!map[bp.realmPath]) map[bp.realmPath] = [];
-      map[bp.realmPath].push(trendSchema);
-
-      return map;
-    }, {});
+      SchemaCache.add(schema);
+    });
   }
 
   /**
@@ -132,7 +124,7 @@ class RealmCache {
    */
   static _loadRealm(realmPath: string, options: RealmOptions) {
     // Merge all Table Schemas related to Realm
-    const trendSchemas: TrendSchema[] = RealmCache.trendSchemaMap[realmPath];
+    const trendSchemas: TrendSchema[] = SchemaCache.trendSchemaMap[realmPath];
     const allSchemas = [...trendSchemas];
 
     // Add Realm to RealmCache
