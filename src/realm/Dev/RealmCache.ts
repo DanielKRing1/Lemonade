@@ -67,7 +67,7 @@ class RealmCache {
 
   /**
    * Load the TrendBlueprints stored in the default Schema
-   * Then parse each TrendBlueprint's 'realmSchema' string into a usable TrendSchema object
+   * Then parse each TrendBlueprint's 'trendSchema' string into a usable TrendSchema object
    */
   static _loadBlueprints() {
     // Load
@@ -77,7 +77,7 @@ class RealmCache {
     // Map to realmPath keys
     RealmCache.trendSchemaMap = blueprints.reduce((map: TrendSchemaMap, bp: TrendBlueprint) => {
       // Deserialize
-      const trendSchema: TrendSchema = JSON.parse(bp.realmSchema);
+      const trendSchema: TrendSchema = JSON.parse(bp.trendSchema);
 
       if (!map[bp.realmPath]) map[bp.realmPath] = [];
       map[bp.realmPath].push(trendSchema);
@@ -92,15 +92,15 @@ class RealmCache {
    *
    * @param options Use to override default 'new Realm' options
    */
-  static _loadRealms(options: any = {}) {
+  static _loadRealms(options: RealmOptions = {}) {
     for (let realmPath in RealmCache.trendSchemaMap) {
       RealmCache._loadRealm(realmPath, options);
     }
   }
 
-  static _loadRealm(realmPath: string, options: any) {
+  static _loadRealm(realmPath: string, options: RealmOptions) {
     const trendSchemas = RealmCache.trendSchemaMap[realmPath];
-    RealmCache.add(realmPath, options, trendSchemas);
+    RealmCache.add(realmPath, trendSchemas, options);
   }
 }
 // Init

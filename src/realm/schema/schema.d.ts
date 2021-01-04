@@ -7,5 +7,5 @@ declare type TrendSchema = {
 declare type TrendBlueprint = {
   schemaName: string;
   realmPath: string;
-  realmSchema: string;
+  trendSchema: string;
 };
