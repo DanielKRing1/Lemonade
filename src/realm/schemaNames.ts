@@ -1,5 +1,5 @@
-enum RealmSchema {
-  TrendBlueprint = 'TrendBlueprint',
+enum RealmSchemaName {
+  SchemaBlueprint = 'SchemaBlueprint',
 
   // Daily
   Day = 'Day',
@@ -16,4 +16,4 @@ enum RealmSchema {
   SequentialCategoryRelationship = 'SequentialCategoryRelationship',
 }
 
-export default RealmSchema;
+export default RealmSchemaName;

@@ -1,8 +1,8 @@
 import Realm from 'realm';
 
-import RealmSchemaName from '../schemaNames';
-import {TrendBlueprint} from './Schemas';
 import {DEFAULT_PATH} from '../../constants/Realm';
+import RealmSchemaName from '../schemaNames';
+import {RealmSchema, TrendSchema} from './RealmSchema';
 import TrendCache from './TrendCache';
 
 type RealmPath = string;
@@ -25,14 +25,14 @@ class RealmCache {
   static trendSchemaMap: TrendSchemaMap = {};
 
   static init() {
-    RealmCache._loadTrendBlueprints();
-    RealmCache._loadRealms();
+    RealmCache._loadSchemaBlueprints();
+    RealmCache._loadAllRealms();
   }
 
-  static _openRealm(realmPath: string, schemas: Array<TrendSchema>, options: RealmOptions) {
+  static _openRealm(realmPath: string, schemas: Array<RealmSchema>, options: RealmOptions) {
     const newRealm = new Realm({
       path: realmPath,
-      schema: schemas,
+      schema: schemas.map((schema: RealmSchema) => schema.getSchemaObject()),
       deleteRealmIfMigrationNeeded: true,
       ...options,
     });
@@ -47,7 +47,7 @@ class RealmCache {
    * @param schemas Schema[] expected to be used (and therefore loaded) with Realm
    * @param options Options object for opening Realm
    */
-  static add(realmPath: string, schemas: Array<TrendSchema>, options: RealmOptions = {}) {
+  static add(realmPath: string, schemas: Array<RealmSchema>, options: RealmOptions = {}) {
     const realmInstance = RealmCache._openRealm(realmPath, schemas, options);
     RealmCache.realmMap[realmPath] = realmInstance;
 
@@ -69,9 +69,16 @@ class RealmCache {
    */
   static getDefaultRealm() {
     let realmInstance = RealmCache.get(DEFAULT_PATH);
-    if (!realmInstance) realmInstance = RealmCache.add(DEFAULT_PATH, [TrendBlueprint], {});
+    if (!realmInstance) realmInstance = RealmCache.add(DEFAULT_PATH, [RealmSchema.getBlueprintSchema()], {});
 
     return realmInstance;
+  }
+
+  /**
+   * Load all Blueprints defined in Default Realm
+   */
+  static _loadSchemaBlueprints() {
+    RealmCache._loadTrendBlueprints();
   }
 
   /**
@@ -80,15 +87,17 @@ class RealmCache {
    *
    * Save to RealmCache.trendSchemaMap as { realmPath: TrendSchema[] }
    */
+
+  // TODO Replace with map, put in plural method ^
   static _loadTrendBlueprints() {
     // Load
     const defaultRealm = RealmCache.getDefaultRealm();
-    const blueprints: Realm.Results<TrendBlueprint> = defaultRealm.objects(RealmSchemaName.TrendBlueprint);
+    const blueprints: Realm.Results<SchemaBlueprintRow> = defaultRealm.objects(RealmSchemaName.SchemaBlueprint);
 
     // Map to realmPath keys
-    RealmCache.trendSchemaMap = blueprints.reduce((map: TrendSchemaMap, bp: TrendBlueprint) => {
+    RealmCache.trendSchemaMap = blueprints.reduce((map: TrendSchemaMap, bp: SchemaBlueprintRow) => {
       // Deserialize
-      const trendSchema: TrendSchema = JSON.parse(bp.trendSchema);
+      const trendSchema: TrendSchema = RealmSchema.fromSchemaStr(bp);
 
       if (!map[bp.realmPath]) map[bp.realmPath] = [];
       map[bp.realmPath].push(trendSchema);
@@ -98,22 +107,20 @@ class RealmCache {
   }
 
   /**
-   * Call after loading blueprints with RealmCache._loadTrendBlueprints()
-   * (and possibly more '_load__Blueprints()' methods in the future)
+   * Call after loading blueprints with RealmCache._loadSchemaBlueprints()
    *
    * Iterates RealmCache.trendSchemaMap to open a Realm at each realmPath, with the mapped TrendSchema[]
    *
    * @param options Use to override default 'new Realm' options
    */
-  static _loadRealms(options: RealmOptions = {}) {
+  static _loadAllRealms(options: RealmOptions = {}) {
     for (let realmPath in RealmCache.trendSchemaMap) {
       RealmCache._loadRealm(realmPath, options);
     }
   }
 
   /**
-   * Call after loading blueprints with RealmCache._loadTrendBlueprints()
-   * (and possibly more '_load__Blueprints()' methods in the future)
+   * Call after loading blueprints with RealmCache._loadSchemaBlueprints()
    *
    * Fetches TrendSchema[] from RealmCache.trendSchemaMap, using the 'realmPath' key
    * And opens a Realm at the specified 'realmPath', with the fetched TrendSchema[]

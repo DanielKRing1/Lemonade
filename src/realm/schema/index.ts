@@ -1,4 +1,4 @@
-export * from '../Dev/Schemas/TrendBlueprint';
+export * from '../Dev/Deprecated/Schemas/BlueprintSchema';
 export * from './Day';
 export * from './DayPart';
 
