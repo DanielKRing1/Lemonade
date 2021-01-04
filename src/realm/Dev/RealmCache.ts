@@ -3,17 +3,20 @@ import Realm from 'realm';
 import RealmSchemaName from '../schemaNames';
 import {TrendBlueprint} from './Schemas';
 import {DEFAULT_PATH} from '../../constants/Realm';
+import TrendCache from './TrendCache';
 
-export type TrendSchemaMap = Record<string, Array<TrendSchema>>;
+type RealmPath = string;
 type RealmOptions = Record<string, any>;
+type TrendSchemaMap = Record<RealmPath, Array<TrendSchema>>;
 
 /**
  *
  * All methods are static
  *
  * This class should be used to fetch and cache realm connections
- *
  * It also has convenience a method to fetch the Default Realm
+ *
+ * This class adds openned Realms to TrendCache
  *
  */
 
@@ -22,7 +25,7 @@ class RealmCache {
   static trendSchemaMap: TrendSchemaMap = {};
 
   static init() {
-    RealmCache._loadBlueprints();
+    RealmCache._loadTrendBlueprints();
     RealmCache._loadRealms();
   }
 
@@ -37,6 +40,13 @@ class RealmCache {
     return newRealm;
   }
 
+  /**
+   * Simply add realm to cache
+   *
+   * @param realmPath Realm path
+   * @param schemas Schema[] expected to be used (and therefore loaded) with Realm
+   * @param options Options object for opening Realm
+   */
   static add(realmPath: string, schemas: Array<TrendSchema>, options: RealmOptions = {}) {
     const realmInstance = RealmCache._openRealm(realmPath, schemas, options);
     RealmCache.realmMap[realmPath] = realmInstance;
@@ -45,31 +55,32 @@ class RealmCache {
   }
 
   /**
-   * Call with 'schemas' and 'options' if expecting to open Realm for the first time
-   * Else, simply provide realmPath to fetch from cache
-   *
-   * @param realmPath Realm id to open
-   * @param options Options with which Realm will be opened
-   * @param schemas Array of TrendSchemas to be loaded into Realm
-   * @param update If true, opens Realm and replaces existing realm in cache
+   * Simply get Realm from cache, if exists
    */
-  static get(realmPath: string, schemas: Array<TrendSchema> = [], options: RealmOptions = {}, update: boolean = false) {
-    // Get or Create + cache
+  static get(realmPath: string) {
     let realmInstance = RealmCache.realmMap[realmPath];
-    if (!realmInstance || update) realmInstance = RealmCache.add(realmPath, schemas, options);
 
     return realmInstance;
   }
 
+  /**
+   * Get Default Realm
+   * Opens Default Realm and caches it if not already in cache
+   */
   static getDefaultRealm() {
-    return RealmCache.get(DEFAULT_PATH, [TrendBlueprint], {});
+    let realmInstance = RealmCache.get(DEFAULT_PATH);
+    if (!realmInstance) realmInstance = RealmCache.add(DEFAULT_PATH, [TrendBlueprint], {});
+
+    return realmInstance;
   }
 
   /**
-   * Load the TrendBlueprints stored in the default Schema
+   * Load the TrendBlueprints stored in the Default Realm
    * Then parse each TrendBlueprint's 'trendSchema' string into a usable TrendSchema object
+   *
+   * Save to RealmCache.trendSchemaMap as { realmPath: TrendSchema[] }
    */
-  static _loadBlueprints() {
+  static _loadTrendBlueprints() {
     // Load
     const defaultRealm = RealmCache.getDefaultRealm();
     const blueprints: Realm.Results<TrendBlueprint> = defaultRealm.objects(RealmSchemaName.TrendBlueprint);
@@ -87,8 +98,10 @@ class RealmCache {
   }
 
   /**
-   * Call after loading blueprints (_loadBlueprints())
-   * Uses trendSchemaMap to open a Realm at each realmPath, with the mapped TrendSchema[]
+   * Call after loading blueprints with RealmCache._loadTrendBlueprints()
+   * (and possibly more '_load__Blueprints()' methods in the future)
+   *
+   * Iterates RealmCache.trendSchemaMap to open a Realm at each realmPath, with the mapped TrendSchema[]
    *
    * @param options Use to override default 'new Realm' options
    */
@@ -98,9 +111,30 @@ class RealmCache {
     }
   }
 
+  /**
+   * Call after loading blueprints with RealmCache._loadTrendBlueprints()
+   * (and possibly more '_load__Blueprints()' methods in the future)
+   *
+   * Fetches TrendSchema[] from RealmCache.trendSchemaMap, using the 'realmPath' key
+   * And opens a Realm at the specified 'realmPath', with the fetched TrendSchema[]
+   *
+   * Also tells TrendCache to add a TrendTracker for any TrendSchemas loaded into the Realm
+   *
+   * @param realmPath The RealmCache.trendSchemaMap key from which to fetch a TrendSchema[]
+   * @param options Use to override default 'new Realm' options
+   */
   static _loadRealm(realmPath: string, options: RealmOptions) {
-    const trendSchemas = RealmCache.trendSchemaMap[realmPath];
-    RealmCache.add(realmPath, trendSchemas, options);
+    // Merge all Table Schemas related to Realm
+    const trendSchemas: TrendSchema[] = RealmCache.trendSchemaMap[realmPath];
+    const allSchemas = [...trendSchemas];
+
+    // Add Realm to RealmCache
+    const realmInstance = RealmCache.add(realmPath, allSchemas, options);
+
+    // Add TrendSchema[] to TrendCache
+    trendSchemas.forEach((trendSchema: TrendSchema) => {
+      TrendCache.add(trendSchema.name, realmInstance);
+    });
   }
 }
 // Init
