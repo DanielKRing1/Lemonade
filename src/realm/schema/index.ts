@@ -1,4 +1,4 @@
-export * from './SchemaDefinition';
+export * from '../Dev/Schemas/TrendBlueprint';
 export * from './Day';
 export * from './DayPart';
 

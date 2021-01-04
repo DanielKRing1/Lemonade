@@ -1,10 +1,10 @@
 import Realm from 'realm';
 
-import {SchemaDefinition} from './schema';
+import {TrendBlueprint} from './Dev/Schemas';
 import RealmSchema from './schemaNames';
 
 export const metadataRealm = new Realm({
-  schema: [SchemaDefinition],
+  schema: [TrendBlueprint],
   // TODO Remove this after testing
   deleteRealmIfMigrationNeeded: true,
 });
@@ -30,44 +30,32 @@ const Entity = {
 };
 metadataRealm.write(() => {
   // TODO Distribute as util method
-  const getSchemaDeclaration = (
-    schemaName: string,
-    realmPath: string,
-    schemaDef: SchemaDefinition,
-  ): SchemaDeclaration => ({
+  const getSchemaDeclaration = (schemaName: string, realmPath: string, realmSchema: SchemaDefinition): SchemaDeclaration => ({
     schemaName,
     realmPath,
-    definition: JSON.stringify(schemaDef),
+    realmSchema: JSON.stringify(realmSchema),
   });
   const entityDeclaration = getSchemaDeclaration(Entity.name, 'Mood', Entity);
-  metadataRealm.create(RealmSchema.SchemaDeclaration, entityDeclaration);
+  metadataRealm.create(RealmSchema.TrendBlueprint, entityDeclaration);
 });
 
 // Might need to wait for timeout during creation
 
-export const loadedSchemaDeclarations: Realm.Results<SchemaDeclaration> = metadataRealm.objects(
-  RealmSchema.SchemaDeclaration,
-);
+export const loadedSchemaDeclarations: Realm.Results<SchemaDeclaration> = metadataRealm.objects(RealmSchema.TrendBlueprint);
 
 // {
 //   realmName: [ SchemaDefinition ],
 //   ...
 // }
-export const realmSchemaDefinitions = loadedSchemaDeclarations.reduce(
-  (
-    realmMap: Record<string, Array<SchemaDefinition>>,
-    declaration: SchemaDeclaration,
-  ) => {
-    const {schemaName, realmPath, definition: defStr} = declaration;
-    if (!!realmMap[realmPath]) realmMap[realmPath] = [];
+export const realmSchemaDefinitions = loadedSchemaDeclarations.reduce((realmMap: Record<string, Array<SchemaDefinition>>, declaration: SchemaDeclaration) => {
+  const {schemaName, realmPath, definition: defStr} = declaration;
+  if (!!realmMap[realmPath]) realmMap[realmPath] = [];
 
-    const defObj = JSON.parse(defStr);
-    realmMap[realmPath].push(defObj);
+  const defObj = JSON.parse(defStr);
+  realmMap[realmPath].push(defObj);
 
-    return realmMap;
-  },
-  {},
-);
+  return realmMap;
+}, {});
 
 export const realms = Object.keys(realmSchemaDefinitions).reduce(
   (_realms, realmName: string) => ({

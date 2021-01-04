@@ -5,3 +5,5 @@ export * from './DatabaseValues/Emotion';
 export * from './DatabaseValues/Activity';
 
 export * from './themes';
+
+export * from './Realm';

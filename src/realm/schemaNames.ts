@@ -1,5 +1,5 @@
 enum RealmSchema {
-  SchemaDeclaration = 'SchemaDeclaration',
+  TrendBlueprint = 'TrendBlueprint',
 
   // Daily
   Day = 'Day',
