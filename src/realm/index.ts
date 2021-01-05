@@ -1,6 +1,6 @@
 import Realm from 'realm';
 
-import {TrendBlueprint} from './Dev/Schemas';
+import {TrendBlueprint} from './Dev/Deprecated/Schemas';
 import RealmSchema from './schemaNames';
 
 export const metadataRealm = new Realm({
