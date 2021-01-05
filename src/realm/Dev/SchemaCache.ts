@@ -33,7 +33,7 @@ class SchemaCache {
    *
    * @param realmPath The Realm for which to fetch all associated Schemas
    */
-  static getRealm(realmPath: string) {
+  static getByRealm(realmPath: string) {
     if (SchemaCache.hasRealmPath(realmPath)) {
       const schemaTypeMap: SchemaTypeMap = SchemaCache.map[realmPath];
 
@@ -44,6 +44,8 @@ class SchemaCache {
         return allSchemas;
       }, []);
     }
+
+    return [];
   }
 
   /**
@@ -53,12 +55,14 @@ class SchemaCache {
    * @param realmPath The Realm from which to fetch associated Schemas
    * @param schemaType The type of Schema to fetch for the associated Realm
    */
-  static getSchemaType(realmPath: string, schemaType: string) {
+  static getBySchemaType(realmPath: string, schemaType: string) {
     if (SchemaCache.hasSchemaType(realmPath, schemaType)) {
       const schemaMap: SchemaMap = SchemaCache.map[realmPath][schemaType];
 
       return Object.values(schemaMap);
     }
+
+    return [];
   }
 
   /**
@@ -68,7 +72,7 @@ class SchemaCache {
    * @param schemaType
    * @param schemaName
    */
-  static getSchemaName(realmPath: string, schemaType: string, schemaName: string) {
+  static getBySchemaName(realmPath: string, schemaType: string, schemaName: string) {
     if (SchemaCache.hasSchemaName(realmPath, schemaType, schemaName)) return SchemaCache.map[realmPath][schemaType][schemaName];
   }
 

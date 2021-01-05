@@ -28,13 +28,13 @@ class RealmCache {
 
   static init() {
     RealmCache._loadSchemaBlueprints();
-    RealmCache._loadAllRealms();
+    RealmCache._openAllRealms();
   }
 
-  static _openRealm(realmPath: string, schemas: Array<RealmSchema>, options: RealmOptions) {
+  static _openRealm(realmPath: string, realmSchemas: Array<RealmSchema>, options: RealmOptions) {
     const newRealm = new Realm({
       path: realmPath,
-      schema: schemas.map((schema: RealmSchema) => schema.getSchemaObject()),
+      schema: realmSchemas.map((schema: RealmSchema) => schema.getSchemaObject()),
       deleteRealmIfMigrationNeeded: true,
       ...options,
     });
@@ -46,11 +46,11 @@ class RealmCache {
    * Simply add realm to cache
    *
    * @param realmPath Realm path
-   * @param schemas Schema[] expected to be used (and therefore loaded) with Realm
+   * @param realmSchemas Schema[] expected to be used (and therefore loaded) with Realm
    * @param options Options object for opening Realm
    */
-  static add(realmPath: string, schemas: Array<RealmSchema>, options: RealmOptions = {}) {
-    const realmInstance = RealmCache._openRealm(realmPath, schemas, options);
+  static add(realmPath: string, realmSchemas: Array<RealmSchema>, options: RealmOptions = {}) {
+    const realmInstance = RealmCache._openRealm(realmPath, realmSchemas, options);
     RealmCache.realmMap[realmPath] = realmInstance;
 
     return realmInstance;
@@ -105,8 +105,8 @@ class RealmCache {
    *
    * @param options Use to override default 'new Realm' options
    */
-  static _loadAllRealms(options: RealmOptions = {}) {
-    for (let realmPath in RealmCache.trendSchemaMap) {
+  static _openAllRealms(options: RealmOptions = {}) {
+    for (let realmPath in SchemaCache.map) {
       RealmCache._loadRealm(realmPath, options);
     }
   }
@@ -123,16 +123,14 @@ class RealmCache {
    * @param options Use to override default 'new Realm' options
    */
   static _loadRealm(realmPath: string, options: RealmOptions) {
-    // Merge all Table Schemas related to Realm
-    const trendSchemas: TrendSchema[] = SchemaCache.trendSchemaMap[realmPath];
-    const allSchemas = [...trendSchemas];
+    const realmSchemas = SchemaCache.getByRealm(realmPath);
 
     // Add Realm to RealmCache
-    const realmInstance = RealmCache.add(realmPath, allSchemas, options);
+    const realmInstance = RealmCache.add(realmPath, realmSchemas, options);
 
-    // Add TrendSchema[] to TrendCache
-    trendSchemas.forEach((trendSchema: TrendSchema) => {
-      TrendCache.add(trendSchema.name, realmInstance);
+    // Add 'Trend' type RealmSchemas to TrendCache
+    realmSchemas.forEach((realmSchema: RealmSchema) => {
+      if (realmSchema.schemaType === SchemaType.Trend) TrendCache.add(realmSchema.name, realmInstance);
     });
   }
 }
