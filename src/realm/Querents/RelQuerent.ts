@@ -13,39 +13,38 @@ export default class RelQuerent extends Querent {
     return this.constructor.sortNamePair(a1, a2).join('-');
   }
 
-  constructor(realm: Realm, schema: RealmSchema) {
-    super(realm, schema);
+  constructor(schema: RealmSchema) {
+    super(schema);
 
-    if (this.constructor === RelQuerent)
-      throw new InstantiateAbstractClassError('RelQuerent');
+    if (this.constructor === RelQuerent) throw new InstantiateAbstractClassError('RelQuerent');
   }
 
-  get(a1: string, a2: string): RelationshipType<any> {
+  get(realm: Realm, a1: string, a2: string): RelationshipType<any> {
     const id = RelQuerent.getRelId(a1, a2);
-    return this.getById(id) as RelationshipType<any>;
+    return this.getById(realm, id) as RelationshipType<any>;
   }
-  getOrCreateCombos = (entityNames: string[]): RelationshipType<any>[] => {
+  getOrCreateCombos = (realm: Realm, entityNames: string[]): RelationshipType<any>[] => {
     const allRels = [];
 
     for (let n1 of entityNames) {
       for (let n2 of entityNames) {
         if (n1 === n2) continue;
 
-        const rel = this.getOrCreate(n1, n2);
+        const rel = this.getOrCreate(realm, n1, n2);
         allRels.push(rel);
       }
     }
 
     return allRels;
   };
-  getCombos(entities: string[]): RelationshipType<any>[] {
+  getCombos(realm: Realm, entities: string[]): RelationshipType<any>[] {
     const allRels = [];
 
     for (let e1 of entities) {
       for (let e2 of entities) {
         if (e1 === e2) continue;
 
-        const rel = this.get(e1, e2);
+        const rel = this.get(realm, e1, e2);
         allRels.push(rel);
       }
     }
@@ -53,18 +52,16 @@ export default class RelQuerent extends Querent {
     return allRels;
   }
 
-  getByEntityId(id: string): Realm.Results<Realm.Object> {
-    return this.realm!.objects(this.schema).filtered(
-      `entity1.id = "${id}" OR entity2.id = "${id}"`,
-    );
+  getByEntityId(realm: Realm, id: string): Realm.Results<Realm.Object> {
+    return realm.objects(this.schema).filtered(`entity1.id = "${id}" OR entity2.id = "${id}"`);
   }
 
   // create(n1: string, n2: string): AnyRel {
   //   throw new NotImplementedError('RelQuerent.create');
   // }
-  create(e1: string, e2: string): RelationshipType<any> {
+  create(realm: Realm, e1: string, e2: string): RelationshipType<any> {
     const [entityName1, entityName2] = RelQuerent.sortNamePair(e1, e2);
-    const id = RelQuerent.getRelId(e1, e2);
+    const id = RelQuerent.getRelId(realm, e1, e2);
 
     const relObj: RelationshipType<any> = {
       id,
@@ -77,26 +74,24 @@ export default class RelQuerent extends Querent {
       totalRatings: 0,
     };
 
-    const realmRel = this._create(relObj);
+    const realmRel = this._create(realm, relObj);
 
     return realmRel as RelationshipType<any>;
   }
 
-  getOrCreate(n1: string, n2: string): AnyRel {
-    let rel = this.get(n1, n2);
-    if (rel === undefined) rel = this.create(n1, n2);
+  getOrCreate(realm: Realm, n1: string, n2: string): AnyRel {
+    let rel = this.get(realm, n1, n2);
+    if (rel === undefined) rel = this.create(realm, n1, n2);
 
     return rel;
   }
 
-  rate(e1: string, e2: string, mood: string, rating: number, weight: number) {
-    const rel = this.getOrCreate(e1, e2);
+  rate(realm: Realm, e1: string, e2: string, mood: string, rating: number, weight: number) {
+    const rel = this.getOrCreate(realm, e1, e2);
 
     const weightedRating = rating * weight;
     const prevRating = rel[mood]!;
-    const newRating =
-      (prevRating * rel.totalRatings + weightedRating) /
-      (rel.totalRatings + weight);
+    const newRating = (prevRating * rel.totalRatings + weightedRating) / (rel.totalRatings + weight);
 
     rel[mood] = newRating;
     rel.totalRatings += weight;
@@ -108,17 +103,12 @@ export default class RelQuerent extends Querent {
   //   throw new NotImplementedError('RelQuerent.update');
   // }
 
-  update(
-    entities: Array<string>,
-    mood: string,
-    rating: number,
-    other: Object = {},
-  ) {
+  update(realm: Realm, entities: Array<string>, mood: string, rating: number, other: Object = {}) {
     for (let i = 0; i < entities.length - 2; i++) {
       const entity1 = entities[i];
       for (let j = i + 1; j < entities.length - 1; j++) {
         const entity2 = entities[j];
-        this.rate(entity1, entity2, mood, rating, 1 / entities.length);
+        this.rate(realm, entity1, entity2, mood, rating, 1 / entities.length);
       }
     }
   }
@@ -133,17 +123,13 @@ export default class RelQuerent extends Querent {
    * @param branchCount Number of times to branhch out from each Entity (More will take longer to compute; also, branches out in ascending order)
    *
    */
-  getMostReflectiveEntities = (
-    startId: string,
-    mood: Mood,
-    branchCount: number,
-  ): Array<string> => {
+  getMostReflectiveEntities = (realm: Realm, startId: string, mood: Mood, branchCount: number): Array<string> => {
     const reflectivityMap: Record<string, number> = {
       [startId]: 1,
     };
 
     const run = (startId: string) => {
-      const allRel: Realm.Results<AnyRel> = this.getByEntityId(startId);
+      const allRel: Realm.Results<AnyRel> = this.getByEntityId(realm, startId);
 
       const heap = new Heap((a: AnyRel, b: AnyRel) => {
         if (a !== undefined && b !== undefined) return a[mood] - b[mood];
@@ -164,10 +150,7 @@ export default class RelQuerent extends Querent {
       // console.log(closestRels)
 
       for (let closestRel of closestRels) {
-        const otherEntityId =
-          startId !== closestRel.entity1.id
-            ? closestRel.entity1.id
-            : closestRel.entity2.id;
+        const otherEntityId = startId !== closestRel.entity1.id ? closestRel.entity1.id : closestRel.entity2.id;
 
         if (!reflectivityMap[otherEntityId]) {
           reflectivityMap[otherEntityId] = 1;
@@ -181,9 +164,7 @@ export default class RelQuerent extends Querent {
       id: string;
       count: number;
     };
-    const reflectivityMaxHeap = new Heap(
-      (a: IdCountType, b: IdCountType) => b.count - a.count,
-    );
+    const reflectivityMaxHeap = new Heap((a: IdCountType, b: IdCountType) => b.count - a.count);
     for (let id in reflectivityMap) {
       const count = reflectivityMap[id];
       const idCount: IdCountType = {
@@ -194,16 +175,11 @@ export default class RelQuerent extends Querent {
       reflectivityMaxHeap.push(idCount);
     }
 
-    return reflectivityMaxHeap.toArray();
+    return reflectivityMaxHeap.toArray().map((el) => el.id);
   };
 
   // DEPRECATED BY getSCEntities of depth 1
-  getMostCorrelatedEntities = (
-    startId: string,
-    mood: Mood,
-    branchCount: number,
-    entityCount: number,
-  ): Array<string> => {
+  getMostCorrelatedEntities = (realm: Realm, startId: string, mood: Mood, branchCount: number, entityCount: number): Array<string> => {
     const mostCorrelatedEntities = new Set([startId]);
 
     const run = () => {
@@ -216,7 +192,7 @@ export default class RelQuerent extends Querent {
 
       const entityMap: Record<string, RealmEntity> = {};
       mostCorrelatedEntities.forEach((id) => {
-        const allRel: Realm.Results<AnyRel> = this.getByEntityId(id);
+        const allRel: Realm.Results<AnyRel> = this.getByEntityId(realm, id);
 
         allRel.forEach((rel) => {
           const {entity1, entity2} = rel;
@@ -245,20 +221,14 @@ export default class RelQuerent extends Querent {
       });
 
       const correlatedEntities = Object.entries(entityMap)
-        .filter(
-          ([entityId, entity]) =>
-            entity.counter === mostCorrelatedEntities.size,
-        )
+        .filter(([entityId, entity]) => entity.counter === mostCorrelatedEntities.size)
         .map(([entityId, entity]) => entity);
 
       correlatedEntities.forEach((rel) => heap.push(rel));
 
       while (!heap.empty() && mostCorrelatedEntities.size < entityCount) {
         const closestRel = heap.pop();
-        const closestEntityId =
-          startId !== closestRel.entity1.id
-            ? closestRel.entity1.id
-            : closestRel.entity2.id;
+        const closestEntityId = startId !== closestRel.entity1.id ? closestRel.entity1.id : closestRel.entity2.id;
 
         if (!mostCorrelatedEntities.has(closestEntityId)) {
           mostCorrelatedEntities.add(closestEntityId);
@@ -272,19 +242,14 @@ export default class RelQuerent extends Querent {
     return Array.from(mostCorrelatedEntities);
   };
 
-  getMaximizedEntitiesAlongPath = (
-    startId: string,
-    mood: Mood,
-    branchCount: number,
-    depth: number,
-  ): Array<string> => {
+  getMaximizedEntitiesAlongPath = (realm: Realm, startId: string, mood: Mood, branchCount: number, depth: number): Array<string> => {
     const maximizedEntities = new Set([startId]);
 
     const run = (startId: string, curDepth = 0) => {
       if (curDepth >= depth) return;
 
       // All connected entities
-      const allRel: Realm.Results<AnyRel> = this.getByEntityId(startId);
+      const allRel: Realm.Results<AnyRel> = this.getByEntityId(realm, startId);
 
       const heap = new Heap((a: AnyRel, b: AnyRel) => {
         if (a !== undefined && b !== undefined) return a[mood] - b[mood];
@@ -297,10 +262,7 @@ export default class RelQuerent extends Querent {
       let curBranchCount = 0;
       while (!heap.empty() && curBranchCount < branchCount) {
         const closestRel = heap.pop();
-        const closestEntityId =
-          startId !== closestRel.entity1.id
-            ? closestRel.entity1.id
-            : closestRel.entity2.id;
+        const closestEntityId = startId !== closestRel.entity1.id ? closestRel.entity1.id : closestRel.entity2.id;
 
         if (!maximizedEntities.has(closestEntityId)) {
           curBranchCount++;
@@ -315,7 +277,7 @@ export default class RelQuerent extends Querent {
     return Array.from(maximizedEntities);
   };
 
-  getSCEntity(startId: string, mood: Mood, branchCount: number, depth: number) {
+  getSCEntity(realm: Realm, startId: string, mood: Mood, branchCount: number, depth: number) {
     type Path = Array<string>;
     type Paths = Array<Path>;
     const scEntityIds: Record<string, Paths> = {};
@@ -325,7 +287,7 @@ export default class RelQuerent extends Querent {
 
       // All connected entities
       const heap = initHeap(mood);
-      const allRel: Realm.Results<AnyRel> = this.getByEntityId(nextId);
+      const allRel: Realm.Results<AnyRel> = this.getByEntityId(realm, nextId);
       allRel.forEach((rel) => heap.push(rel));
 
       let curBranchCount = 0;
@@ -333,10 +295,7 @@ export default class RelQuerent extends Querent {
         curBranchCount++;
 
         const closestRel = heap.pop();
-        const closestEntityId =
-          nextId !== closestRel.entity1.id
-            ? closestRel.entity1.id
-            : closestRel.entity2.id;
+        const closestEntityId = nextId !== closestRel.entity1.id ? closestRel.entity1.id : closestRel.entity2.id;
 
         if (!scEntityIds.hasOwnProperty(closestEntityId)) {
           scEntityIds[closestEntityId] = [path];
@@ -355,9 +314,7 @@ export default class RelQuerent extends Querent {
       id: string;
       paths: Paths;
     };
-    const maxHeap = new Heap(
-      (a: EntityPath, b: EntityPath) => b.paths.length - a.paths.length,
-    );
+    const maxHeap = new Heap((a: EntityPath, b: EntityPath) => b.paths.length - a.paths.length);
     Object.entries(scEntityIds).forEach(([entityId, pathsToEntity]) =>
       maxHeap.push({
         id: entityId,
@@ -368,8 +325,8 @@ export default class RelQuerent extends Querent {
     return maxHeap.toArray();
   }
 
-  getMostRelevantEntity(startId: string, mood: Mood, branchCount: number = 1) {
-    this.getSCEntity(startId, mood, branchCount, 1);
+  getMostRelevantEntity(realm: Realm, startId: string, mood: Mood, branchCount: number = 1) {
+    this.getSCEntity(realm, startId, mood, branchCount, 1);
   }
 }
 

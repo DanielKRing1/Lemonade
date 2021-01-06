@@ -1,14 +1,16 @@
 import RealmSchema from '../schemaNames';
 
 import Querent from './Querent';
+import RelQuerent from './RelQuerent';
 
 export default class DayQuerent extends Querent {
-  constructor(realm: Realm, schema: RealmSchema) {
-    super(realm, schema);
+  constructor(schema: RealmSchema) {
+    super(schema);
   }
 
-  getDay(date: ): RelationshipType<any> {
-    const id = RelQuerent.getRelId(a1, a2);
+  // TODO Refactor into DayQuerent
+  getDay(realm: Realm, date: ): RelationshipType<any> {
+    const id = RelQuerent.getRelId(realm, a1, a2);
     return this.getById(id) as RelationshipType<any>;
   }
   getOrCreateCombos = (entityNames: string[]): RelationshipType<any>[] => {

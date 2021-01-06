@@ -3,11 +3,12 @@ import RealmSchema from '../schemaNames';
 import SeqRelQuerent from './SeqRelQuerent';
 
 export default class DayPartSeqRelQuerent extends SeqRelQuerent {
-  constructor(realm: Realm, schema: RealmSchema) {
-    super(realm, schema);
+  constructor(schema: RealmSchema) {
+    super(schema);
   }
 
   update(
+    realm: Realm,
     entitiesNow: Array<string>,
     mood: string,
     rating: number,
@@ -21,7 +22,7 @@ export default class DayPartSeqRelQuerent extends SeqRelQuerent {
       const entityNow = entitiesNow[i];
       for (let j = 0; j < entitiesPrev.length - 1; j++) {
         const entityPrev = entitiesPrev[j];
-        this.rate(entityNow, entityPrev, mood, rating, 1 / entitiesNow.length);
+        this.rate(realm, entityNow, entityPrev, mood, rating, 1 / entitiesNow.length);
       }
     }
   }

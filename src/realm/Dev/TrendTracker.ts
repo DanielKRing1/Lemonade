@@ -1,10 +1,10 @@
 class TrendTracker {
+  realmPath: string;
   trendName: string;
-  realm: Realm;
 
-  constructor(trendName: string, realm: Realm) {
+  constructor(realmPath: string, trendName: string) {
+    this.realmPath = realmPath;
     this.trendName = trendName;
-    this.realm = realm;
   }
 }
 
