@@ -49,7 +49,7 @@ export class RealmSchema {
 
   save(defaultRealm: Realm, blueprintTableName: BlueprintTableName) {
     defaultRealm.write(() => {
-      const schemaObj: RealmSchemaObject = this.getSchemaObject();
+      const schemaObj: RealmSchemaObject = this.toSchemaObject();
       const schemaStr = JSON.stringify(schemaObj);
 
       const schemaBlueprint: SchemaBlueprintRow = {
@@ -65,7 +65,7 @@ export class RealmSchema {
   /**
    * Formats object instance into a plain object that can be used to open Realms
    */
-  getSchemaObject(): RealmSchemaObject {
+  toSchemaObject(): RealmSchemaObject {
     return {
       name: this.name,
       primaryKey: this.primaryKey,
