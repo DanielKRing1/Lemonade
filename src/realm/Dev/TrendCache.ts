@@ -9,17 +9,17 @@ import RealmSchema from '../schemaNames';
  */
 
 class TrendCache {
-  static trends: Record<string, TrendTracker> = {};
+  static cache: Record<string, TrendTracker> = {};
 
-  static add(trendName: string, realm: Realm, update: boolean = false) {
+  static add(realmPath: string, trendName: string, update: boolean = false) {
     // Do not overwrite
-    if (TrendCache.trends[trendName] && !update) return;
+    if (TrendCache.cache[trendName] && !update) return;
 
-    TrendCache.trends[trendName] = new TrendTracker(trendName, realm);
+    TrendCache.cache[trendName] = new TrendTracker(realmPath, trendName);
   }
 
   static get(trendName: string) {
-    return TrendCache.trends[trendName];
+    return TrendCache.cache[trendName];
   }
 }
 

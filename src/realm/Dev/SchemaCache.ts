@@ -18,13 +18,13 @@ type RealmSchemaMap = Record<RealmPath, SchemaTypeMap>;
 // }
 
 class SchemaCache {
-  static map: RealmSchemaMap = {};
+  static cache: RealmSchemaMap = {};
 
   static add(realmSchema: RealmSchema) {
     const {realmPath, schemaType, name} = realmSchema;
 
     SchemaCache.initSchemaType(realmPath, schemaType);
-    SchemaCache.map[realmPath][schemaType][name] = realmSchema;
+    SchemaCache.cache[realmPath][schemaType][name] = realmSchema;
   }
 
   /**
@@ -35,7 +35,7 @@ class SchemaCache {
    */
   static getByRealm(realmPath: string) {
     if (SchemaCache.hasRealmPath(realmPath)) {
-      const schemaTypeMap: SchemaTypeMap = SchemaCache.map[realmPath];
+      const schemaTypeMap: SchemaTypeMap = SchemaCache.cache[realmPath];
 
       return Object.values(schemaTypeMap).reduce((allSchemas: Array<RealmSchema>, schemaMap: SchemaMap) => {
         const schemaTypeSchemas = Object.values(schemaMap);
@@ -57,7 +57,7 @@ class SchemaCache {
    */
   static getBySchemaType(realmPath: string, schemaType: string) {
     if (SchemaCache.hasSchemaType(realmPath, schemaType)) {
-      const schemaMap: SchemaMap = SchemaCache.map[realmPath][schemaType];
+      const schemaMap: SchemaMap = SchemaCache.cache[realmPath][schemaType];
 
       return Object.values(schemaMap);
     }
@@ -73,7 +73,7 @@ class SchemaCache {
    * @param schemaName
    */
   static getBySchemaName(realmPath: string, schemaType: string, schemaName: string) {
-    if (SchemaCache.hasSchemaName(realmPath, schemaType, schemaName)) return SchemaCache.map[realmPath][schemaType][schemaName];
+    if (SchemaCache.hasSchemaName(realmPath, schemaType, schemaName)) return SchemaCache.cache[realmPath][schemaType][schemaName];
   }
 
   //   UTILS METHODS
@@ -81,24 +81,24 @@ class SchemaCache {
   static initSchemaType(realmPath: string, schemaType: string) {
     if (!SchemaCache.hasSchemaType(realmPath, schemaType)) {
       SchemaCache.initRealmPath(realmPath);
-      SchemaCache.map[realmPath][schemaType] = {};
+      SchemaCache.cache[realmPath][schemaType] = {};
     }
   }
 
   static initRealmPath(realmPath: string) {
-    if (!SchemaCache.hasRealmPath(realmPath)) SchemaCache.map[realmPath] = {};
+    if (!SchemaCache.hasRealmPath(realmPath)) SchemaCache.cache[realmPath] = {};
   }
 
   static hasSchemaName(realmPath: string, schemaType: string, schemaName: string) {
-    return SchemaCache.hasSchemaType(realmPath, schemaType) && SchemaCache.map[realmPath][schemaType].hasOwnProperty(schemaName);
+    return SchemaCache.hasSchemaType(realmPath, schemaType) && SchemaCache.cache[realmPath][schemaType].hasOwnProperty(schemaName);
   }
 
   static hasSchemaType(realmPath: string, schemaType: string) {
-    return SchemaCache.hasRealmPath(realmPath) && SchemaCache.map[realmPath].hasOwnProperty(schemaType);
+    return SchemaCache.hasRealmPath(realmPath) && SchemaCache.cache[realmPath].hasOwnProperty(schemaType);
   }
 
   static hasRealmPath(realmPath: string) {
-    return SchemaCache.map.hasOwnProperty(realmPath);
+    return SchemaCache.cache.hasOwnProperty(realmPath);
   }
 }
 

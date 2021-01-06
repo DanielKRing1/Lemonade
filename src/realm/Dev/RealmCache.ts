@@ -23,7 +23,7 @@ type TrendSchemaMap = Record<RealmPath, Array<TrendSchema>>;
  */
 
 class RealmCache {
-  static realmMap: Record<string, Realm> = {};
+  static cache: Record<string, Realm> = {};
   // static trendSchemaMap: TrendSchemaMap = {};
 
   static init() {
@@ -34,7 +34,7 @@ class RealmCache {
   static _openRealm(realmPath: string, realmSchemas: Array<RealmSchema>, options: RealmOptions) {
     const newRealm = new Realm({
       path: realmPath,
-      schema: realmSchemas.map((schema: RealmSchema) => schema.getSchemaObject()),
+      schema: realmSchemas.map((schema: RealmSchema) => schema.toSchemaObject()),
       deleteRealmIfMigrationNeeded: true,
       ...options,
     });
@@ -51,7 +51,7 @@ class RealmCache {
    */
   static add(realmPath: string, realmSchemas: Array<RealmSchema>, options: RealmOptions = {}) {
     const realmInstance = RealmCache._openRealm(realmPath, realmSchemas, options);
-    RealmCache.realmMap[realmPath] = realmInstance;
+    RealmCache.cache[realmPath] = realmInstance;
 
     return realmInstance;
   }
@@ -60,7 +60,7 @@ class RealmCache {
    * Simply get Realm from cache, if exists
    */
   static get(realmPath: string) {
-    let realmInstance = RealmCache.realmMap[realmPath];
+    let realmInstance = RealmCache.cache[realmPath];
 
     return realmInstance;
   }
@@ -92,9 +92,12 @@ class RealmCache {
     // Add to SchemaCache
     schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprintRow) => {
       // Deserialize
-      const schema = RealmSchema.fromSchemaStr(schemaBlueprint);
+      const realmSchema = RealmSchema.fromSchemaStr(schemaBlueprint);
 
-      SchemaCache.add(schema);
+      SchemaCache.add(realmSchema);
+
+      // Add 'Trend' type RealmSchemas to TrendCache
+      if (realmSchema.schemaType === SchemaType.Trend) TrendCache.add(realmSchema.realmPath, realmSchema.name);
     });
   }
 
@@ -106,7 +109,7 @@ class RealmCache {
    * @param options Use to override default 'new Realm' options
    */
   static _openAllRealms(options: RealmOptions = {}) {
-    for (let realmPath in SchemaCache.map) {
+    for (let realmPath in SchemaCache.cache) {
       RealmCache._loadRealm(realmPath, options);
     }
   }
@@ -127,11 +130,6 @@ class RealmCache {
 
     // Add Realm to RealmCache
     const realmInstance = RealmCache.add(realmPath, realmSchemas, options);
-
-    // Add 'Trend' type RealmSchemas to TrendCache
-    realmSchemas.forEach((realmSchema: RealmSchema) => {
-      if (realmSchema.schemaType === SchemaType.Trend) TrendCache.add(realmSchema.name, realmInstance);
-    });
   }
 }
 // Init
