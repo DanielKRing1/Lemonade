@@ -9,7 +9,7 @@ const actCatMap: Record<string, Category> = {
 };
 
 export default class ActivityRelQuerent extends RelQuerent {
-  constructor(realm: Realm, schema: RealmSchema) {
+  constructor(realm: Realm, schema: RealmSchema | string) {
     super(realm, schema);
   }
 

@@ -5,7 +5,7 @@ import {InstantiateAbstractClassError, NotImplementedError} from '../../Errors';
 export default class Querent {
   schema: string;
 
-  constructor(schema: RealmSchema) {
+  constructor(schema: RealmSchema | string) {
     if (this.constructor === Querent) throw new InstantiateAbstractClassError('Querent');
 
     this.schema = schema;

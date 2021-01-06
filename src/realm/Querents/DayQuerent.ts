@@ -4,7 +4,7 @@ import Querent from './Querent';
 import RelQuerent from './RelQuerent';
 
 export default class DayQuerent extends Querent {
-  constructor(schema: RealmSchema) {
+  constructor(schema: RealmSchema | string) {
     super(schema);
   }
 

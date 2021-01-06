@@ -8,7 +8,7 @@ export default class SeqRelQuerent extends RelQuerent {
     return [n1, n2];
   }
 
-  constructor(schema: RealmSchema) {
+  constructor(schema: RealmSchema | string) {
     super(schema);
   }
 }

@@ -34,7 +34,7 @@ class RealmCache {
   static _openRealm(realmPath: string, realmSchemas: Array<RealmSchema>, options: RealmOptions) {
     const newRealm = new Realm({
       path: realmPath,
-      schema: realmSchemas.map((schema: RealmSchema) => schema.toSchemaObject()),
+      schema: realmSchemas.map((schema: RealmSchema | string) => schema.toSchemaObject()),
       deleteRealmIfMigrationNeeded: true,
       ...options,
     });

@@ -3,29 +3,17 @@ import Realm from 'realm';
 import RealmSchema from '../../realm/schemaNames';
 import {Querent, DayQuerent, RelQuerent} from './';
 
-import {
-  ActivitySchema,
-  CategorySchema,
-  CategoryRelationshipSchema,
-  ActivityRelationshipSchema,
-} from '../Activity';
+import {ActivitySchema, CategorySchema, CategoryRelationshipSchema, ActivityRelationshipSchema} from '../Activity';
 
 import {DEFAULT_PATH} from '../../constants/Realm/paths';
 
 export default class QuerentFactory {
   static realmInstanceMap: Record<RealmPath, Realm> = {};
-  static querentInstanceMap: Record<
-    RealmPath,
-    {[key in RealmSchema]?: Querent}
-  > = {};
+  static querentInstanceMap: Record<RealmPath, {[key in RealmSchema]?: Querent}> = {};
 
-  static getDayQuerent(
-    realmPath: RealmPath = DEFAULT_PATH,
-    schema: RealmSchema = RealmSchema.Day,
-  ) {
+  static getDayQuerent(realmPath: RealmPath = DEFAULT_PATH, schema: RealmSchema | string = RealmSchema.Day) {
     let realmInstance = QuerentFactory.getRealm(DEFAULT_PATH);
-    let querentInstance =
-      QuerentFactory.querentInstanceMap[DEFAULT_PATH][schema];
+    let querentInstance = QuerentFactory.querentInstanceMap[DEFAULT_PATH][schema];
 
     if (querentInstance === undefined) {
       querentInstance = new DayQuerent(realmInstance, schema);
@@ -36,11 +24,7 @@ export default class QuerentFactory {
     return querentInstance as DayQuerent;
   }
 
-  static getRelQuerent(
-    realmPath: RealmPath = DEFAULT_PATH,
-    schema: RealmSchema,
-    classType: AnyRel | any,
-  ): RelQuerent {
+  static getRelQuerent(realmPath: RealmPath = DEFAULT_PATH, schema: RealmSchema | string, classType: AnyRel | any): RelQuerent {
     let realmInstance = QuerentFactory.getRealm(realmPath);
     let querentInstance = QuerentFactory.querentInstanceMap[realmPath][schema];
 
@@ -63,12 +47,7 @@ export default class QuerentFactory {
     if (realmInstance === undefined) {
       realmInstance = new Realm({
         path: realmPath,
-        schema: [
-          ActivitySchema,
-          CategorySchema,
-          CategoryRelationshipSchema,
-          ActivityRelationshipSchema,
-        ],
+        schema: [ActivitySchema, CategorySchema, CategoryRelationshipSchema, ActivityRelationshipSchema],
         deleteRealmIfMigrationNeeded: true,
       });
 

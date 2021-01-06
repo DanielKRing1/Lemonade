@@ -13,7 +13,7 @@ export default class RelQuerent extends Querent {
     return this.constructor.sortNamePair(a1, a2).join('-');
   }
 
-  constructor(schema: RealmSchema) {
+  constructor(schema: RealmSchema | string) {
     super(schema);
 
     if (this.constructor === RelQuerent) throw new InstantiateAbstractClassError('RelQuerent');

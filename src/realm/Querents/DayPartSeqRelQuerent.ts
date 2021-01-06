@@ -3,7 +3,7 @@ import RealmSchema from '../schemaNames';
 import SeqRelQuerent from './SeqRelQuerent';
 
 export default class DayPartSeqRelQuerent extends SeqRelQuerent {
-  constructor(schema: RealmSchema) {
+  constructor(schema: RealmSchema | string) {
     super(schema);
   }
 

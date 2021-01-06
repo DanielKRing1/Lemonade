@@ -3,7 +3,7 @@ import RealmSchema from '../schemaNames';
 import RelQuerent from './RelQuerent';
 
 export default class CategoryRelQuerent extends RelQuerent {
-  constructor(realm: Realm, schema: RealmSchema) {
+  constructor(realm: Realm, schema: RealmSchema | string) {
     super(realm, schema);
   }
 
