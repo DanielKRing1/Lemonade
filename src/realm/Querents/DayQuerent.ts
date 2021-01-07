@@ -9,11 +9,11 @@ export default class DayQuerent extends Querent {
   }
 
   // TODO Refactor into DayQuerent
-  getDay(realm: Realm, date: ): RelationshipType<any> {
+  getDay(realm: Realm, date: ): RealmRelationship<any> {
     const id = RelQuerent.getRelId(realm, a1, a2);
-    return this.getById(id) as RelationshipType<any>;
+    return this.getById(id) as RealmRelationship<any>;
   }
-  getOrCreateCombos = (entityNames: string[]): RelationshipType<any>[] => {
+  getOrCreateCombos = (entityNames: string[]): RealmRelationship<any>[] => {
     const allRels = [];
 
     for (let n1 of entityNames) {
@@ -27,7 +27,7 @@ export default class DayQuerent extends Querent {
 
     return allRels;
   };
-  getCombos(entities: string[]): RelationshipType<any>[] {
+  getCombos(entities: string[]): RealmRelationship<any>[] {
     const allRels = [];
 
     for (let e1 of entities) {
@@ -167,7 +167,7 @@ export default class DayQuerent extends Querent {
         else return a === undefined ? 1 : -1;
       });
 
-      const entityMap: Record<string, RealmEntity> = {};
+      const entityMap: Record<string, RealmRow> = {};
       mostCorrelatedEntities.forEach((id) => {
         const allRel: Realm.Results<AnyRel> = this.getByEntityId(id);
 

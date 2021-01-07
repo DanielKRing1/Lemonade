@@ -19,11 +19,11 @@ export default class RelQuerent extends Querent {
     if (this.constructor === RelQuerent) throw new InstantiateAbstractClassError('RelQuerent');
   }
 
-  get(realm: Realm, a1: string, a2: string): RelationshipType<any> {
+  get(realm: Realm, a1: string, a2: string): RealmRelationship<any> {
     const id = RelQuerent.getRelId(a1, a2);
-    return this.getById(realm, id) as RelationshipType<any>;
+    return this.getById(realm, id) as RealmRelationship<any>;
   }
-  getOrCreateCombos = (realm: Realm, entityNames: string[]): RelationshipType<any>[] => {
+  getOrCreateCombos = (realm: Realm, entityNames: string[]): RealmRelationship<any>[] => {
     const allRels = [];
 
     for (let n1 of entityNames) {
@@ -37,7 +37,7 @@ export default class RelQuerent extends Querent {
 
     return allRels;
   };
-  getCombos(realm: Realm, entities: string[]): RelationshipType<any>[] {
+  getCombos(realm: Realm, entities: string[]): RealmRelationship<any>[] {
     const allRels = [];
 
     for (let e1 of entities) {
@@ -59,11 +59,11 @@ export default class RelQuerent extends Querent {
   // create(n1: string, n2: string): AnyRel {
   //   throw new NotImplementedError('RelQuerent.create');
   // }
-  create(realm: Realm, e1: string, e2: string): RelationshipType<any> {
+  create(realm: Realm, e1: string, e2: string): RealmRelationship<any> {
     const [entityName1, entityName2] = RelQuerent.sortNamePair(e1, e2);
     const id = RelQuerent.getRelId(e1, e2);
 
-    const relObj: RelationshipType<any> = {
+    const relObj: RealmRelationship<any> = {
       id,
       entity1: {
         id: entityName1,
@@ -76,17 +76,17 @@ export default class RelQuerent extends Querent {
 
     const realmRel = this._create(realm, relObj);
 
-    return realmRel as RelationshipType<any>;
+    return realmRel as RealmRelationship<any>;
   }
 
-  getOrCreate(realm: Realm, n1: string, n2: string): AnyRel {
+  getOrCreate(realm: Realm, n1: string, n2: string): RealmRelationship<any> {
     let rel = this.get(realm, n1, n2);
     if (rel === undefined) rel = this.create(realm, n1, n2);
 
     return rel;
   }
 
-  rate(realm: Realm, e1: string, e2: string, mood: string, rating: number, weight: number) {
+  _rate(realm: Realm, mood: string, rating: number, weight: number, e1: string, e2: string) {
     const rel = this.getOrCreate(realm, e1, e2);
 
     const weightedRating = rating * weight;
@@ -102,16 +102,6 @@ export default class RelQuerent extends Querent {
   // update(entities: Array<string>, mood: string, rating: number) {
   //   throw new NotImplementedError('RelQuerent.update');
   // }
-
-  update(realm: Realm, entities: Array<string>, mood: string, rating: number, other: Object = {}) {
-    for (let i = 0; i < entities.length - 2; i++) {
-      const entity1 = entities[i];
-      for (let j = i + 1; j < entities.length - 1; j++) {
-        const entity2 = entities[j];
-        this.rate(realm, entity1, entity2, mood, rating, 1 / entities.length);
-      }
-    }
-  }
 
   // Trend Algos
 
@@ -190,7 +180,7 @@ export default class RelQuerent extends Querent {
         else return a === undefined ? 1 : -1;
       });
 
-      const entityMap: Record<string, RealmEntity> = {};
+      const entityMap: Record<string, RealmRow> = {};
       mostCorrelatedEntities.forEach((id) => {
         const allRel: Realm.Results<AnyRel> = this.getByEntityId(realm, id);
 

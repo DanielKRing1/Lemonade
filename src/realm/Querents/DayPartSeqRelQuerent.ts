@@ -7,6 +7,17 @@ export default class DayPartSeqRelQuerent extends SeqRelQuerent {
     super(schema);
   }
 
+  // TODO Replace with update
+  groupAndRate(realm: Realm, entities: Array<string>, mood: string, rating: number, other: Object = {}) {
+    for (let i = 0; i < entities.length - 2; i++) {
+      const entity1 = entities[i];
+      for (let j = i + 1; j < entities.length - 1; j++) {
+        const entity2 = entities[j];
+        this._rate(realm, mood, rating, 1 / entities.length, entity1, entity2);
+      }
+    }
+  }
+
   update(
     realm: Realm,
     entitiesNow: Array<string>,
@@ -22,7 +33,7 @@ export default class DayPartSeqRelQuerent extends SeqRelQuerent {
       const entityNow = entitiesNow[i];
       for (let j = 0; j < entitiesPrev.length - 1; j++) {
         const entityPrev = entitiesPrev[j];
-        this.rate(realm, entityNow, entityPrev, mood, rating, 1 / entitiesNow.length);
+        this._rate(realm, mood, rating, 1 / entitiesNow.length, entityNow, entityPrev);
       }
     }
   }

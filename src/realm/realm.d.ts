@@ -15,6 +15,6 @@ declare interface RealmSchemaType<T> {
 }
 
 // Row Definition
-declare type RealmEntity = {
+declare type RealmRow = {
   id: string;
 };
