@@ -61,7 +61,7 @@ export default class RelQuerent extends Querent {
   // }
   create(realm: Realm, e1: string, e2: string): RelationshipType<any> {
     const [entityName1, entityName2] = RelQuerent.sortNamePair(e1, e2);
-    const id = RelQuerent.getRelId(realm, e1, e2);
+    const id = RelQuerent.getRelId(e1, e2);
 
     const relObj: RelationshipType<any> = {
       id,
