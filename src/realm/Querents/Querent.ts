@@ -21,11 +21,24 @@ export default class Querent {
     return realm.objects(this.schema);
   }
 
-  _create(realm: Realm, entity: any): RealmEntity {
-    const rel: RealmEntity = realm.create(this.schema, entity, Realm.UpdateMode.All);
+  /**
+   * Calls the realm.create method on the passed row
+   *
+   * @param realm Realm to insert into
+   * @param row Data object to insert into Realm
+   */
+  _create(realm: Realm, row: any): RealmEntity {
+    const rel: RealmEntity = realm.create(this.schema, row, Realm.UpdateMode.All);
 
     return rel;
   }
+  /**
+   * Creates a row to insert into the passed Realm
+   * Then calls _create to perform the actual insertion
+   *
+   * @param realm Realm to insert into
+   * @param args Any parameters necessary for creating row to insert
+   */
   create(realm: Realm, ...args: any[]): RealmEntity {
     throw new NotImplementedError('Querent.create');
   }
