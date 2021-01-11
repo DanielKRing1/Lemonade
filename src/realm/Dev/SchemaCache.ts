@@ -1,14 +1,5 @@
 import {RealmSchema} from './RealmSchema';
 
-type SchemaName = string;
-type SchemaMap = Record<SchemaName, RealmSchema>;
-
-type SchemaType = string;
-type SchemaTypeMap = Record<SchemaType, SchemaMap>;
-
-type RealmPath = string;
-type RealmSchemaMap = Record<RealmPath, SchemaTypeMap>;
-
 // {
 //     realmPath: {
 //         schemaType: {
@@ -18,7 +9,7 @@ type RealmSchemaMap = Record<RealmPath, SchemaTypeMap>;
 // }
 
 class SchemaCache {
-  static cache: RealmSchemaMap = {};
+  static cache: RealmSchemaTypeMap = {};
 
   static add(realmSchema: RealmSchema) {
     const {realmPath, schemaType, name} = realmSchema;
