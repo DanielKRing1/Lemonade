@@ -17,7 +17,8 @@ declare type RealmSchemaTypeMap = Record<RealmPath, SchemaTypeMap>;
 declare type SchemaTypeMap = Record<SchemaType, SchemaMap>;
 
 declare type SchemaName = string;
-declare type SchemaMap = Record<SchemaName, import('../Dev/RealmSchema/RealmSchema').RealmSchema>;
+declare type SchemaMap = Record<SchemaName, RealmSchemaObject>;
+// declare type SchemaMap = Record<SchemaName, import('../Dev/RealmSchema/RealmSchema').RealmSchema>;
 
 // REALM DATA
 

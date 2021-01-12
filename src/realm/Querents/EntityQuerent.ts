@@ -40,7 +40,7 @@ class EntityQuerent extends Querent {
     const entity = this.getOrCreate(realm, entityName);
 
     const weightedRating = rating * weight;
-    const prevRating = entity[mood]!;
+    const prevRating = entity[mood];
     const newRating = (prevRating * entity.totalRatings + weightedRating) / (entity.totalRatings + weight);
 
     entity[mood] = newRating;

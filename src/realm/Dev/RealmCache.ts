@@ -28,13 +28,13 @@ class RealmCache {
 
   static init() {
     RealmCache._loadSchemaBlueprints();
-    RealmCache._openAllRealms();
+    RealmCache._loadAllRealms();
   }
 
   static _openRealm(realmPath: string, realmSchemas: Array<RealmSchema>, options: RealmOptions) {
     const newRealm = new Realm({
       path: realmPath,
-      schema: realmSchemas.map((schema: RealmSchema | string) => schema.toSchemaObject()),
+      schema: realmSchemas.map((schema: RealmSchema) => schema.getSchemaObject()),
       deleteRealmIfMigrationNeeded: true,
       ...options,
     });
@@ -84,21 +84,29 @@ class RealmCache {
    *
    * Save to RealmCache.trendSchemaMap as { realmPath: TrendSchema[] }
    */
-  static _loadSchemaBlueprints() {
-    // Load
-    const defaultRealm = RealmCache.getDefaultRealm();
-    const schemaBlueprints: Realm.Results<SchemaBlueprintRow> = defaultRealm.objects(RealmSchemaName.SchemaBlueprint);
+  static async _loadSchemaBlueprints() {
+    try {
+      // Load
+      const defaultRealm = RealmCache.getDefaultRealm();
+      const schemaBlueprints: Realm.Results<SchemaBlueprintRow> = await defaultRealm.objects(RealmSchemaName.SchemaBlueprint);
 
-    // Add to SchemaCache
-    schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprintRow) => {
-      // Deserialize
-      const realmSchema = RealmSchema.fromSchemaStr(schemaBlueprint);
+      // Add to SchemaCache
+      schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprintRow) => {
+        // Deserialize
+        const realmSchema = RealmSchema.fromSchemaStr(schemaBlueprint);
 
-      SchemaCache.add(realmSchema);
+        SchemaCache.add(realmSchema);
 
-      // Add 'Trend' type RealmSchemas to TrendCache
-      if (realmSchema.schemaType === SchemaType.Trend) TrendCache.add(realmSchema.realmPath, realmSchema.name);
-    });
+        // Add 'Trend' type RealmSchemas to TrendCache
+        if (realmSchema.schemaType === SchemaType.Trend) TrendCache.add(realmSchema.realmPath, realmSchema.name);
+      });
+
+      return schemaBlueprints;
+    } catch (err) {
+      console.log(`RealmCache._loadSchemaBlueprints error: ${err}`);
+
+      return [];
+    }
   }
 
   /**
@@ -108,7 +116,7 @@ class RealmCache {
    *
    * @param options Use to override default 'new Realm' options
    */
-  static _openAllRealms(options: RealmOptions = {}) {
+  static _loadAllRealms(options: RealmOptions = {}) {
     for (let realmPath in SchemaCache.cache) {
       RealmCache._loadRealm(realmPath, options);
     }
