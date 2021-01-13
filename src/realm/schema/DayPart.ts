@@ -2,10 +2,18 @@ import RealmSchema from '../schemaNames';
 
 export const DayPart = {
   name: RealmSchema.DayPart,
-  primaryKey: 'id',
+  primaryKey: 'date',
   properties: {
-    id: 'string',
-    schemaType: 'string',
-    mood: {},
+    date: 'date',
+    entityType: 'string',
+    entities: {
+      type: 'list',
+      // Entity name
+      objectType: 'string',
+    },
+    mood: 'string',
+    expectedMood: 'string',
+    rating: 'float',
+    expectedRating: 'float',
   },
 };
