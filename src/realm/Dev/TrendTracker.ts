@@ -24,8 +24,18 @@ class TrendTracker {
     this.dpSeqQ = new DPSeqRelQuerent(trendName);
   }
 
+  rate(entities: Array<string>, mood: string, rating: number, weights?: Array<number>) {
+    const realm = this.getRealm();
+
+    // TODO Add weights to Querent.rate methods
+    this.entityQ.rate(realm, entities, mood, rating, weights);
+    this.denseQ.rate(realm, entities, mood, rating, weights);
+    this.seqQ.rate(realm, entities, mood, rating, weights);
+    this.dpSeqQ.rate(realm, entities, mood, rating, weights);
+  }
+
   getRealm() {
-    RealmCache.get(this.realmPath);
+    return RealmCache.get(this.realmPath);
   }
 }
 

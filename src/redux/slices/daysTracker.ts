@@ -1,6 +1,7 @@
 import {createAsyncThunk, createSelector, createSlice, PayloadAction} from '@reduxjs/toolkit';
-
 import {DayPart} from './dayPartTracker';
+
+import TrendCache from '../../realm/Dev/TrendCache';
 
 export type Day = Array<DayPart>;
 export type Days = Array<Day>;
@@ -16,14 +17,15 @@ const initialLifeTrackerState: DaysTrackerState = {
 
 const rateDay = createAsyncThunk(
   'daysTracker/rateDay',
-  async (args: {trendName: string; mood: string; moodIntensity: string; activities: Array<string>}, {dispatch, getState}): Promise<any> => {
+  async (args: {trendName: string; entities: Array<string>; mood: string; rating: number; weights?: Array<number>}, {dispatch, getState}): Promise<any> => {
+    const {trendName, entities, mood, rating, weights = []} = args;
+
     try {
-      // TODO
       // Get TrendTracker
-      //   const defaultRealm = RealmCache.getDefaultRealm();
-      //   const schemaBlueprints: Realm.Results<SchemaBlueprintRow> = await defaultRealm.objects(RealmSchemaName.SchemaBlueprint);
+      const trendTracker = TrendCache.get(trendName);
 
       // Rate in TrendTracker -> Writes rating to Realm
+      trendTracker.rate(entities, mood, rating, weights);
 
       return args;
     } catch (err) {

@@ -1,11 +1,7 @@
 import {createAsyncThunk, createSelector, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import memoize from 'lodash.memoize';
 
-import RealmCache from '../../realm/Dev/RealmCache';
-import TrendCache from '../../realm/Dev/TrendCache';
 import RealmSchemaName from '../../realm/schemaNames';
-
-import {RealmSchema} from '../../realm/Dev/RealmSchema';
 
 const initialState: RealmSchemaTypeMap = {};
 
