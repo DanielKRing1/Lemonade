@@ -16,7 +16,7 @@ const initialLifeTrackerState: DaysTrackerState = {
 
 const rateDay = createAsyncThunk(
   'daysTracker/rateDay',
-  async (args: {mood: string; moodIntensity: string; activities: Array<string>}, {dispatch, getState}): Promise<any> => {
+  async (args: {trendName: string; mood: string; moodIntensity: string; activities: Array<string>}, {dispatch, getState}): Promise<any> => {
     try {
       // TODO
       // Get TrendTracker

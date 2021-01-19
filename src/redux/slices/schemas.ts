@@ -104,7 +104,7 @@ export const schemasSlice = createSlice({
       realmSchemas.forEach((realmSchema: SchemaBlueprintRow) => {
         const {realmPath, schemaType, schemaName, schemaStr} = realmSchema;
 
-        // Add to state
+        // Init to state
         if (!state.hasOwnProperty(realmPath))
           state[realmPath] = {
             Blueprint: {},
@@ -112,19 +112,44 @@ export const schemasSlice = createSlice({
           };
         if (!state[realmPath].hasOwnProperty(schemaType)) state[realmPath][schemaType] = {};
 
+        // Add to state
         const schemaObj: RealmSchemaObject = JSON.parse(schemaStr);
         state[realmPath][schemaType][schemaName] = schemaObj;
 
-        // Add to TrendCache
+        // Filter into TrendCache
         if (schemaType === SchemaType.Trend) TrendCache.add(realmPath, schemaName);
       });
 
-      // TODO Load Realms
-      // TODO Update method to read from Redux instead of SchemaCache
-      RealmCache._loadAllRealms();
+      Object.keys(state).forEach((realmPath: string) => {
+        // Unsafe? way to select, so do not expect this selector to notice changes made to state draft in this reducer
+        const schemaObjs = selectRealmPath(state)(realmPath);
+        RealmCache.add(realmPath, schemaObjs);
+      });
     },
   },
 });
+
+// TODO
+// 1. Async Thunk: Load Schemas
+//    1.1. Read Schemas from Default Realm into Redux
+//    1.2. Save Schemas to Redux state
+//    1.3. For any Trend Schemas, add new Trend to TrendCache
+//    1.4. Foreach 'realmPath', push all Schemas to RealmCache.addRealm
+
+// 2. Async Thunk: Rate Day
+//    2.1. Accept 'trendName', 'entities', 'rating', 'weights'
+//    2.2. Get TrendTracker from TrendCache.get(trendName)
+//    2.3. Get 'realmPath' from Redux state, using 'selectSchemaName' selector with 'trendName'
+//    2.4. Get Realm from RealmCache.get(realmPath)
+//    2.5. Call myTrendTracker.rate(realm, entities, rating, weights)
+//    2.6. For each instance Querent, myTrendTracker calls Querent.rate(realm, entities, rating, weights)
+
+// x. Async Thunk: Add Schema
+//    x.1. Accept new Schema definition
+//    x.2. Save to Default Realm
+//    x.3. If is a Trend Schema, add new Trend to TrendCache
+//    x.4. If is new 'realmPath', push new Schema to RealmCache.addRealm
+//         Else, reopen Realm with this new Schema with RealmCache.reloadRealm (Maybe internally, this just calls RealmCache.addRealm)
 
 // ACTIONS
 export const {addSchemas} = schemasSlice.actions;
