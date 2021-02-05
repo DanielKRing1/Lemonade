@@ -29,10 +29,14 @@ class EntityQuerent extends Querent {
     return entity as RealmEntity;
   }
 
-  groupAndRate(realm: Realm, entities: Array<string>, mood: string, rating: number, other: Object = {}) {
+  _groupAndRate(realm: Realm, entities: Array<string>, mood: string, ratings: Array<number>, weights: Array<number>, other: Object = {}) {
+    // TODO Why is this '- 2' and not '- 1'?
     for (let i = 0; i < entities.length - 2; i++) {
+      const rating = ratings[i];
+      const weight = weights[i];
+
       const entity = entities[i];
-      this._rate(realm, mood, rating, 1 / entities.length, entity);
+      this._rate(realm, mood, rating, weight, entity);
     }
   }
 

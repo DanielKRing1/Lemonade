@@ -56,9 +56,17 @@ export default class Querent {
    * @param rating
    * @param other
    */
-  rate(realm: Realm, entities: Array<string>, mood: string, rating: number, other: Object = {}) {
+  rate(realm: Realm, entities: Array<string>, mood: string, ratings: number | Array<number>, weights: null | number | Array<number>, other: Object = {}) {
+    // number to Array<number>
+    const r = !Array.isArray(ratings) ? new Array(entities.length).fill(ratings) : ratings;
+
+    // null to number
+    if (weights === null) weights = 1 / entities.length;
+    // number to Array<number>
+    const w = !Array.isArray(weights) ? new Array(entities.length).fill(weights) : weights;
+
     realm.write(() => {
-      this.groupAndRate(realm, entities, mood, rating, other);
+      this._groupAndRate(realm, entities, mood, r, w, other);
     });
   }
 
@@ -72,7 +80,7 @@ export default class Querent {
    * @param rating
    * @param other
    */
-  groupAndRate(realm: Realm, entities: Array<string>, mood: string, rating: number, other: Object = {}) {
+  _groupAndRate(realm: Realm, entities: Array<string>, mood: string, ratings: Array<number>, weights: Array<number>, other: Object = {}) {
     throw new NotImplementedError('Querent.rate');
   }
   /**

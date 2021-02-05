@@ -86,6 +86,27 @@ export default class RelQuerent extends Querent {
     return rel;
   }
 
+  // Stock example:
+  //    rating = % of stake compared to total of all investments
+  //    weight = 1
+  //
+  // Base Querent's rate method:
+  // Accept single rating number or an array of ratings (for each entity)
+  // Accept no weight (then use 1/# entities) or an array of weights
+  // Accept rating option:
+  //    Uniform, then rating = single rating
+  //    Unique (Array), then rating = rating1 + rating2
+  // In Base Querent, map entities to:
+  // [
+  //    {
+  //        entity: string,
+  //        rating: number,
+  //        weight: number,
+  //    }
+  // ]
+  // This _rate method accepts this ^ Entity type and rating options:
+  //    Uniform, then rating = rating1 + rating2 / 2
+  //    Unique (Array), then rating = rating1 + rating2
   _rate(realm: Realm, mood: string, rating: number, weight: number, e1: string, e2: string) {
     const rel = this.getOrCreate(realm, e1, e2);
 
