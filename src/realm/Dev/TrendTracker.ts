@@ -24,7 +24,7 @@ class TrendTracker {
     this.dpSeqQ = new DPSeqRelQuerent(trendName);
   }
 
-  rate(entities: Array<string>, mood: string, rating: number, weights?: Array<number>) {
+  rate(entities: Array<string>, mood: string, rating: number, weights: null | number | Array<number>) {
     const realm = this.getRealm();
 
     // TODO Add weights to Querent.rate methods

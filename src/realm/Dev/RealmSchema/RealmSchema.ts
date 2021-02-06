@@ -1,11 +1,9 @@
 import {DEFAULT_PATH} from '../../../constants/Realm';
 import RealmSchemaName from '../../schemaNames';
 
-import BlueprintTableName from '../BlueprintTableName';
-
 import {InstantiateAbstractClassError, NotImplementedError} from '../../../Errors';
 
-export class RealmSchema {
+export class SchemaBlueprintRow {
   schemaType: SchemaType;
   realmPath: string;
 
@@ -14,7 +12,7 @@ export class RealmSchema {
   primaryKey: string | undefined;
 
   static getBlueprintSchema() {
-    return new RealmSchema(
+    return new SchemaBlueprintRow(
       SchemaType.Blueprint,
       DEFAULT_PATH,
       RealmSchemaName.SchemaBlueprint,
@@ -27,17 +25,17 @@ export class RealmSchema {
     );
   }
 
-  static fromSchemaStr(blueprintRow: SchemaBlueprintRow) {
+  static fromBlueprintRowObj(blueprintRow: SchemaBlueprintRowObj) {
     const {schemaStr, schemaType, realmPath} = blueprintRow;
 
     const schemaObj: RealmSchemaObject = JSON.parse(schemaStr);
     const {name, primaryKey, properties} = schemaObj;
 
-    return new RealmSchema(schemaType, realmPath, name, properties, primaryKey);
+    return new SchemaBlueprintRow(schemaType, realmPath, name, properties, primaryKey);
   }
 
   constructor(schemaType: SchemaType, realmPath: string, name: string, properties: Record<string, any>, primaryKey?: string) {
-    if (this.constructor === RealmSchema) throw new InstantiateAbstractClassError('RealmSchema');
+    if (this.constructor === SchemaBlueprintRow) throw new InstantiateAbstractClassError('SchemaBlueprintRow');
 
     this.schemaType = schemaType;
     this.realmPath = realmPath;
@@ -47,19 +45,14 @@ export class RealmSchema {
     this.primaryKey = primaryKey;
   }
 
-  save(defaultRealm: Realm, blueprintTableName: BlueprintTableName) {
-    defaultRealm.write(() => {
-      const schemaObj: RealmSchemaObject = this.getSchemaObject();
-      const schemaStr = JSON.stringify(schemaObj);
+  save(defaultRealm: Realm): SchemaBlueprintRowObj {
+    const schemaBlueprint: SchemaBlueprintRowObj = this.getSchemaBlueprintRowObj();
 
-      const schemaBlueprint: SchemaBlueprintRow = {
-        schemaName: this.name,
-        schemaType: this.schemaType,
-        realmPath: this.realmPath,
-        schemaStr,
-      };
-      defaultRealm.create(blueprintTableName, schemaBlueprint);
+    defaultRealm.write(() => {
+      defaultRealm.create(RealmSchemaName.SchemaBlueprint, schemaBlueprint);
     });
+
+    return schemaBlueprint;
   }
 
   /**
@@ -71,5 +64,19 @@ export class RealmSchema {
       primaryKey: this.primaryKey,
       properties: this.properties,
     };
+  }
+
+  getSchemaBlueprintRowObj(): SchemaBlueprintRowObj {
+    const schemaObj: RealmSchemaObject = this.getSchemaObject();
+    const schemaStr = JSON.stringify(schemaObj);
+
+    const schemaBlueprint: SchemaBlueprintRowObj = {
+      schemaName: this.name,
+      schemaType: this.schemaType,
+      realmPath: this.realmPath,
+      schemaStr,
+    };
+
+    return schemaBlueprint;
   }
 }

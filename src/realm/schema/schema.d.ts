@@ -23,7 +23,7 @@ declare type SchemaMap = Record<SchemaName, RealmSchemaObject>;
 // REALM DATA
 
 // From database 'Blueprint' Table
-declare type SchemaBlueprintRow = {
+declare type SchemaBlueprintRowObj = {
   schemaName: string;
   schemaType: SchemaType;
   realmPath: string;
@@ -31,10 +31,13 @@ declare type SchemaBlueprintRow = {
 };
 
 // 'schemaStr' parsed
-declare type RealmSchemaObject = {
+declare type RealmSchemaObject = GenericRealmSchemaObject<Record<string, any>>;
+declare type RealmSchemaBlueprintObject = GenericRealmSchemaObject<SchemaBlueprintRowObj>;
+
+declare type GenericRealmSchemaObject<T> = {
   name: string;
   primaryKey?: string;
-  properties: Record<string, any>;
+  properties: T;
 };
 
 // declare type RealmSchema = {

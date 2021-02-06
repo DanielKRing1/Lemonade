@@ -1,12 +1,18 @@
-import {RealmSchema} from './RealmSchema';
+import {SchemaBlueprintRow} from './RealmSchema';
 import BlueprintTableName from '../BlueprintTableName';
 
-export class TrendSchema extends RealmSchema {
-  constructor(realmPath: string, name: string, properties: Record<string, any>, primaryKey?: string) {
-    super(SchemaType.Trend, realmPath, name, properties, primaryKey);
+export class TrendSchemaBlueprintRow extends SchemaBlueprintRow {
+  constructor(realmPath: string, name: string, properties: Record<string, any>) {
+    const pk = 'id';
+    properties = {
+      ...properties,
+      [pk]: 'string',
+    };
+
+    super(SchemaType.Trend, realmPath, name, properties, pk);
   }
 
-  save(defaultRealm: Realm, blueprintTableName: BlueprintTableName = BlueprintTableName.TrendBlueprint) {
-    super.save(defaultRealm, blueprintTableName);
+  save(defaultRealm: Realm): SchemaBlueprintRowObj {
+    return super.save(defaultRealm);
   }
 }

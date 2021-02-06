@@ -2,14 +2,14 @@ import Realm from 'realm';
 
 import {DEFAULT_PATH} from '../../constants/Realm';
 import RealmSchemaName from '../schemaNames';
-import {RealmSchema, TrendSchema} from './RealmSchema';
+import {SchemaBlueprintRow, TrendSchemaBlueprintRow} from './RealmSchema';
 
 import SchemaCache from './SchemaCache';
 import TrendCache from './TrendCache';
 
 type RealmPath = string;
 type RealmOptions = Record<string, any>;
-type TrendSchemaMap = Record<RealmPath, Array<TrendSchema>>;
+// type TrendSchemaMap = Record<RealmPath, Array<TrendSchemaBlueprintRow>>;
 
 /**
  *
@@ -26,10 +26,10 @@ class RealmCache {
   static cache: Record<string, Realm> = {};
   // static trendSchemaMap: TrendSchemaMap = {};
 
-  static init() {
-    RealmCache._loadSchemaBlueprints();
-    RealmCache._loadAllRealms();
-  }
+  // static init() {
+  //   RealmCache._loadSchemaBlueprints();
+  //   RealmCache._loadAllRealms();
+  // }
 
   static _openRealm(realmPath: string, realmSchemas: Array<RealmSchemaObject>, options: RealmOptions) {
     const newRealm = new Realm({
@@ -53,6 +53,9 @@ class RealmCache {
     const realmInstance = RealmCache._openRealm(realmPath, realmSchemas, options);
     RealmCache.cache[realmPath] = realmInstance;
 
+    // TODO Do I need to close an existing, open Realm first?
+    // RealmCache.cache[realmPath].close();
+
     return realmInstance;
   }
 
@@ -71,7 +74,7 @@ class RealmCache {
    */
   static getDefaultRealm() {
     let realmInstance = RealmCache.get(DEFAULT_PATH);
-    if (!realmInstance) realmInstance = RealmCache.add(DEFAULT_PATH, [RealmSchema.getBlueprintSchema()], {});
+    if (!realmInstance) realmInstance = RealmCache.add(DEFAULT_PATH, [SchemaBlueprintRow.getBlueprintSchema().getSchemaObject()], {});
 
     return realmInstance;
   }
@@ -88,12 +91,12 @@ class RealmCache {
     try {
       // Load
       const defaultRealm = RealmCache.getDefaultRealm();
-      const schemaBlueprints: Realm.Results<SchemaBlueprintRow> = await defaultRealm.objects(RealmSchemaName.SchemaBlueprint);
+      const schemaBlueprints: Realm.Results<SchemaBlueprintRowObj> = await defaultRealm.objects(RealmSchemaName.SchemaBlueprint);
 
       // Add to SchemaCache
-      schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprintRow) => {
+      schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprintRowObj) => {
         // Deserialize
-        const realmSchema = RealmSchema.fromSchemaStr(schemaBlueprint);
+        const realmSchema = SchemaBlueprintRow.fromBlueprintRowObj(schemaBlueprint);
 
         SchemaCache.add(realmSchema);
 
@@ -133,14 +136,34 @@ class RealmCache {
    * @param realmPath The RealmCache.trendSchemaMap key from which to fetch a TrendSchema[]
    * @param options Use to override default 'new Realm' options
    */
-  static _loadRealm(realmPath: string, options: RealmOptions) {
+  static _loadRealm(realmPath: string, options?: RealmOptions) {
     const realmSchemas = SchemaCache.getByRealm(realmPath);
 
     // Add Realm to RealmCache
     const realmInstance = RealmCache.add(realmPath, realmSchemas, options);
   }
+
+  static reloadRealm(realmPath: string, options?: RealmOptions) {
+    this._loadRealm(realmPath, options);
+  }
+
+  static async addTrend(realmPath: string, trendName: string, properties: Record<string, string>, options: RealmOptions = {}): Promise<TrendSchemaBlueprintRow | undefined> {
+    const defaultRealm = RealmCache.getDefaultRealm();
+
+    try {
+      // Construct Trend Schema Blueprint
+      const trendBlueprint = new TrendSchemaBlueprintRow(realmPath, trendName, properties);
+      // Save
+      await trendBlueprint.save(defaultRealm);
+
+      return trendBlueprint;
+    } catch (err) {
+      console.log(`RealmCache.addSchema() error: ${err}`);
+    }
+  }
 }
+
 // Init
-RealmCache.init();
+// RealmCache.init();
 
 export default RealmCache;

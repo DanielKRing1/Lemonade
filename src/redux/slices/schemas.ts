@@ -1,7 +1,13 @@
 import {createAsyncThunk, createSelector, createSlice, PayloadAction} from '@reduxjs/toolkit';
 import memoize from 'lodash.memoize';
 
+import RealmCache from '../../realm/Dev/RealmCache';
+import TrendCache from '../../realm/Dev/TrendCache';
+
+import {SchemaBlueprintRow, TrendSchemaBlueprintRow} from '../../realm/Dev/RealmSchema';
+
 import RealmSchemaName from '../../realm/schemaNames';
+import {TREND_PATH} from '../../constants/Realm/paths';
 
 const initialState: RealmSchemaTypeMap = {};
 
@@ -9,23 +15,38 @@ const initialState: RealmSchemaTypeMap = {};
 
 const loadSchemas = createAsyncThunk(
   'schemas/loadSchemas',
-  async (arg, {dispatch, getState}): Promise<Array<SchemaBlueprintRow>> => {
+  async (arg, {dispatch, getState}): Promise<Array<SchemaBlueprintRowObj>> => {
     try {
       // Load
       const defaultRealm = RealmCache.getDefaultRealm();
-      const schemaBlueprints: Realm.Results<SchemaBlueprintRow> = await defaultRealm.objects(RealmSchemaName.SchemaBlueprint);
+      const schemaBlueprints: Realm.Results<SchemaBlueprintRowObj> = await defaultRealm.objects(RealmSchemaName.SchemaBlueprint);
 
       // TODO Check that this actually converts to an Array
       return Array.from(schemaBlueprints);
     } catch (err) {
-      console.log(`RealmCache._loadSchemaBlueprints error: ${err}`);
+      console.log(`schema reducer loadSchemas error: ${err}`);
 
       return [];
     }
   },
 );
 
-export {loadSchemas};
+const addTrend = createAsyncThunk(
+  'schemas/addTrend',
+  async (args: {realmPath?: string; trendName: string; properties: Record<string, string>}, {dispatch, getState}): Promise<TrendSchemaBlueprintRow | undefined> => {
+    let {realmPath = TREND_PATH, trendName, properties} = args;
+
+    try {
+      const trendBlueprint: TrendSchemaBlueprintRow | undefined = await RealmCache.addTrend(realmPath, trendName, properties);
+
+      return trendBlueprint;
+    } catch (err) {
+      console.log(`schema reducer addTrend error: ${err}`);
+    }
+  },
+);
+
+export {loadSchemas, addTrend};
 
 // SELECTORS
 
@@ -95,44 +116,58 @@ export const schemasSlice = createSlice({
   },
   extraReducers: {
     [loadSchemas.fulfilled]: (state, action) => {
-      const realmSchemas: Array<SchemaBlueprintRow> = action.payload;
+      const blueprintRows: Array<SchemaBlueprintRowObj> = action.payload;
 
-      realmSchemas.forEach((realmSchema: SchemaBlueprintRow) => {
-        const {realmPath, schemaType, schemaName, schemaStr} = realmSchema;
+      // Organize Realm Schemas
+      blueprintRows.forEach((row: SchemaBlueprintRowObj) => {
+        const realmSchema = SchemaBlueprintRow.fromBlueprintRowObj(row);
+        const {realmPath, schemaType, name: schemaName} = realmSchema;
 
-        // Init to state
-        if (!state.hasOwnProperty(realmPath))
-          state[realmPath] = {
-            Blueprint: {},
-            Trend: {},
-          };
-        if (!state[realmPath].hasOwnProperty(schemaType)) state[realmPath][schemaType] = {};
+        // Init state map
+        initState(state, realmPath, schemaType);
 
         // Add to state
-        const schemaObj: RealmSchemaObject = JSON.parse(schemaStr);
-        state[realmPath][schemaType][schemaName] = schemaObj;
+        state[realmPath][schemaType][schemaName] = realmSchema.getSchemaObject();
 
         // Filter into TrendCache
         if (schemaType === SchemaType.Trend) TrendCache.add(realmPath, schemaName);
       });
 
+      // Open Realms
       Object.keys(state).forEach((realmPath: string) => {
         // Unsafe? way to select, so do not expect this selector to notice changes made to state draft in this reducer
         const schemaObjs = selectRealmPath(state)(realmPath);
         RealmCache.add(realmPath, schemaObjs);
       });
     },
+    [addTrend.fulfilled]: (state, action) => {
+      const trendBlueprint: TrendSchemaBlueprintRow = action.payload;
+
+      // Failed
+      // Will this be handled by the Thunk, or do I need to handle this case?
+      if (!trendBlueprint) return;
+
+      // Init state map
+      initState(state, trendBlueprint.realmPath, trendBlueprint.schemaType);
+
+      // Add to state
+      state[trendBlueprint.realmPath][trendBlueprint.schemaType][trendBlueprint.name] = trendBlueprint.getSchemaObject();
+
+      // Reload this Realm
+      const schemaObjs = selectRealmPath(state)(trendBlueprint.realmPath);
+      RealmCache.add(trendBlueprint.realmPath, schemaObjs);
+    },
   },
 });
 
-// TODO
-// 1. Async Thunk: Load Schemas
+// TODO NOW
+// 1. Done - Async Thunk: Load Schemas
 //    1.1. Read Schemas from Default Realm into Redux
 //    1.2. Save Schemas to Redux state
 //    1.3. For any Trend Schemas, add new Trend to TrendCache
 //    1.4. Foreach 'realmPath', push all Schemas to RealmCache.addRealm
 
-// 2. Async Thunk: Rate Day
+// 2. Done - Async Thunk: Rate Day
 //    2.1. Accept 'trendName', 'entities', 'rating', 'weights'
 //    2.2. Get TrendTracker from TrendCache.get(trendName)
 //    2.3. Get 'realmPath' from Redux state, using 'selectSchemaName' selector with 'trendName'
@@ -152,3 +187,14 @@ export const {addSchemas} = schemasSlice.actions;
 
 // REDUCER
 export default schemasSlice.reducer;
+
+// UTIL
+function initState(state: RealmSchemaTypeMap, realmPath: string, schemaType: SchemaType) {
+  // Init to state
+  if (!state.hasOwnProperty(realmPath))
+    state[realmPath] = {
+      Blueprint: {},
+      Trend: {},
+    };
+  if (!state[realmPath].hasOwnProperty(schemaType)) state[realmPath][schemaType] = {};
+}
