@@ -161,6 +161,16 @@ export const schemasSlice = createSlice({
 });
 
 // TODO NOW
+// 4. Store 'New Trend' input form
+//    4.1. Store 'trendName'
+//    4.2. Store properties ('moods')
+
+// 5. Create Context for Day Input/ Screen Color
+//    5.1. Create Context with 'screenColor' and 'isFocused'
+//    5.2. Wrap Input Form in Context
+//    5.3. Add useColor hook to Context?
+//    5.4. Call handleFocus/Blur from Input Form
+
 // 1. Done - Async Thunk: Load Schemas
 //    1.1. Read Schemas from Default Realm into Redux
 //    1.2. Save Schemas to Redux state

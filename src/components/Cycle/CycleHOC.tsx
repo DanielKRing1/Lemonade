@@ -1,14 +1,5 @@
 import React, {FC, useRef, useState} from 'react';
-import {
-  NativeSyntheticEvent,
-  TextInputSubmitEditingEventData,
-  Dimensions,
-  Button,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {NativeSyntheticEvent, TextInputSubmitEditingEventData, Dimensions, Button, Text, TextInput, TouchableOpacity, View} from 'react-native';
 import styled from 'styled-components/native';
 
 import {AbsoluteView, ExpandableInput} from '..';
@@ -37,20 +28,10 @@ type CycleProps = {
   onCycle: () => void;
   onSubmit: () => void;
 };
-export const withCycleContainer = <T extends object>(
-  WrappedComponent: FC<T & CycleProps & ChildProps>,
-) => (props: T & CycleProps) => {
+export const withCycleContainer = <T extends object>(WrappedComponent: FC<T & CycleProps & ChildProps>) => (props: T & CycleProps) => {
   const {placeholder, input, handleChangeInput, onCycle, onSubmit} = props;
 
-  const {
-    willMax: willFocus,
-    isMax: isFocused,
-    animation,
-    min,
-    max,
-    animateUp: animateFocus,
-    animateDown: animateBlur,
-  } = useOscillate(INPUT_MIN_HEIGHT, INPUT_MAX_HEIGHT, {
+  const {willMax: willFocus, isMax: isFocused, animation, min, max, animateUp: animateFocus, animateDown: animateBlur} = useOscillate(INPUT_MIN_HEIGHT, INPUT_MAX_HEIGHT, {
     duration: 150,
     initIsMax: true,
   });
@@ -104,23 +85,10 @@ export const withCycleContainer = <T extends object>(
         max={max}
         minHeight={INPUT_MIN_HEIGHT}
         maxHeight={INPUT_MAX_HEIGHT}>
-        <WrappedComponent
-          {...props}
-          isFocused={isFocused}
-          onScrollUp={handleFocus}
-          onScrollDown={handleBlur}
-        />
+        <WrappedComponent {...props} isFocused={isFocused} onScrollUp={handleFocus} onScrollDown={handleBlur} />
       </CycleInput>
 
-      <CycleButton
-        color={color}
-        animation={animation}
-        min={min}
-        max={max}
-        minWidth={BUTTON_MIN_WIDTH}
-        maxWidth={BUTTON_MAX_WIDTH}
-        onCycle={handleButtonPress}
-      />
+      <CycleButton color={color} animation={animation} min={min} max={max} minWidth={BUTTON_MIN_WIDTH} maxWidth={BUTTON_MAX_WIDTH} onCycle={handleButtonPress} />
 
       {/* <Button onPress={onSubmit} /> */}
     </StyledView>
