@@ -7,19 +7,26 @@ import DropShadow from 'react-native-drop-shadow';
 import {AbsoluteView} from '../../';
 import {BoxShadowStyle, CircleStyle} from '../../../styles';
 
-type CycleButtonProps = {
-  color: Animated.Node<number>;
+type AnimationParams = {
   min: number;
   max: number;
-  minWidth: number;
-  maxWidth: number;
+  minWidth?: number;
+  maxWidth?: number;
+  minHeight?: number;
+  maxHeight?: number;
+};
+
+type CycleButtonProps = {
+  color: Animated.Node<number>;
 
   animation: Animated.Value<number>;
+  animationParams: AnimationParams;
 
   onPress: () => void;
 };
 export const CycleButton: FC<CycleButtonProps> = (props) => {
-  const {color, animation, min, max, minWidth, maxWidth, onPress} = props;
+  const {color, animation, animationParams, onPress} = props;
+  const {min, max, minWidth = 0, maxWidth = 0} = animationParams;
 
   const buttonWidth = animation.interpolate({
     inputRange: [min, max],
@@ -38,7 +45,7 @@ export const CycleButton: FC<CycleButtonProps> = (props) => {
           shadowOpacity: 0.5,
           shadowRadius: 5,
         }}>
-        <StyledCycleButton activeOpacity={1} style={{height: minWidth, width: buttonWidth, backgroundColor: color}} onPress={onCycle}>
+        <StyledCycleButton activeOpacity={1} style={{height: minWidth, width: buttonWidth, backgroundColor: color}} onPress={onPress}>
           <Text>+</Text>
         </StyledCycleButton>
       </DropShadow>
