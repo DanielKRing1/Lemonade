@@ -1,6 +1,6 @@
 // This class is an attempt to make a non-reusable (but simpler) daily input form
 
-import React, {FC, useRef, useState} from 'react';
+import React, {FC, useContext, useRef, useState} from 'react';
 import styled from 'styled-components';
 import Animated from 'react-native-reanimated';
 
@@ -8,6 +8,9 @@ import Animated from 'react-native-reanimated';
 import DropShadow from 'react-native-drop-shadow';
 import {AbsoluteView, ExpandableInput} from '../..';
 import {CycleButton} from './CycleButton';
+
+// Contexts
+import {ColorContext, ColorProvider, DailyInputContext, DailyInputProvider} from './context';
 
 // Hooks
 import {useAttractiveColorAnimation, useOscillate, useIndexCycle} from '../../../hooks';
@@ -33,12 +36,16 @@ export const DailyInput: FC<DailyInputProps> = (props) => {
   const {trendProperties} = props;
 
   // HOOKS
-  const {willMax: willFocus, isMax: isFocused, animation, min, max, animateUp: animateFocus, animateDown: animateBlur} = useOscillate(INPUT_MIN_HEIGHT, INPUT_MAX_HEIGHT, {
-    duration: SIZE_ITERPOLATION_MS,
-    initIsMax: true,
-  });
+  // const {willMax: willFocus, isMax: isFocused, animation, min, max, animateUp: animateFocus, animateDown: animateBlur} = useOscillate(INPUT_MIN_HEIGHT, INPUT_MAX_HEIGHT, {
+  //   duration: SIZE_ITERPOLATION_MS,
+  //   initIsMax: true,
+  // });
 
-  const {color, animate: animateColor} = useAttractiveColorAnimation(COLOR_INTERPOLATION_MS);
+  // const {color, animate: animateColor} = useAttractiveColorAnimation(COLOR_INTERPOLATION_MS);
+
+  // CONTEXTS
+  const {color, animateColor} = useContext(ColorContext);
+  const {willFocus, isFocused, animation, min, max, animateFocus, animateBlur} = useContext(DailyInputContext);
 
   // INPUT UI FIELDS
   const [entity, setEntity] = useState<string>('');
@@ -117,15 +124,11 @@ export const DailyInput: FC<DailyInputProps> = (props) => {
         textInputRef={textInputRef}
         handleChangeInput={INPUT_FIELDS[activeIndex].handleChangeInput}
         handleSubmit={INPUT_FIELDS[activeIndex].handleSubmit}
-        color={color}
-        animation={animation}
-        animationParams={{min, max}}
-        hasShadow={willFocus || isFocused}
         handleFocus={handleFocus}
         handleBlur={handleBlur}
       />
 
-      <CycleButton color={color} animation={animation} animationParams={{min, max, minWidth: BUTTON_MIN_WIDTH, maxWidth: BUTTON_MAX_WIDTH}} onPress={handleButtonPress} />
+      <CycleButton onPress={handleButtonPress} />
     </AbsoluteView>
   );
 };
@@ -139,18 +142,16 @@ type DailyInputCycleProps = {
   handleChangeInput: (newInput: any) => void;
   handleSubmit: (finalInput: any) => void;
 
-  // TODO Add color, animation, animationParams, animateFocus/Blur, will/isFocused to Context
-  color: Animated.Node<number>;
-  animation: Animated.Value<number>;
-  animationParams: AnimationParams;
-  hasShadow: boolean;
-
   handleFocus: () => void;
   handleBlur: () => void;
 };
 const DailyInputCycle: FC<DailyInputCycleProps> = (props) => {
-  const {placeholder, value, textInputRef, enumList, handleChangeInput, handleSubmit, color, animation, animationParams, hasShadow, handleFocus, handleBlur} = props;
-  const {min, max} = animationParams;
+  const {placeholder, value, textInputRef, enumList, handleChangeInput, handleSubmit, handleFocus, handleBlur} = props;
+
+  // CONTEXTS
+  const {color, animateColor} = useContext(ColorContext);
+  const {willFocus, isFocused, animation, min, max, animateFocus, animateBlur} = useContext(DailyInputContext);
+  const hasShadow = willFocus || isFocused;
 
   const inputHeight = animation.interpolate({
     inputRange: [min, max],

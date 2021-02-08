@@ -1,4 +1,4 @@
-import React, {FC, useState} from 'react';
+import React, {FC, useContext, useState} from 'react';
 import {Animated as RNAnimated, Dimensions, Button, Text, TextInput, TouchableOpacity, TouchableHighlight, View} from 'react-native';
 import styled from 'styled-components/native';
 import Animated from 'react-native-reanimated';
@@ -7,30 +7,25 @@ import DropShadow from 'react-native-drop-shadow';
 import {AbsoluteView} from '../../';
 import {BoxShadowStyle, CircleStyle} from '../../../styles';
 
-type AnimationParams = {
-  min: number;
-  max: number;
-  minWidth?: number;
-  maxWidth?: number;
-  minHeight?: number;
-  maxHeight?: number;
-};
+// Contexts
+import {ColorContext, ColorProvider, DailyInputContext, DailyInputProvider} from './context';
+
+// Util/Constants
+import {INPUT_MIN_HEIGHT, INPUT_MAX_HEIGHT, INPUT_MIN_WIDTH, INPUT_MAX_WIDTH, BUTTON_MIN_WIDTH, BUTTON_MAX_WIDTH, SIZE_ITERPOLATION_MS, COLOR_INTERPOLATION_MS} from './constants';
 
 type CycleButtonProps = {
-  color: Animated.Node<number>;
-
-  animation: Animated.Value<number>;
-  animationParams: AnimationParams;
-
   onPress: () => void;
 };
 export const CycleButton: FC<CycleButtonProps> = (props) => {
-  const {color, animation, animationParams, onPress} = props;
-  const {min, max, minWidth = 0, maxWidth = 0} = animationParams;
+  const {onPress} = props;
+
+  // CONTEXTS
+  const {color, animateColor} = useContext(ColorContext);
+  const {willFocus, isFocused, animation, min, max, animateFocus, animateBlur} = useContext(DailyInputContext);
 
   const buttonWidth = animation.interpolate({
     inputRange: [min, max],
-    outputRange: [minWidth, maxWidth],
+    outputRange: [BUTTON_MIN_WIDTH, BUTTON_MAX_WIDTH],
   });
 
   return (
@@ -45,7 +40,7 @@ export const CycleButton: FC<CycleButtonProps> = (props) => {
           shadowOpacity: 0.5,
           shadowRadius: 5,
         }}>
-        <StyledCycleButton activeOpacity={1} style={{height: minWidth, width: buttonWidth, backgroundColor: color}} onPress={onPress}>
+        <StyledCycleButton activeOpacity={1} style={{height: BUTTON_MIN_WIDTH, width: buttonWidth, backgroundColor: color}} onPress={onPress}>
           <Text>+</Text>
         </StyledCycleButton>
       </DropShadow>

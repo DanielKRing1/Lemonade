@@ -7,8 +7,12 @@ import {useAttractiveColorAnimation, useOscillate, useIndexCycle} from '../../..
 // Util/Constants
 import {INPUT_MIN_HEIGHT, INPUT_MAX_HEIGHT, INPUT_MIN_WIDTH, INPUT_MAX_WIDTH, BUTTON_MIN_WIDTH, BUTTON_MAX_WIDTH, SIZE_ITERPOLATION_MS, COLOR_INTERPOLATION_MS} from './constants';
 
+// TODO Make these type global, from a .d.ts file
 type ColorContextValue = {color: Animated.Node<number>; animateColor: () => void};
-export const ColorContext = createContext<ColorContextValue | null>(null);
+export const ColorContext = createContext<ColorContextValue>({
+  color: new Animated.Value<number>(0),
+  animateColor: () => {},
+});
 
 type ColorProviderProps = {
   children?: React.ReactNode;
@@ -21,9 +25,22 @@ export const ColorProvider: FC<ColorProviderProps> = (props) => {
   return <ColorContext.Provider value={{color, animateColor}}>{children}</ColorContext.Provider>;
 };
 
+// TODO Make these type global, from a .d.ts file
 // TODO Separate these Contexts into individual files
-type DailyInputContextValue = {willFocus: boolean; isFocused: boolean; animation: Animated.Node<number>; min: number; max: number; animateFocus: () => void; animateBlur: () => void};
-export const DailyInputContext = createContext<DailyInputContextValue | null>(null);
+type DailyInputContextValue = {willFocus: boolean; isFocused: boolean; animation: Animated.Value<number>; min: number; max: number; animateFocus: () => void; animateBlur: () => void};
+export const DailyInputContext = createContext<DailyInputContextValue>({
+  willFocus: false,
+  isFocused: false,
+  animation: new Animated.Value<number>(0),
+  min: 0,
+  max: 1,
+  animateFocus: () => {
+    console.log('Initial DailyInputContext.animateFocus');
+  },
+  animateBlur: () => {
+    console.log('Initial DailyInputContext.animateBlur');
+  },
+});
 
 type DailyInputProviderProps = {
   children?: React.ReactNode;
