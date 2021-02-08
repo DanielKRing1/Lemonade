@@ -161,15 +161,19 @@ export const schemasSlice = createSlice({
 });
 
 // TODO NOW
-// 4. Store 'New Trend' input form
-//    4.1. Store 'trendName'
-//    4.2. Store properties ('moods')
+// Learn to make Context
+// Make Context for color
+// Make Context for Daily Input Form
+// Provide both Contexts
+// Consume both Contexts
 
-// 5. Create Context for Day Input/ Screen Color
-//    5.1. Create Context with 'screenColor' and 'isFocused'
-//    5.2. Wrap Input Form in Context
-//    5.3. Add useColor hook to Context?
-//    5.4. Call handleFocus/Blur from Input Form
+// 4. Create Context for Color to be used by multiple 'scenes' in the app
+//    4.1. Create top-level Context for 'color' and its AnimatedValue
+//    4.2. Provide method to change state to 'next' color
+
+// 5. Create Context for Daily Input Form components
+//    5.1. Track 'willFocus', 'isFocused'
+//    5.2. Provide AnimatedValue for focused/blurred states
 
 // 1. Done - Async Thunk: Load Schemas
 //    1.1. Read Schemas from Default Realm into Redux

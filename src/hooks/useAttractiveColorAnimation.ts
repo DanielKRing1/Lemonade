@@ -28,6 +28,8 @@ const getColor = (lb = 0, ub = 200, maxIterations = 50) => {
   return randColor;
 };
 
+// TODO Use useOscillate Hook
+//  Add cb param to 'oscillate' method
 export const useAttractiveColorAnimation = (duration = SHORT_ANIMATION_MS) => {
   const [colorNode, setColorNode] = useState(new Animated.Value<number>(0));
 

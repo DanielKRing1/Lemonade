@@ -112,7 +112,6 @@ export const DailyInput: FC<DailyInputProps> = (props) => {
   return (
     <AbsoluteView>
       <DailyInputCycle
-        activeIndex={activeIndex}
         placeholder={INPUT_FIELDS[activeIndex].placeholder}
         value={INPUT_FIELDS[activeIndex].value}
         textInputRef={textInputRef}
@@ -132,7 +131,6 @@ export const DailyInput: FC<DailyInputProps> = (props) => {
 };
 
 type DailyInputCycleProps = {
-  activeIndex: number;
   placeholder: string;
   value: string;
   textInputRef: any;
@@ -141,6 +139,7 @@ type DailyInputCycleProps = {
   handleChangeInput: (newInput: any) => void;
   handleSubmit: (finalInput: any) => void;
 
+  // TODO Add color, animation, animationParams, animateFocus/Blur, will/isFocused to Context
   color: Animated.Node<number>;
   animation: Animated.Value<number>;
   animationParams: AnimationParams;
@@ -150,7 +149,7 @@ type DailyInputCycleProps = {
   handleBlur: () => void;
 };
 const DailyInputCycle: FC<DailyInputCycleProps> = (props) => {
-  const {activeIndex, placeholder, value, textInputRef, enumList, handleChangeInput, handleSubmit, color, animation, animationParams, hasShadow, handleFocus, handleBlur} = props;
+  const {placeholder, value, textInputRef, enumList, handleChangeInput, handleSubmit, color, animation, animationParams, hasShadow, handleFocus, handleBlur} = props;
   const {min, max} = animationParams;
 
   const inputHeight = animation.interpolate({
