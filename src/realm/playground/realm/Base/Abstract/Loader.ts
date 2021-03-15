@@ -1,10 +1,10 @@
-import { NotImplementedError } from "../../Errors";
+import {NotImplementedError} from '../../Errors';
 
 export type LoadParams = Record<string, any>;
 export class Loader {
   constructor() {}
 
-  load(param?: LoadParams): void {
+  load(param?: LoadParams): any {
     throw NotImplementedError();
   }
 }

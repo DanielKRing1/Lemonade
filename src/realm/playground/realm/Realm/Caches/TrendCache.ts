@@ -12,7 +12,7 @@ export class TrendCache extends Singleton(Cache)<TrendTracker> {
   constructor() {
     super();
 
-    return this.getSingleton();
+    return this.getSingleton() as TrendCache;
   }
 
   @Override('Cache')

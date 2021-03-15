@@ -1,6 +1,9 @@
 import {Cache, Loadable, Loader, LoadParams, Singleton, Override, Implement} from '../../Base';
+import {SchemaBlueprint} from '../SchemaBlueprint';
 
-type Realm = any;
+import {TrendCache} from './TrendCache';
+
+import {DEFAULT_PATH} from '../../../../../constants';
 
 /**
  * A SINGLETON CACHE that caches all open Realm connections
@@ -8,29 +11,152 @@ type Realm = any;
  * It is also LOADABLE, meaning it can load() predefined Realm connections (defined the default Realm)
  */
 export class RealmCache extends Singleton(Cache)<Realm> implements Loadable {
-  _loader: RealmLoader;
+  _loader: SchemaLoader;
 
   constructor() {
     super();
 
-    this._loader = new RealmLoader();
+    this._loader = new SchemaLoader();
 
-    return this.getSingleton();
+    return this.getSingleton() as RealmCache;
+  }
+
+  /**
+   * Get Default Realm
+   * Opens Default Realm and caches it if not already in cache
+   */
+  public getDefault(): Realm {
+    if (!this.has(DEFAULT_PATH))
+      // Init Default Realm
+      this.add(DEFAULT_PATH, {
+        schemaBlueprints: [SchemaBlueprint.BLUEPRINT_SCHEMA],
+        options: {},
+      });
+
+    return this.get(DEFAULT_PATH) as Realm;
   }
 
   @Override('Cache')
-  add(key: string, valueParams: Record<string, any>) {
-    throw new Error('Method not implemented.');
+  public add(realmPath: string, valueParams: {schemaBlueprints: Array<SchemaBlueprint>; options?: any}): void {
+    const {schemaBlueprints, options} = valueParams;
+    const newRealm = this._open(realmPath, schemaBlueprints, options);
+
+    // Close existing realm (if exists)
+    this._close(realmPath);
+    this._map[realmPath] = newRealm;
   }
 
   @Implement('Loadable')
-  load(params?: LoadParams) {
-    this._loader.load(params);
+  public load(params?: {options?: Dict<string>}): Array<SchemaBlueprint> {
+    // Get SchemaBlueprints
+    const allParams = {
+      ...params,
+      defaultRealm: this.getDefault(),
+    };
+
+    // TODO
+    // Does Realm.Results work in place of Array?
+    const schemas: Array<SchemaBlueprint> = this._loader.load(allParams);
+
+    // Index SchemaBlueprints by realmPath
+    const schemasIndexedByRealmPath: Dict<Array<SchemaBlueprint>> = {};
+
+    for (const schema of schemas) {
+      const realmPath = schema.realmPath;
+
+      if (!schemasIndexedByRealmPath.hasOwnProperty(realmPath)) schemasIndexedByRealmPath[realmPath] = [];
+      schemasIndexedByRealmPath[realmPath].push(schema);
+    }
+
+    // Add a Realm to the RealmCache for each set of indexed SchemaBlueprints
+    const realmPaths = Object.keys(schemasIndexedByRealmPath);
+    for (const realmPath of realmPaths) {
+      const schemaBlueprints = schemasIndexedByRealmPath[realmPath];
+      const options = {};
+
+      this._loadOne(realmPath, {
+        schemaBlueprints,
+        options,
+      });
+    }
+
+    return schemas;
+  }
+
+  /**
+   * Same as this.add for now
+   */
+  public _loadOne(realmPath: string, params: {schemaBlueprints: Array<SchemaBlueprint>; options?: Dict<string>}) {
+    const {schemaBlueprints, options} = params;
+
+    this.add(realmPath, {
+      schemaBlueprints,
+      options,
+    });
+  }
+
+  public _reloadOne(realmPath: string, params: {newSchemas: Array<SchemaBlueprint>; options?: Dict<string>}) {
+    const {newSchemas, options} = params;
+
+    // Merge and Close existing Realm
+    const realm: Realm | undefined = this._close(realmPath);
+    if (!!realm) {
+      // Convert old schema definitions to SchemaBlueprints
+      const oldSchemas = realm.schema.map((oldSchema: Realm.ObjectSchema) => new SchemaBlueprint(oldSchema.name, realmPath, SchemaType.Unknown, (oldSchema.properties as unknown) as SchemaDef));
+
+      // Merge old set with new set of SchemaBlueprints
+      newSchemas.push(...oldSchemas);
+    }
+
+    // Open and add Realm with new schema definitions
+    this.add(realmPath, {
+      schemaBlueprints: newSchemas,
+      options,
+    });
+  }
+
+  public save(schemaName: string, realmPath: string, schemaType: SchemaType, schemaDef: SchemaDef, options?: Dict<string>): SchemaBlueprint {
+    const newSchemaBlueprint: SchemaBlueprint = SchemaBlueprint.save(this.getDefault(), schemaName, realmPath, schemaType, schemaDef);
+    this._reloadOne(realmPath, {
+      newSchemas: [newSchemaBlueprint],
+      options,
+    });
+
+    return newSchemaBlueprint;
+  }
+
+  private _open(realmPath: string, schemaBlueprints: Array<SchemaBlueprint>, options: any): Realm {
+    const schemaDefinitions = schemaBlueprints.map((blueprint) => blueprint.schemaDef);
+
+    const newRealm = new Realm({
+      path: realmPath,
+      schema: schemaDefinitions,
+      deleteRealmIfMigrationNeeded: true,
+      ...options,
+    });
+
+    return newRealm;
+  }
+
+  private _close(realmPath: string): Realm | undefined {
+    const existingRealm = this.get(realmPath);
+    if (!!existingRealm && existingRealm instanceof Realm) existingRealm.close();
+
+    return existingRealm;
   }
 }
 
-class RealmLoader extends Loader {
+class SchemaLoader extends Loader {
   constructor() {
     super();
+  }
+
+  load(params: LoadParams & {defaultRealm: Realm}): Array<SchemaBlueprint> {
+    const {defaultRealm} = params;
+
+    // Load
+    const schemaBlueprints: Array<SchemaBlueprint> = Array.from(defaultRealm.objects(SchemaName.SchemaBlueprint));
+
+    return schemaBlueprints;
   }
 }

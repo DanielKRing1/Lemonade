@@ -20,27 +20,27 @@
 type Constructor<T = {}> = new (...args: any[]) => T;
 
 export function Singleton<TBase extends Constructor>(Base: TBase) {
-    abstract class Singleton extends Base {
-        private static _instance;
+  abstract class Singleton extends Base {
+    private static _instance: Singleton;
 
-        protected getSingleton() {
-            if (!this._hasInstance()) this._setInstance();
+    protected getSingleton() {
+      if (!this._hasInstance()) this._setInstance();
 
-            return this._getInstance();
-        }
-
-        private _getInstance() {
-            return (this.constructor as typeof Singleton)._instance;
-        }
-
-        private _setInstance() {
-            (this.constructor as typeof Singleton)._instance = this;
-        }
-
-        private _hasInstance() {
-            return !!(this.constructor as typeof Singleton)._instance;
-        }
+      return this._getInstance();
     }
 
-    return Singleton;
+    private _getInstance() {
+      return (this.constructor as typeof Singleton)._instance;
+    }
+
+    private _setInstance() {
+      (this.constructor as typeof Singleton)._instance = this;
+    }
+
+    private _hasInstance() {
+      return !!(this.constructor as typeof Singleton)._instance;
+    }
+  }
+
+  return Singleton;
 }

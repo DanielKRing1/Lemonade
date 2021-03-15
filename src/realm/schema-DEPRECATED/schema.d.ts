@@ -1,8 +1,8 @@
 // ENUMS
-declare enum SchemaType {
-  Blueprint = 'Blueprint',
-  Trend = 'Trend',
-}
+// declare enum SchemaType {
+//   Blueprint = 'Blueprint',
+//   Trend = 'Trend',
+// }
 
 // DATA STORE MAPS
 // {
@@ -16,7 +16,7 @@ declare type RealmSchemaTypeMap = Record<RealmPath, SchemaTypeMap>;
 
 declare type SchemaTypeMap = Record<SchemaType, SchemaMap>;
 
-declare type SchemaName = string;
+// declare type SchemaName = string;
 declare type SchemaMap = Record<SchemaName, RealmSchemaObject>;
 // declare type SchemaMap = Record<SchemaName, import('../Dev/RealmSchema/RealmSchema').RealmSchema>;
 
