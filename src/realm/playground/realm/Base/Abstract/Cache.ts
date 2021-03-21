@@ -1,4 +1,4 @@
-import {NotImplementedError} from '../../Errors';
+import {NotInCacheError, NotImplementedError} from '../../Errors';
 
 export class Cache<T> {
   protected _map: Record<string, T>;
@@ -14,11 +14,22 @@ export class Cache<T> {
    * @param valueParams Object of data needed to build a value for the key
    */
   add(key: string, valueParams: Record<string, any>) {
-    throw NotImplementedError();
+    throw NotImplementedError({});
   }
 
-  get(key: string): T | undefined {
+  rm(key: string, options?: any): T | undefined {
+    if (this.has(key)) {
+      const val = this._map[key];
+      delete this._map[key];
+
+      return val;
+    }
+  }
+
+  get(key: string): T {
     if (this.has(key)) return this._map[key];
+
+    // throw NotInCacheError({message: `"${key}" does not exist in ${this.constructor} Cache`});
   }
 
   has(key: string) {

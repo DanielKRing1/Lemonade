@@ -2,8 +2,6 @@ import {Cache, LoadParams, Singleton, Override, Implement} from '../../Base';
 
 import {TrendTracker} from '../Trends';
 
-type Realm = any;
-
 /**
  * A SINGLETON CACHE that caches all TrendSchemas and their TrendTracker
  *
@@ -16,7 +14,9 @@ export class TrendCache extends Singleton(Cache)<TrendTracker> {
   }
 
   @Override('Cache')
-  add(key: string, valueParams: Record<string, any>) {
-    throw new Error('Method not implemented.');
+  add(trendName: string, valueParams: {realmPath: string}) {
+    const {realmPath} = valueParams;
+
+    this._map[trendName] = new TrendTracker(realmPath, trendName);
   }
 }

@@ -69,9 +69,9 @@ export class SchemaBlueprint {
 
   //   SAVE
 
-  static save(defaultRealm: Realm, schemaName: string, realmPath: string, schemaType: SchemaType, schemaDef: SchemaDef): SchemaBlueprint {
+  static save(realm: Realm, schemaName: string, realmPath: string, schemaType: SchemaType, schemaDef: SchemaDef): SchemaBlueprint {
     const schemaBlueprint = new SchemaBlueprint(schemaName, realmPath, schemaType, schemaDef);
-    schemaBlueprint.save(defaultRealm);
+    schemaBlueprint.save(realm);
 
     return schemaBlueprint;
   }

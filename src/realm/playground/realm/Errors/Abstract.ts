@@ -1,4 +1,7 @@
-type ErrorGeneratorParams = {};
-type ErrorGenerator = (params?: ErrorGeneratorParams) => Error;
+import {MyError} from './Error';
 
-export const NotImplementedError: ErrorGenerator = (params) => new Error(`This method (${NotImplementedError.caller}) has not been implemented`);
+export const NotImplementedError: ErrorGenerator = (params = {}) => {
+  const error = new MyError(ErrorCode.AbstractClass, `This method (${NotImplementedError.caller}) has not been implemented`);
+
+  return error;
+};
