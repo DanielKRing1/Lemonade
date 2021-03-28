@@ -56,7 +56,7 @@ class RealmInterface extends Singleton(Object) {
 
     if (!!realm) {
       const newSchemaBlueprint: SchemaBlueprint = SchemaBlueprint.save(realm, schemaName, realmPath, schemaType, schemaDef);
-      const allSchemas: Array<SchemaBlueprint> = RealmUtils.mergeSchemas(realm, [newSchemaBlueprint]);
+      const allSchemas: Array<SchemaBlueprint> = RealmUtils.mergeSchemasFromRealm(realm, [newSchemaBlueprint]);
 
       this._realmCache.add(realmPath, {
         schemaBlueprints: allSchemas,
@@ -71,7 +71,7 @@ class RealmInterface extends Singleton(Object) {
     const realm = this._realmCache.get(realmPath);
 
     if (!!realm) {
-      const remainingSchemas: Array<SchemaBlueprint> = RealmUtils.filterSchemas(realm, [schemaName]);
+      const remainingSchemas: Array<SchemaBlueprint> = RealmUtils.filterSchemasfromRealm(realm, [schemaName]);
 
       this._realmCache.add(realmPath, {
         schemaBlueprints: remainingSchemas,
@@ -81,4 +81,13 @@ class RealmInterface extends Singleton(Object) {
       return remainingSchemas;
     }
   }
+
+  //   TODO
+  // 1. Design Base Trend Schema + TrendTags Schema: Think about all properties needed
+  // 2. Design RealmInterface.rate method: Accepts list of entity names, 'mood' , single rating for the set of entities, weights for each entity (defaults to 1/# entities) + Call rate on all of a Schema's defined Querent types
+  // 3. Design Querent.rate method
+  // 4. Define Querent types: Enum dense, sequential, sequential_dense
+  // 5. Define variable Trend attributes (hasTags - Create Seperate Graph for tags, Enum relationshipTypes - dense, sequential, sequential_dense, ...)
+  // 6. Define DayPart Schema: Timestamp, entities, rating, mood
+  // 7. Define Day Schema: Timestamp, List reference to DayParts
 }
