@@ -1,14 +1,14 @@
 import {DEFAULT_PATH} from '../../../../../constants';
 
-export class SchemaBlueprint {
+export class SchemaBlueprint implements SchemaBlueprintObj {
   schemaName: string;
   realmPath: string;
   schemaType: SchemaType;
-  schemaDef: SchemaDef;
+  schemaDef: Realm.ObjectSchema;
 
   // STATIC UTILITIES
 
-  static BLUEPRINT_SCHEMA_DEF: SchemaDef = {
+  static BLUEPRINT_SCHEMA_DEF: Realm.ObjectSchema = {
     name: SchemaName.SchemaBlueprint,
     primaryKey: 'schemaName',
     properties: {
@@ -20,7 +20,7 @@ export class SchemaBlueprint {
   };
   static BLUEPRINT_SCHEMA: SchemaBlueprint = new SchemaBlueprint(SchemaName.SchemaBlueprint, DEFAULT_PATH, SchemaType.Blueprint, SchemaBlueprint.BLUEPRINT_SCHEMA_DEF);
 
-  constructor(schemaName: string, realmPath: string, schemaType: SchemaType, schemaDef: SchemaDef) {
+  constructor(schemaName: string, realmPath: string, schemaType: SchemaType, schemaDef: Realm.ObjectSchema) {
     this.schemaName = schemaName;
     this.realmPath = realmPath;
     this.schemaType = schemaType;

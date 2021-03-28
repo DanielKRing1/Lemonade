@@ -1,20 +1,13 @@
 // Db Definition
 declare type RealmPath = string;
 
-// Schema Definition for Realm
-declare type SchemaDef = {
-  name: string;
-  primaryKey?: string;
-  properties: import('realm').PropertiesTypes;
-};
-
 // User Defined Table Definition
-declare type SchemaBlueprintObj = {
+declare interface SchemaBlueprintObj {
   schemaName: string;
   realmPath: string;
   schemaType: SchemaType;
-  schemaDef: SchemaDef;
-};
+  schemaDef: Realm.ObjectSchema;
+}
 
 // Table Definition saved to Realm Blueprint Table
 declare type SchemaBlueprintRow = {

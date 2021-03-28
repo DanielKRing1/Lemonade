@@ -5,7 +5,7 @@ export abstract class RealmUtils {
     const realmPath: string = realm.path;
 
     return realm.schema.map((oldSchema: Realm.ObjectSchema) => {
-      const schemaDef: SchemaDef = {name: oldSchema.name, primaryKey: oldSchema.primaryKey, properties: oldSchema.properties};
+      const schemaDef: Realm.ObjectSchema = {name: oldSchema.name, primaryKey: oldSchema.primaryKey, properties: oldSchema.properties};
 
       return new SchemaBlueprint(oldSchema.name, realmPath, SchemaType.Unknown, schemaDef);
     });
