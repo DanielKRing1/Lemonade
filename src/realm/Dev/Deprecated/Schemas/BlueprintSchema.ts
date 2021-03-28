@@ -1,6 +1,6 @@
 import RealmSchemaName from '../../../schemaNames';
 
-const BlueprintSchema: RealmSchemaObject = {
+const BlueprintSchema: Realm.ObjectSchema = {
   name: RealmSchemaName.SchemaBlueprint,
   primaryKey: 'schemaName',
   properties: {

@@ -28,7 +28,7 @@ export class SchemaBlueprintRow {
   static fromBlueprintRowObj(blueprintRow: SchemaBlueprintRowObj) {
     const {schemaStr, schemaType, realmPath} = blueprintRow;
 
-    const schemaObj: RealmSchemaObject = JSON.parse(schemaStr);
+    const schemaObj: Realm.ObjectSchema = JSON.parse(schemaStr);
     const {name, primaryKey, properties} = schemaObj;
 
     return new SchemaBlueprintRow(schemaType, realmPath, name, properties, primaryKey);
@@ -58,7 +58,7 @@ export class SchemaBlueprintRow {
   /**
    * Formats object instance into a plain object that can be used to open Realms
    */
-  getSchemaObject(): RealmSchemaObject {
+  getSchemaObject(): Realm.ObjectSchema {
     return {
       name: this.name,
       primaryKey: this.primaryKey,
@@ -67,7 +67,7 @@ export class SchemaBlueprintRow {
   }
 
   getSchemaBlueprintRowObj(): SchemaBlueprintRowObj {
-    const schemaObj: RealmSchemaObject = this.getSchemaObject();
+    const schemaObj: Realm.ObjectSchema = this.getSchemaObject();
     const schemaStr = JSON.stringify(schemaObj);
 
     const schemaBlueprint: SchemaBlueprintRowObj = {

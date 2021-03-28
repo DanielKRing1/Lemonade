@@ -31,7 +31,7 @@ class RealmCache {
   //   RealmCache._loadAllRealms();
   // }
 
-  static _openRealm(realmPath: string, realmSchemas: Array<RealmSchemaObject>, options: RealmOptions) {
+  static _openRealm(realmPath: string, realmSchemas: Array<Realm.ObjectSchema>, options: RealmOptions) {
     const newRealm = new Realm({
       path: realmPath,
       schema: realmSchemas,
@@ -49,7 +49,7 @@ class RealmCache {
    * @param realmSchemas Schema[] expected to be used (and therefore loaded) with Realm
    * @param options Options object for opening Realm
    */
-  static add(realmPath: string, realmSchemas: Array<RealmSchemaObject>, options: RealmOptions = {}) {
+  static add(realmPath: string, realmSchemas: Array<Realm.ObjectSchema>, options: RealmOptions = {}) {
     const realmInstance = RealmCache._openRealm(realmPath, realmSchemas, options);
     RealmCache.cache[realmPath] = realmInstance;
 
