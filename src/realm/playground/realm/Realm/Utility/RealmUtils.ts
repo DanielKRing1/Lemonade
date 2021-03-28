@@ -1,4 +1,4 @@
-import {SchemaBlueprint} from '../SchemaBlueprint';
+import {SchemaBlueprint} from '../Schema/SchemaBlueprint';
 
 export abstract class RealmUtils {
   static getSchemasFromRealm(realm: Realm): Array<SchemaBlueprint> {

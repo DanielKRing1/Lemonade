@@ -3,7 +3,7 @@ import {Singleton} from '../Base';
 import {RealmCache, TrendCache} from './Caches';
 import {RealmUtils} from './Utility';
 
-import {SchemaBlueprint} from './SchemaBlueprint';
+import {SchemaBlueprint} from './Schema/SchemaBlueprint';
 
 class RealmInterface extends Singleton(Object) {
   private _realmCache: RealmCache;

@@ -1,4 +1,4 @@
-import {DEFAULT_PATH} from '../../../../constants';
+import {DEFAULT_PATH} from '../../../../../constants';
 
 export class SchemaBlueprint {
   schemaName: string;
