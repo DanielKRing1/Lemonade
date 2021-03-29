@@ -21,6 +21,9 @@ declare type SchemaBlueprintRow = {
 declare enum SchemaType {
   Blueprint = 'blueprint',
   Trend = 'trend',
+  TrendTag = 'trend_tag',
+  TrendRelationship = 'trend_rel',
+  TrendTagRelationship = 'trend_tag_rel',
   Unknown = 'unknown',
 }
 
