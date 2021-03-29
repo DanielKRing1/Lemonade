@@ -3,7 +3,7 @@ type ErrorGeneratorParams = {
 };
 type ErrorGenerator = (params: ErrorGeneratorParams) => Error;
 
-declare enum ErrorCode {
+declare enum ErrorCodeEnum {
   AbstractClass = 10,
 
   NotInCache = 20,

@@ -20,7 +20,7 @@ type BuildTrendBlueprintReturn = {
  * @param attributeNames
  * @param relTypes
  */
-export const buildTrendBlueprint = (trendName: string, realmPath: string, attributeNames: string[], relTypes: RelationshipType[]): BuildTrendBlueprintReturn => {
+export const buildTrendBlueprint = (trendName: string, realmPath: string, attributeNames: string[], relTypes: RelationshipTypeEnum[]): BuildTrendBlueprintReturn => {
   // Build Trend blueprint obj with custom attributes and relationship arrays
   const trendSchemaDef: Realm.ObjectSchema = getBaseTrendSchemaDef(trendName);
 
@@ -46,10 +46,10 @@ export const buildTrendBlueprint = (trendName: string, realmPath: string, attrib
   const tagRelSchemaDefs: Array<Realm.ObjectSchema> = getRelSchemaDefs(trendTagSchemaName, relTypes);
 
   // Return SchemaBlueprints
-  const trendSchemaBlueprint: SchemaBlueprint = new SchemaBlueprint(trendName, realmPath, SchemaType.Trend, trendSchemaDef);
-  const trendTagSchemaBlueprint: SchemaBlueprint = new SchemaBlueprint(trendTagSchemaName, realmPath, SchemaType.TrendTag, trendTagSchemaDef);
-  const relSchemaBlueprints: Array<SchemaBlueprint> = relSchemaDefs.map((def) => new SchemaBlueprint(def.name, realmPath, SchemaType.TrendRelationship, def));
-  const tagRelSchemaBlueprints: Array<SchemaBlueprint> = tagRelSchemaDefs.map((def) => new SchemaBlueprint(def.name, realmPath, SchemaType.TrendTagRelationship, def));
+  const trendSchemaBlueprint: SchemaBlueprint = new SchemaBlueprint(trendName, realmPath, SchemaTypeEnum.Trend, trendSchemaDef);
+  const trendTagSchemaBlueprint: SchemaBlueprint = new SchemaBlueprint(trendTagSchemaName, realmPath, SchemaTypeEnum.TrendTag, trendTagSchemaDef);
+  const relSchemaBlueprints: Array<SchemaBlueprint> = relSchemaDefs.map((def) => new SchemaBlueprint(def.name, realmPath, SchemaTypeEnum.TrendRelationship, def));
+  const tagRelSchemaBlueprints: Array<SchemaBlueprint> = tagRelSchemaDefs.map((def) => new SchemaBlueprint(def.name, realmPath, SchemaTypeEnum.TrendTagRelationship, def));
 
   return {
     trend: trendSchemaBlueprint,
@@ -75,14 +75,14 @@ const getTrendAttributeProps = (attributeNames: string[]): Realm.PropertiesTypes
   return ObjectBuilder.buildUniformObject(attributeKeys, attributeValue);
 };
 
-const getRelationshipProps = (schemaName: string, relTypes: RelationshipType[]): Realm.PropertiesTypes => {
+const getRelationshipProps = (schemaName: string, relTypes: RelationshipTypeEnum[]): Realm.PropertiesTypes => {
   const relKeys: string[] = relTypes.map((relType) => getTrendRelKey(relType));
   const relSchemaValues: string[] = relTypes.map((relType) => `${getRelSchemaName(schemaName, relType)}[]`);
 
   return ObjectBuilder.buildObject(relKeys, relSchemaValues);
 };
 
-const getRelSchemaDefs = (schemaName: string, relTypes: RelationshipType[]): Array<Realm.ObjectSchema> => {
+const getRelSchemaDefs = (schemaName: string, relTypes: RelationshipTypeEnum[]): Array<Realm.ObjectSchema> => {
   const relSchemaDefs: Array<Realm.ObjectSchema> = [];
   for (const relType of relTypes) {
     const relKey = getTrendRelKey(relType);
@@ -105,6 +105,6 @@ const getRelSchemaDefs = (schemaName: string, relTypes: RelationshipType[]): Arr
 };
 
 const getTrendAttrKey = (attributeName: string) => `${attributeName}_rating`;
-const getTrendRelKey = (relType: RelationshipType) => `rel_${relType}`;
+const getTrendRelKey = (relType: RelationshipTypeEnum) => `rel_${relType}`;
 const getTrendTagSchemaName = (trendName: string) => `${trendName}_tag`;
-const getRelSchemaName = (entitySchemaName: string, relType: RelationshipType) => `${entitySchemaName}_${getTrendRelKey(relType)}`;
+const getRelSchemaName = (entitySchemaName: string, relType: RelationshipTypeEnum) => `${entitySchemaName}_${getTrendRelKey(relType)}`;

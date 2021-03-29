@@ -1,7 +1,7 @@
 export class MyError extends Error {
-  public code: ErrorCode;
+  public code: ErrorCodeEnum;
 
-  constructor(code: ErrorCode, message?: string) {
+  constructor(code: ErrorCodeEnum, message?: string) {
     super(message);
 
     this.code = code;

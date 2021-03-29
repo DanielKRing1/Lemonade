@@ -140,7 +140,7 @@ class SchemaLoader extends Loader {
     const {defaultRealm} = params;
 
     // Load
-    const schemaBlueprints: Array<SchemaBlueprint> = Array.from(defaultRealm.objects(SchemaName.SchemaBlueprint));
+    const schemaBlueprints: Array<SchemaBlueprint> = Array.from(defaultRealm.objects(SchemaNameEnum.SchemaBlueprint));
 
     return schemaBlueprints;
   }

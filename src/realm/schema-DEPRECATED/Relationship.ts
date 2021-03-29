@@ -21,7 +21,7 @@ export const ActivityRelationshipSchema = {
   },
 };
 
-export const CategoryRelationshipSchema: RealmSchemaType<CategoryRel> = {
+export const CategoryRelationshipSchema: RealmSchemaTypeEnum<CategoryRel> = {
   name: RealmSchema.CategoryRelationship,
   primaryKey: 'id',
   properties: {

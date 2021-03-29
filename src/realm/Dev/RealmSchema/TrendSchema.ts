@@ -9,7 +9,7 @@ export class TrendSchemaBlueprintRow extends SchemaBlueprintRow {
       [pk]: 'string',
     };
 
-    super(SchemaType.Trend, realmPath, name, properties, pk);
+    super(SchemaTypeEnum.Trend, realmPath, name, properties, pk);
   }
 
   save(defaultRealm: Realm): SchemaBlueprintRowObj {

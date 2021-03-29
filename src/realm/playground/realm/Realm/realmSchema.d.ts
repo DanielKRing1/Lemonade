@@ -1,11 +1,12 @@
 // Db Definition
 declare type RealmPath = string;
+declare type SchemaName = string;
 
 // User Defined Table Definition
 declare interface SchemaBlueprintObj {
   schemaName: string;
   realmPath: string;
-  schemaType: SchemaType;
+  schemaType: SchemaTypeEnum;
   schemaDef: Realm.ObjectSchema;
 }
 
@@ -13,12 +14,12 @@ declare interface SchemaBlueprintObj {
 declare type SchemaBlueprintRow = {
   schemaName: string;
   realmPath: string;
-  schemaType: SchemaType;
+  schemaType: SchemaTypeEnum;
   schemaStr: string;
 };
 
 // Schema Types
-declare enum SchemaType {
+declare enum SchemaTypeEnum {
   Blueprint = 'blueprint',
   Trend = 'trend',
   TrendTag = 'trend_tag',
@@ -28,6 +29,6 @@ declare enum SchemaType {
 }
 
 // Schema Names
-declare enum SchemaName {
+declare enum SchemaNameEnum {
   SchemaBlueprint = 'SchemaBlueprint',
 }

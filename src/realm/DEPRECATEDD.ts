@@ -6,7 +6,7 @@
 //   type: string;
 //   default?: any;
 // };
-// declare interface RealmSchemaType<T> {
+// declare interface RealmSchemaTypeEnum<T> {
 //   name: string;
 //   primaryKey?: string;
 //   properties: {

@@ -7,7 +7,7 @@ export abstract class RealmUtils {
     return realm.schema.map((oldSchema: Realm.ObjectSchema) => {
       const schemaDef: Realm.ObjectSchema = {name: oldSchema.name, primaryKey: oldSchema.primaryKey, properties: oldSchema.properties};
 
-      return new SchemaBlueprint(oldSchema.name, realmPath, SchemaType.Unknown, schemaDef);
+      return new SchemaBlueprint(oldSchema.name, realmPath, SchemaTypeEnum.Unknown, schemaDef);
     });
   }
 

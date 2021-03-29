@@ -3,13 +3,13 @@ import {DEFAULT_PATH} from '../../../../../constants';
 export class SchemaBlueprint implements SchemaBlueprintObj {
   schemaName: string;
   realmPath: string;
-  schemaType: SchemaType;
+  schemaType: SchemaTypeEnum;
   schemaDef: Realm.ObjectSchema;
 
   // STATIC UTILITIES
 
   static BLUEPRINT_SCHEMA_DEF: Realm.ObjectSchema = {
-    name: SchemaName.SchemaBlueprint,
+    name: SchemaNameEnum.SchemaBlueprint,
     primaryKey: 'schemaName',
     properties: {
       schemaName: 'string',
@@ -18,9 +18,9 @@ export class SchemaBlueprint implements SchemaBlueprintObj {
       schemaStr: 'string',
     },
   };
-  static BLUEPRINT_SCHEMA: SchemaBlueprint = new SchemaBlueprint(SchemaName.SchemaBlueprint, DEFAULT_PATH, SchemaType.Blueprint, SchemaBlueprint.BLUEPRINT_SCHEMA_DEF);
+  static BLUEPRINT_SCHEMA: SchemaBlueprint = new SchemaBlueprint(SchemaNameEnum.SchemaBlueprint, DEFAULT_PATH, SchemaTypeEnum.Blueprint, SchemaBlueprint.BLUEPRINT_SCHEMA_DEF);
 
-  constructor(schemaName: string, realmPath: string, schemaType: SchemaType, schemaDef: Realm.ObjectSchema) {
+  constructor(schemaName: string, realmPath: string, schemaType: SchemaTypeEnum, schemaDef: Realm.ObjectSchema) {
     this.schemaName = schemaName;
     this.realmPath = realmPath;
     this.schemaType = schemaType;
@@ -69,7 +69,7 @@ export class SchemaBlueprint implements SchemaBlueprintObj {
 
   //   SAVE
 
-  static save(realm: Realm, schemaName: string, realmPath: string, schemaType: SchemaType, schemaDef: SchemaDef): SchemaBlueprint {
+  static save(realm: Realm, schemaName: string, realmPath: string, schemaType: SchemaTypeEnum, schemaDef: SchemaDef): SchemaBlueprint {
     const schemaBlueprint = new SchemaBlueprint(schemaName, realmPath, schemaType, schemaDef);
     schemaBlueprint.save(realm);
 
@@ -80,7 +80,7 @@ export class SchemaBlueprint implements SchemaBlueprintObj {
     const schemaBlueprintRow: SchemaBlueprintRow = this.toRow();
 
     defaultRealm.write(() => {
-      defaultRealm.create(SchemaName.SchemaBlueprint, schemaBlueprintRow);
+      defaultRealm.create(SchemaNameEnum.SchemaBlueprint, schemaBlueprintRow);
     });
 
     return schemaBlueprintRow;

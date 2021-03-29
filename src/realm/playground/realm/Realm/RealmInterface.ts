@@ -31,7 +31,7 @@ class RealmInterface extends Singleton(Object) {
 
   public addTrend(trendName: string, schemaDef: SchemaDef, options?: Dict<string>): SchemaBlueprint | undefined {
     const realmPath = DEFAULT_PATH;
-    const schemaType = SchemaType.Trend;
+    const schemaType = SchemaTypeEnum.Trend;
 
     const addedSchema: SchemaBlueprint | undefined = this._addSchema(realmPath, trendName, schemaType, schemaDef, options);
     if (!!addedSchema) {
@@ -51,7 +51,7 @@ class RealmInterface extends Singleton(Object) {
     return remainingSchemas;
   }
 
-  private _addSchema(realmPath: string, schemaName: string, schemaType: SchemaType, schemaDef: SchemaDef, options?: Dict<string>): SchemaBlueprint | undefined {
+  private _addSchema(realmPath: string, schemaName: string, schemaType: SchemaTypeEnum, schemaDef: SchemaDef, options?: Dict<string>): SchemaBlueprint | undefined {
     const realm = this._realmCache.get(realmPath);
 
     if (!!realm) {
@@ -81,6 +81,10 @@ class RealmInterface extends Singleton(Object) {
       return remainingSchemas;
     }
   }
+
+  // Main TODOS
+  // 1. Save SchemaBlueprints in a Singleton SchemaCache
+  // 2. Fetch and Pass appropriate SchemaBlueprints to rate method
 
   //   TODO
   // 1. Design Base Trend Schema + TrendTags Schema: Think about all properties needed

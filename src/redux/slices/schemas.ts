@@ -9,7 +9,7 @@ import {SchemaBlueprintRow, TrendSchemaBlueprintRow} from '../../realm/Dev/Realm
 import RealmSchemaName from '../../realm/schemaNames';
 import {TREND_PATH} from '../../constants/Realm/paths';
 
-const initialState: RealmSchemaTypeMap = {};
+const initialState: RealmSchemaTypeEnumMap = {};
 
 // THUNKS
 
@@ -51,8 +51,8 @@ export {loadSchemas, addTrend};
 // SELECTORS
 
 const selectRealmPath = createSelector(
-  (state: RealmSchemaTypeMap) => state,
-  (state: RealmSchemaTypeMap) =>
+  (state: RealmSchemaTypeEnumMap) => state,
+  (state: RealmSchemaTypeEnumMap) =>
     memoize((realmPath: RealmPath) => {
       const schemas = [];
 
@@ -60,7 +60,7 @@ const selectRealmPath = createSelector(
         const schemaTypeMap = state[realmPath];
 
         for (let schemaType in schemaTypeMap) {
-          const schemaTypeSchemas = Object.values(state[realmPath][schemaType as SchemaType]);
+          const schemaTypeSchemas = Object.values(state[realmPath][schemaType as SchemaTypeEnum]);
           schemas.push(...schemaTypeSchemas);
         }
       }
@@ -69,10 +69,10 @@ const selectRealmPath = createSelector(
     }),
 );
 
-const selectSchemaType = createSelector(
-  (state: RealmSchemaTypeMap) => state,
-  (state: RealmSchemaTypeMap) =>
-    memoize((schemaType: SchemaType) => {
+const selectSchemaTypeEnum = createSelector(
+  (state: RealmSchemaTypeEnumMap) => state,
+  (state: RealmSchemaTypeEnumMap) =>
+    memoize((schemaType: SchemaTypeEnum) => {
       const schemas = [];
 
       // For each realmPath
@@ -89,20 +89,20 @@ const selectSchemaType = createSelector(
 );
 
 const selectSchemaName = createSelector(
-  (state: RealmSchemaTypeMap) => state,
-  (state: RealmSchemaTypeMap) =>
+  (state: RealmSchemaTypeEnumMap) => state,
+  (state: RealmSchemaTypeEnumMap) =>
     memoize((schemaName: SchemaName) => {
       for (let realmPath in state) {
         const schemaTypeMap = state[realmPath];
 
         for (let schemaType in schemaTypeMap) {
-          if (state[realmPath][schemaType as SchemaType].hasOwnProperty(schemaName)) return state[realmPath][schemaType as SchemaType][schemaName];
+          if (state[realmPath][schemaType as SchemaTypeEnum].hasOwnProperty(schemaName)) return state[realmPath][schemaType as SchemaTypeEnum][schemaName];
         }
       }
     }),
 );
 
-export {selectRealmPath, selectSchemaType, selectSchemaName};
+export {selectRealmPath, selectSchemaTypeEnum, selectSchemaName};
 
 // SLICE
 
@@ -130,7 +130,7 @@ export const schemasSlice = createSlice({
         state[realmPath][schemaType][schemaName] = realmSchema.getSchemaObject();
 
         // Filter into TrendCache
-        if (schemaType === SchemaType.Trend) TrendCache.add(realmPath, schemaName);
+        if (schemaType === SchemaTypeEnum.Trend) TrendCache.add(realmPath, schemaName);
       });
 
       // Open Realms
@@ -203,7 +203,7 @@ export const {addSchemas} = schemasSlice.actions;
 export default schemasSlice.reducer;
 
 // UTIL
-function initState(state: RealmSchemaTypeMap, realmPath: string, schemaType: SchemaType) {
+function initState(state: RealmSchemaTypeEnumMap, realmPath: string, schemaType: SchemaTypeEnum) {
   // Init to state
   if (!state.hasOwnProperty(realmPath))
     state[realmPath] = {

@@ -4,7 +4,7 @@ import RealmSchemaName from '../../schemaNames';
 import {InstantiateAbstractClassError, NotImplementedError} from '../../../Errors';
 
 export class SchemaBlueprintRow {
-  schemaType: SchemaType;
+  schemaType: SchemaTypeEnum;
   realmPath: string;
 
   name: string;
@@ -13,7 +13,7 @@ export class SchemaBlueprintRow {
 
   static getBlueprintSchema() {
     return new SchemaBlueprintRow(
-      SchemaType.Blueprint,
+      SchemaTypeEnum.Blueprint,
       DEFAULT_PATH,
       RealmSchemaName.SchemaBlueprint,
       {
@@ -34,7 +34,7 @@ export class SchemaBlueprintRow {
     return new SchemaBlueprintRow(schemaType, realmPath, name, properties, primaryKey);
   }
 
-  constructor(schemaType: SchemaType, realmPath: string, name: string, properties: Record<string, any>, primaryKey?: string) {
+  constructor(schemaType: SchemaTypeEnum, realmPath: string, name: string, properties: Record<string, any>, primaryKey?: string) {
     if (this.constructor === SchemaBlueprintRow) throw new InstantiateAbstractClassError('SchemaBlueprintRow');
 
     this.schemaType = schemaType;

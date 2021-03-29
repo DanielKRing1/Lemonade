@@ -101,7 +101,7 @@ class RealmCache {
         SchemaCache.add(realmSchema);
 
         // Add 'Trend' type RealmSchemas to TrendCache
-        if (realmSchema.schemaType === SchemaType.Trend) TrendCache.add(realmSchema.realmPath, realmSchema.name);
+        if (realmSchema.schemaType === SchemaTypeEnum.Trend) TrendCache.add(realmSchema.realmPath, realmSchema.name);
       });
 
       return schemaBlueprints;

@@ -1,5 +1,5 @@
 // ENUMS
-// declare enum SchemaType {
+// declare enum SchemaTypeEnum {
 //   Blueprint = 'Blueprint',
 //   Trend = 'Trend',
 // }
@@ -12,9 +12,9 @@
 //         }
 //     }
 // }
-declare type RealmSchemaTypeMap = Record<RealmPath, SchemaTypeMap>;
+declare type RealmSchemaTypeEnumMap = Record<RealmPath, SchemaTypeEnumMap>;
 
-declare type SchemaTypeMap = Record<SchemaType, SchemaMap>;
+declare type SchemaTypeEnumMap = Record<SchemaTypeEnum, SchemaMap>;
 
 // declare type SchemaName = string;
 declare type SchemaMap = Record<SchemaName, RealmSchemaObject>;
@@ -25,7 +25,7 @@ declare type SchemaMap = Record<SchemaName, RealmSchemaObject>;
 // From database 'Blueprint' Table
 declare type SchemaBlueprintRowObj = {
   schemaName: string;
-  schemaType: SchemaType;
+  schemaType: SchemaTypeEnum;
   realmPath: string;
   schemaStr: string;
 };
