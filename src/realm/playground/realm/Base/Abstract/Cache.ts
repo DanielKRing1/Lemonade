@@ -56,13 +56,13 @@ export class ArrayCache<T> extends Cache<T[]> {
     }
   }
 
-  protected addToArr(key: string, value: T) {
-    this.initArray(key);
+  protected addToKeyArr(key: string, value: T) {
+    this.initKeyWithArray(key);
 
     this._map[key].push(value);
   }
 
-  protected initArray(key: string) {
+  protected initKeyWithArray(key: string) {
     if (!this.has(key)) this._map[key] = [];
   }
 }
