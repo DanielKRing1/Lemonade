@@ -1,19 +1,19 @@
 import {DEFAULT_PATH} from '../../../../constants';
 import {Singleton} from '../Base';
-import {RealmCache, TrendCache} from './Caches';
+import {RealmCache, SchemaCache, TrendCache} from './Caches';
 import {RealmUtils} from './Utility';
 
 import {SchemaBlueprint} from './Schema/SchemaBlueprint';
 
 class RealmInterface extends Singleton(Object) {
   private _realmCache: RealmCache;
-  private _trendCache: TrendCache;
+  private _schemaCache: SchemaCache;
 
   constructor() {
     super();
 
     this._realmCache = new RealmCache();
-    this._trendCache = new TrendCache();
+    this._schemaCache = new SchemaCache();
 
     return this.getSingleton() as RealmInterface;
   }
@@ -29,14 +29,11 @@ class RealmInterface extends Singleton(Object) {
     this._realmCache.rm(realmPath, options);
   }
 
-  public addTrend(trendName: string, schemaDef: SchemaDef, options?: Dict<string>): SchemaBlueprint | undefined {
+  public addTrend(trendName: string, schemaDef: Realm.ObjectSchema, options?: Dict<string>): SchemaBlueprint | undefined {
     const realmPath = DEFAULT_PATH;
     const schemaType = SchemaTypeEnum.Trend;
 
     const addedSchema: SchemaBlueprint | undefined = this._addSchema(realmPath, trendName, schemaType, schemaDef, options);
-    if (!!addedSchema) {
-      this._trendCache.add(trendName, {realmPath});
-    }
 
     return addedSchema;
   }
@@ -44,14 +41,11 @@ class RealmInterface extends Singleton(Object) {
     const defaultRealmPath = DEFAULT_PATH;
 
     const remainingSchemas: Array<SchemaBlueprint> | undefined = this._rmSchema(defaultRealmPath, trendName, options);
-    if (!!remainingSchemas) {
-      this._trendCache.rm(trendName);
-    }
 
     return remainingSchemas;
   }
 
-  private _addSchema(realmPath: string, schemaName: string, schemaType: SchemaTypeEnum, schemaDef: SchemaDef, options?: Dict<string>): SchemaBlueprint | undefined {
+  private _addSchema(realmPath: string, schemaName: string, schemaType: SchemaTypeEnum, schemaDef: Realm.ObjectSchema, options?: Dict<string>): SchemaBlueprint | undefined {
     const realm = this._realmCache.get(realmPath);
 
     if (!!realm) {
@@ -62,6 +56,8 @@ class RealmInterface extends Singleton(Object) {
         schemaBlueprints: allSchemas,
         options,
       });
+
+      this._schemaCache.add(schemaName, {schemaBlueprint: newSchemaBlueprint});
 
       return newSchemaBlueprint;
     }
@@ -77,6 +73,8 @@ class RealmInterface extends Singleton(Object) {
         schemaBlueprints: remainingSchemas,
         options,
       });
+
+      this._schemaCache.rm(schemaName);
 
       return remainingSchemas;
     }
