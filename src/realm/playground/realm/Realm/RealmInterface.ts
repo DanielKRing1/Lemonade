@@ -5,7 +5,7 @@ import {RealmUtils} from './Utility';
 
 import {SchemaBlueprint} from './Schema/SchemaBlueprint';
 
-class RealmInterface extends Singleton(Object) {
+export class RealmInterface extends Singleton(Object) {
   private _realmCache: RealmCache;
   private _schemaCache: SchemaCache;
 
