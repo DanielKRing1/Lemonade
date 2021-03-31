@@ -8,12 +8,14 @@ import {SchemaBlueprint} from './Schema/SchemaBlueprint';
 export class RealmInterface extends Singleton(Object) {
   private _realmCache: RealmCache;
   private _schemaCache: SchemaCache;
+  private _trendCache: TrendCache;
 
   constructor() {
     super();
 
     this._realmCache = new RealmCache();
     this._schemaCache = new SchemaCache();
+    this._trendCache = new TrendCache();
 
     return this.getSingleton() as RealmInterface;
   }
@@ -29,52 +31,73 @@ export class RealmInterface extends Singleton(Object) {
     this._realmCache.rm(realmPath, options);
   }
 
-  public addTrend(trendName: string, schemaDef: Realm.ObjectSchema, options?: Dict<string>): SchemaBlueprint | undefined {
+  public addTrend(trendName: string, attributeNames: string[], relTypes: RelationshipTypeEnum[] = Object.values(RelationshipTypeEnum), options?: Dict<string>): SchemaBlueprint[] | undefined {
     const realmPath = DEFAULT_PATH;
     const schemaType = SchemaTypeEnum.Trend;
 
-    const addedSchema: SchemaBlueprint | undefined = this._addSchema(realmPath, trendName, schemaType, schemaDef, options);
+    // Add to TrendCache
+    const schemaBlueprints: SchemaBlueprint[] = this._trendCache.add(trendName, {realmPath, attributeNames, relTypes});
 
-    return addedSchema;
+    const addedSchemas: SchemaBlueprint[] | undefined = this._addSchemas(realmPath, schemaBlueprints);
+
+    return addedSchemas;
   }
   public rmTrend(trendName: string, options?: Dict<string>): Array<SchemaBlueprint> | undefined {
     const defaultRealmPath = DEFAULT_PATH;
 
-    const remainingSchemas: Array<SchemaBlueprint> | undefined = this._rmSchema(defaultRealmPath, trendName, options);
+    this._trendCache.rm(trendName);
+    const remainingSchemas: SchemaBlueprint[] | undefined = this._rmSchemas(defaultRealmPath, [trendName], options);
 
     return remainingSchemas;
   }
 
-  private _addSchema(realmPath: string, schemaName: string, schemaType: SchemaTypeEnum, schemaDef: Realm.ObjectSchema, options?: Dict<string>): SchemaBlueprint | undefined {
+  private _addSchemas(realmPath: string, schemaBlueprints: SchemaBlueprint[], options?: Dict<string>): SchemaBlueprint[] | undefined {
+    // 1. Get Realm
     const realm = this._realmCache.get(realmPath);
 
     if (!!realm) {
-      const newSchemaBlueprint: SchemaBlueprint = SchemaBlueprint.save(realm, schemaName, realmPath, schemaType, schemaDef);
-      const allSchemas: Array<SchemaBlueprint> = RealmUtils.mergeSchemasFromRealm(realm, [newSchemaBlueprint]);
+      // 2. Save to Realm
+      this._realmCache.save(realm, schemaBlueprints);
 
+      // 3. Reload Realm
+      const allSchemas: Array<SchemaBlueprint> = RealmUtils.mergeSchemasFromRealm(realm, schemaBlueprints);
+      // NOTE: Adding also reloads the Realm
       this._realmCache.add(realmPath, {
         schemaBlueprints: allSchemas,
         options,
       });
 
-      this._schemaCache.add(schemaName, {schemaBlueprint: newSchemaBlueprint});
+      // 4. Add to SchemaCache
+      schemaBlueprints.forEach((schemaBlueprint) => this._schemaCache.add(schemaBlueprint.schemaName, {schemaBlueprint}));
 
-      return newSchemaBlueprint;
+      return schemaBlueprints;
     }
   }
 
-  private _rmSchema(realmPath: string, schemaName: string, options?: Dict<string>): Array<SchemaBlueprint> | undefined {
-    const realm = this._realmCache.get(realmPath);
+  private _rmSchemas(realmPath: string, schemaNames: string[], options?: Dict<string>): SchemaBlueprint[] | undefined {
+    // 1. Get Realm
+    const realm: Realm | undefined = this._realmCache.get(realmPath);
+
+    // 2. Get SchemaBlueprints
+    const schemaBlueprints: SchemaBlueprint[] = schemaNames
+      .map((schemaName: string) => this._schemaCache.get(schemaName))
+      .filter((schemaBlueprint: SchemaBlueprint | undefined) => schemaBlueprints !== undefined) as SchemaBlueprint[];
 
     if (!!realm) {
-      const remainingSchemas: Array<SchemaBlueprint> = RealmUtils.filterSchemasfromRealm(realm, [schemaName]);
+      // 3. Remove from Realm
+      this._realmCache.delete(realm, schemaBlueprints);
 
+      // 4. Reload Realm
+      const schemaNamesToRm: string[] = schemaBlueprints.map((sb) => sb.schemaName);
+      const remainingSchemas: Array<SchemaBlueprint> = RealmUtils.filterSchemasfromRealm(realm, schemaNamesToRm);
+      // NOTE: Adding also reloads the Realm
       this._realmCache.add(realmPath, {
         schemaBlueprints: remainingSchemas,
         options,
       });
 
-      this._schemaCache.rm(schemaName);
+      // 5. Remove from SchemaCache
+      schemaBlueprints.forEach((schemaBlueprint) => this._schemaCache.rm(schemaBlueprint.schemaName));
 
       return remainingSchemas;
     }

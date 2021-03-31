@@ -1,12 +1,6 @@
 import {SchemaBlueprint} from '../Schema/SchemaBlueprint';
 import {ObjectBuilder} from '../Utility';
 
-type BuildTrendBlueprintReturn = {
-  trend: SchemaBlueprint;
-  tag: SchemaBlueprint;
-  rels: Array<SchemaBlueprint>;
-  tagRels: Array<SchemaBlueprint>;
-};
 /**
  * Get the Entity, Tag, EntityRelationships, and TagRelationships SchemaBlueprints needed to add the given Trend to the App
  *
@@ -20,7 +14,7 @@ type BuildTrendBlueprintReturn = {
  * @param attributeNames
  * @param relTypes
  */
-export const buildTrendBlueprint = (trendName: string, realmPath: string, attributeNames: string[], relTypes: RelationshipTypeEnum[]): BuildTrendBlueprintReturn => {
+export const buildTrendBlueprints = (trendName: string, realmPath: string, attributeNames: string[], relTypes: RelationshipTypeEnum[]): CompleteTrendBlueprints => {
   // Build Trend blueprint obj with custom attributes and relationship arrays
   const trendSchemaDef: Realm.ObjectSchema = getBaseTrendSchemaDef(trendName);
 
@@ -106,5 +100,5 @@ const getRelSchemaDefs = (schemaName: string, relTypes: RelationshipTypeEnum[]):
 
 const getTrendAttrKey = (attributeName: string) => `${attributeName}_rating`;
 const getTrendRelKey = (relType: RelationshipTypeEnum) => `rel_${relType}`;
-const getTrendTagSchemaName = (trendName: string) => `${trendName}_tag`;
-const getRelSchemaName = (entitySchemaName: string, relType: RelationshipTypeEnum) => `${entitySchemaName}_${getTrendRelKey(relType)}`;
+export const getTrendTagSchemaName = (trendName: string) => `${trendName}_tag`;
+export const getRelSchemaName = (entitySchemaName: string, relType: RelationshipTypeEnum) => `${entitySchemaName}_${getTrendRelKey(relType)}`;

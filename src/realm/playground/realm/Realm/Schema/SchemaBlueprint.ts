@@ -85,4 +85,19 @@ export class SchemaBlueprint implements SchemaBlueprintObj {
 
     return schemaBlueprintRow;
   }
+
+  delete(defaultRealm: Realm): boolean {
+    const primaryKey: string | undefined = this.schemaDef.primaryKey;
+
+    if (primaryKey) {
+      defaultRealm.write(() => {
+        const realmObj: Realm.Results<any> | undefined = defaultRealm.objectForPrimaryKey(SchemaNameEnum.SchemaBlueprint, primaryKey);
+
+        if (realmObj) defaultRealm.delete(realmObj);
+      });
+    }
+
+    // No primary key or no entry found in realm
+    return false;
+  }
 }

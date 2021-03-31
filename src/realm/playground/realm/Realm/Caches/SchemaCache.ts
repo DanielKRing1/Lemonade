@@ -1,10 +1,9 @@
-import {sceneName} from 'aws-amplify';
 import {ArrayCache, Cache, Singleton, Override} from '../../Base';
-import {TrendCache} from './TrendCache';
 import {SchemaBlueprint} from '../Schema/SchemaBlueprint';
 
+import {TrendCache} from './TrendCache';
+
 export class SchemaCache extends Singleton(Cache)<SchemaBlueprint> {
-  private _trendCache: TrendCache = new TrendCache();
   private _realmMap: RealmSchemaCache = new RealmSchemaCache();
   private _schemaTypeMap: SchemaTypeCache = new SchemaTypeCache();
 
@@ -25,11 +24,6 @@ export class SchemaCache extends Singleton(Cache)<SchemaBlueprint> {
     // Add to normalized helper maps
     this._realmMap.add(realmPath, {schemaName});
     this._schemaTypeMap.add(schemaType, {schemaName});
-
-    // Add to TrendCache
-    if (schemaType === SchemaTypeEnum.Trend) {
-      this._trendCache.add(schemaName, {realmPath});
-    }
   }
 
   @Override('Cache')
@@ -40,10 +34,6 @@ export class SchemaCache extends Singleton(Cache)<SchemaBlueprint> {
     if (!!realmPath && !!schemaType) {
       this._realmMap.rm(realmPath, schemaName);
       this._schemaTypeMap.rm(schemaType, schemaName);
-
-      if (schemaType === SchemaTypeEnum.Trend) {
-        this._trendCache.rm(schemaName);
-      }
     }
   }
 
