@@ -36,6 +36,14 @@ export class Cache<T> {
   has(key: string) {
     return this._map.hasOwnProperty(key);
   }
+
+  getKeys(): string[] {
+    return Object.keys(this._map);
+  }
+
+  getValues(): T[] {
+    return Object.values(this._map);
+  }
 }
 
 export class ArrayCache<T> extends Cache<T[]> {
