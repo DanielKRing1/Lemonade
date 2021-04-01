@@ -5,8 +5,13 @@ declare enum RelationshipTypeEnum {
 }
 
 declare type CompleteTrendBlueprints = {
-  trend: import('../Schema/SchemaBlueprint').SchemaBlueprint;
-  tag: import('../Schema/SchemaBlueprint').SchemaBlueprint;
-  rels: import('../Schema/SchemaBlueprint').SchemaBlueprint[];
-  tagRels: import('../Schema/SchemaBlueprint').SchemaBlueprint[];
+  [SchemaTypeEnum.TREND]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
+  [SchemaTypeEnum.TAG]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
+  [SchemaTypeEnum.TREND_RELS]: import('../Schema/SchemaBlueprint').SchemaBlueprint[];
+  [SchemaTypeEnum.TAG_RELS]: import('../Schema/SchemaBlueprint').SchemaBlueprint[];
+};
+
+declare type TrendCacheValue = {
+  [SchemaTypeEnum.TREND]: import('../Trends/TrendTracker').TrendTracker;
+  [SchemaTypeEnum.TAG]: import('../Trends/TrendTracker').TrendTracker;
 };

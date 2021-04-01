@@ -7,7 +7,7 @@ import {buildTrendBlueprints, TrendTracker} from '../Trends';
  * A SINGLETON CACHE that caches all TrendSchemas and their TrendTracker
  *
  */
-export class TrendCache extends Singleton(Cache)<TrendTracker> {
+export class TrendCache extends Singleton(Cache)<TrendCacheValue> {
   constructor() {
     super();
 
@@ -21,8 +21,11 @@ export class TrendCache extends Singleton(Cache)<TrendTracker> {
     // 1. Get all Trend Blueprints
     const trendBlueprints: CompleteTrendBlueprints = buildTrendBlueprints(trendName, realmPath, attributeNames, relTypes);
 
-    // 2. Add Blueprints to TrendTracker + Cache TrendTracker
-    this._map[trendName] = new TrendTracker(realmPath, trendName);
+    // 2. Add TREND and TAG TrendTrackers to Cache
+    this._map[trendName] = {
+      [SchemaTypeEnum.TREND]: new TrendTracker(realmPath, trendName),
+      [SchemaTypeEnum.TAG]: new TrendTracker(realmPath, trendName),
+    };
 
     // TODO Make Array flatten util
 

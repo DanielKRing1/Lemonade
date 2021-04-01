@@ -21,10 +21,10 @@ declare type SchemaBlueprintRow = {
 // Schema Types
 declare enum SchemaTypeEnum {
   Blueprint = 'blueprint',
-  Trend = 'trend',
-  TrendTag = 'trend_tag',
-  TrendRelationship = 'trend_rel',
-  TrendTagRelationship = 'trend_tag_rel',
+  TREND = 'trend',
+  TAG = 'tag',
+  TREND_RELS = 'trend_rels',
+  TAG_RELS = 'tag_rels',
   Unknown = 'unknown',
 }
 
