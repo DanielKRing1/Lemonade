@@ -101,15 +101,27 @@ const getRelSchemaDefs = (schemaName: string, relTypes: RelationshipTypeEnum[]):
 // TREND NAME BUILDERS AND CONSTANTS
 
 const DELIM = '_';
-const TREND_ATTRIBUTE_SUFFIX = 'rating';
-const TREND_REL_PREFIX = 'rel';
-const TAG_ATTRIBUTE_SUFFIX = 'rating';
+const TREND_ATTRIBUTE_SUFFIX = `${DELIM}rating`;
+const TREND_REL_PREFIX = `rel${DELIM}`;
+const TAG_ATTRIBUTE_SUFFIX = `${DELIM}rating`;
 
 // Key builders
-const getTrendAttrKey = (attributeName: string) => `${attributeName}${DELIM}${TREND_ATTRIBUTE_SUFFIX}`;
-const getTrendRelKey = (relType: RelationshipTypeEnum) => `${TREND_REL_PREFIX}${DELIM}${relType}`;
+const getTrendAttrKey = (attributeName: string) => `${attributeName}${TREND_ATTRIBUTE_SUFFIX}`;
+const getTrendRelKey = (relType: RelationshipTypeEnum) => `${TREND_REL_PREFIX}${relType}`;
+
+/**
+ * Filter the property names of a SchemaBlueprint.schemaDef for only its trend attribute keys (end with the TREND_ATTRIBUTE_SUFFIX)
+ * @param propertyNames Array of property names from SchemaBlueprint.schemaDef
+ */
+export const getTrendAttrKeys = (propertyNames: string[]): string[] => propertyNames.filter((name: string) => name.endsWith(TREND_ATTRIBUTE_SUFFIX));
+
+/**
+ * Filter the property names of a SchemaBlueprint.schemaDef for only its trend attribute keys and return the attribute names (without the TREND_ATTRIBUTE_SUFFIX)
+ * @param propertyNames Array of property names from SchemaBlueprint.schemaDef
+ */
+export const getTrendAttrs = (propertyNames: string[]): string[] => filterForTrendAttr(propertyNames).map((trendAttr: string) => trendAttr.slice(-TREND_ATTRIBUTE_SUFFIX.length));
 
 // SchemaName builders
 export const getTrendSchemaName = (trendName: string) => trendName;
-export const getTrendTagSchemaName = (trendName: string) => `${trendName}${DELIM}${TAG_ATTRIBUTE_SUFFIX}`;
-export const getRelSchemaName = (entitySchemaName: string, relType: RelationshipTypeEnum) => `${entitySchemaName}${DELIM}${getTrendRelKey(relType)}`;
+export const getTrendTagSchemaName = (trendName: string) => `${trendName}${TAG_ATTRIBUTE_SUFFIX}`;
+export const getRelSchemaName = (entitySchemaName: string, relType: RelationshipTypeEnum) => `${entitySchemaName}${getTrendRelKey(relType)}`;

@@ -1,4 +1,5 @@
 import {DEFAULT_PATH} from '../../../../../constants';
+import {getTrendAttrs} from '../Trends/trendDef';
 
 export class SchemaBlueprint implements SchemaBlueprintObj {
   schemaName: string;
@@ -99,5 +100,13 @@ export class SchemaBlueprint implements SchemaBlueprintObj {
 
     // No primary key or no entry found in realm
     return false;
+  }
+
+  // SCHEMA UTILITIES
+
+  getAttributes() {
+    const propertyNames = Object.keys(this.schemaDef.properties);
+
+    return getTrendAttrs(propertyNames);
   }
 }
