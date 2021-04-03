@@ -1,5 +1,5 @@
 import {DEFAULT_PATH} from '../../../../../constants';
-import {getTrendAttrs} from '../Trends/trendDef';
+import {filterForTrendAttrs} from '../Trends/trendDef';
 
 export class SchemaBlueprint implements SchemaBlueprintObj {
   schemaName: string;
@@ -70,7 +70,7 @@ export class SchemaBlueprint implements SchemaBlueprintObj {
 
   //   SAVE
 
-  static save(realm: Realm, schemaName: string, realmPath: string, schemaType: SchemaTypeEnum, schemaDef: SchemaDef): SchemaBlueprint {
+  static save(realm: Realm, schemaName: string, realmPath: string, schemaType: SchemaTypeEnum, schemaDef: Realm.ObjectSchema): SchemaBlueprint {
     const schemaBlueprint = new SchemaBlueprint(schemaName, realmPath, schemaType, schemaDef);
     schemaBlueprint.save(realm);
 
@@ -107,6 +107,6 @@ export class SchemaBlueprint implements SchemaBlueprintObj {
   getAttributes() {
     const propertyNames = Object.keys(this.schemaDef.properties);
 
-    return getTrendAttrs(propertyNames);
+    return filterForTrendAttrs(propertyNames);
   }
 }

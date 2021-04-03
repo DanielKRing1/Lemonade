@@ -40,16 +40,16 @@ export const buildTrendBlueprints = (trendName: string, realmPath: string, attri
   const tagRelSchemaDefs: Array<Realm.ObjectSchema> = getRelSchemaDefs(trendTagSchemaName, relTypes);
 
   // Return SchemaBlueprints
-  const trendSchemaBlueprint: SchemaBlueprint = new SchemaBlueprint(trendName, realmPath, SchemaTypeEnum.Trend, trendSchemaDef);
-  const trendTagSchemaBlueprint: SchemaBlueprint = new SchemaBlueprint(trendTagSchemaName, realmPath, SchemaTypeEnum.TrendTag, trendTagSchemaDef);
-  const relSchemaBlueprints: Array<SchemaBlueprint> = relSchemaDefs.map((def) => new SchemaBlueprint(def.name, realmPath, SchemaTypeEnum.TrendRelationship, def));
-  const tagRelSchemaBlueprints: Array<SchemaBlueprint> = tagRelSchemaDefs.map((def) => new SchemaBlueprint(def.name, realmPath, SchemaTypeEnum.TrendTagRelationship, def));
+  const trendSchemaBlueprint: SchemaBlueprint = new SchemaBlueprint(trendName, realmPath, SchemaTypeEnum.TREND, trendSchemaDef);
+  const trendTagSchemaBlueprint: SchemaBlueprint = new SchemaBlueprint(trendTagSchemaName, realmPath, SchemaTypeEnum.TAG, trendTagSchemaDef);
+  const relSchemaBlueprints: Array<SchemaBlueprint> = relSchemaDefs.map((def) => new SchemaBlueprint(def.name, realmPath, SchemaTypeEnum.TREND_RELS, def));
+  const tagRelSchemaBlueprints: Array<SchemaBlueprint> = tagRelSchemaDefs.map((def) => new SchemaBlueprint(def.name, realmPath, SchemaTypeEnum.TAG_RELS, def));
 
   return {
-    trend: trendSchemaBlueprint,
-    tag: trendTagSchemaBlueprint,
-    rels: relSchemaBlueprints,
-    tagRels: tagRelSchemaBlueprints,
+    [SchemaTypeEnum.TREND]: trendSchemaBlueprint,
+    [SchemaTypeEnum.TAG]: trendTagSchemaBlueprint,
+    [SchemaTypeEnum.TREND_RELS]: relSchemaBlueprints,
+    [SchemaTypeEnum.TAG_RELS]: tagRelSchemaBlueprints,
   };
 };
 
@@ -113,13 +113,13 @@ const getTrendRelKey = (relType: RelationshipTypeEnum) => `${TREND_REL_PREFIX}${
  * Filter the property names of a SchemaBlueprint.schemaDef for only its trend attribute keys (end with the TREND_ATTRIBUTE_SUFFIX)
  * @param propertyNames Array of property names from SchemaBlueprint.schemaDef
  */
-export const getTrendAttrKeys = (propertyNames: string[]): string[] => propertyNames.filter((name: string) => name.endsWith(TREND_ATTRIBUTE_SUFFIX));
+export const filterForTrendAttrKeys = (propertyNames: string[]): string[] => propertyNames.filter((name: string) => name.endsWith(TREND_ATTRIBUTE_SUFFIX));
 
 /**
  * Filter the property names of a SchemaBlueprint.schemaDef for only its trend attribute keys and return the attribute names (without the TREND_ATTRIBUTE_SUFFIX)
  * @param propertyNames Array of property names from SchemaBlueprint.schemaDef
  */
-export const getTrendAttrs = (propertyNames: string[]): string[] => filterForTrendAttr(propertyNames).map((trendAttr: string) => trendAttr.slice(-TREND_ATTRIBUTE_SUFFIX.length));
+export const filterForTrendAttrs = (propertyNames: string[]): string[] => filterForTrendAttrKeys(propertyNames).map((trendAttr: string) => trendAttr.slice(-TREND_ATTRIBUTE_SUFFIX.length));
 
 // SchemaName builders
 export const getTrendSchemaName = (trendName: string) => trendName;
