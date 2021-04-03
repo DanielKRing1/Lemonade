@@ -33,7 +33,7 @@ export class RealmInterface extends Singleton(Object) {
 
   public addTrend(trendName: string, attributeNames: string[], relTypes: RelationshipTypeEnum[] = Object.values(RelationshipTypeEnum), options?: Dict<string>): SchemaBlueprint[] | undefined {
     const realmPath = DEFAULT_PATH;
-    const schemaType = SchemaTypeEnum.Trend;
+    const schemaType = SchemaTypeEnum.TREND;
 
     // Add to TrendCache
     const schemaBlueprints: SchemaBlueprint[] = this._trendCache.add(trendName, {realmPath, attributeNames, relTypes});
