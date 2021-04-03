@@ -98,7 +98,18 @@ const getRelSchemaDefs = (schemaName: string, relTypes: RelationshipTypeEnum[]):
   return relSchemaDefs;
 };
 
-const getTrendAttrKey = (attributeName: string) => `${attributeName}_rating`;
-const getTrendRelKey = (relType: RelationshipTypeEnum) => `rel_${relType}`;
-export const getTrendTagSchemaName = (trendName: string) => `${trendName}_tag`;
-export const getRelSchemaName = (entitySchemaName: string, relType: RelationshipTypeEnum) => `${entitySchemaName}_${getTrendRelKey(relType)}`;
+// TREND NAME BUILDERS AND CONSTANTS
+
+const DELIM = '_';
+const TREND_ATTRIBUTE_SUFFIX = 'rating';
+const TREND_REL_PREFIX = 'rel';
+const TAG_ATTRIBUTE_SUFFIX = 'rating';
+
+// Key builders
+const getTrendAttrKey = (attributeName: string) => `${attributeName}${DELIM}${TREND_ATTRIBUTE_SUFFIX}`;
+const getTrendRelKey = (relType: RelationshipTypeEnum) => `${TREND_REL_PREFIX}${DELIM}${relType}`;
+
+// SchemaName builders
+export const getTrendSchemaName = (trendName: string) => trendName;
+export const getTrendTagSchemaName = (trendName: string) => `${trendName}${DELIM}${TAG_ATTRIBUTE_SUFFIX}`;
+export const getRelSchemaName = (entitySchemaName: string, relType: RelationshipTypeEnum) => `${entitySchemaName}${DELIM}${getTrendRelKey(relType)}`;
