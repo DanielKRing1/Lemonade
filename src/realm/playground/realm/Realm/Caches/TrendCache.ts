@@ -37,4 +37,14 @@ export class TrendCache extends Singleton(Cache)<TrendCacheValue> {
       return acc as SchemaBlueprint[];
     }, []);
   }
+
+  getTrend(trendName: string, valueParams: any = {}): TrendTracker | undefined {
+    const cachedValue: TrendCacheValue | undefined = this.get(trendName);
+    if (!!cachedValue) return cachedValue[SchemaTypeEnum.TREND];
+  }
+
+  getTag(trendName: string, valueParams: any = {}): TrendTracker | undefined {
+    const cachedValue: TrendCacheValue | undefined = this.get(trendName);
+    if (!!cachedValue) return cachedValue[SchemaTypeEnum.TREND];
+  }
 }
