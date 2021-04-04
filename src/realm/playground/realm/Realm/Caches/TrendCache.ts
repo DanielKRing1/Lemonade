@@ -1,7 +1,7 @@
 import {Cache, LoadParams, Singleton, Override, Implement} from '../../Base';
 import {SchemaBlueprint} from '../Schema/SchemaBlueprint';
 
-import {buildTrendBlueprints, TrendTracker} from '../Trends';
+import {buildTrendBlueprints, getTrendTagSchemaName, TrendTracker} from '../Trends';
 
 /**
  * A SINGLETON CACHE that caches all TrendSchemas and their TrendTracker
@@ -24,7 +24,7 @@ export class TrendCache extends Singleton(Cache)<TrendCacheValue> {
     // 2. Add TREND and TAG TrendTrackers to Cache
     this._map[trendName] = {
       [SchemaTypeEnum.TREND]: new TrendTracker(realmPath, trendName),
-      [SchemaTypeEnum.TAG]: new TrendTracker(realmPath, trendName),
+      [SchemaTypeEnum.TAG]: new TrendTracker(realmPath, getTrendTagSchemaName(trendName)),
     };
 
     // TODO Make Array flatten util
