@@ -57,18 +57,18 @@ function pageRank<N, E>(
     const summedNodeEdgeAttrs: Dict<number> = sumDicts(...allNodeEdgeAttrs);
 
     for (const nodeEdge of nodeEdges) {
-      // 2. Get destination node
+      // 2. Get each edge's destination node
       const destinationNode: N = getDestinationNode(node, nodeEdge);
       const destinationId: string = getNodeId(destinationNode);
 
-      // 3. Get weight for each destination node, based on edge attributes
+      // 3. Get weight for each destination node, based its edge's attributes (sum of weights for all destination nodes should = 1)
       const edgeAttrs: Dict<number> = getEdgeAttrs(nodeEdge);
       const weightedNodeEdgeAttrs: Dict<number> = divideDicts(edgeAttrs, summedNodeEdgeAttrs);
 
       const curNodeAttrWeights: Dict<number> = initialMap[nodeId];
       const destinationNodeAddendWeights: Dict<number> = multiplyDicts(curNodeAttrWeights, weightedNodeEdgeAttrs);
 
-      // 3. Add product of weight and current node to destinatio node
+      // 3. Add product of edge weight and current node weight to destination node
       weightMap[destinationId] = sumDicts(weightMap[destinationId], destinationNodeAddendWeights);
     }
   }
