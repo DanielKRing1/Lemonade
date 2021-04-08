@@ -1,6 +1,6 @@
 import Heap from 'heap';
 
-function getMST<T>(originEntity: T, getId: (entity: T) => string, getConnectedEntities: (entity: T) => ConnectedEntity<T>[], maxDepth = Number.POSITIVE_INFINITY) {
+function getMST<T>(originEntity: T, getId: (entity: T) => string, getConnectedNodes: (originEntity: T) => T[], getDistance: (entity: T) => number, maxDepth = Number.POSITIVE_INFINITY) {
   const mst: Dict<number> = {};
   // Min-heap prioritizing smaller distances in MST
   const minHeap = new Heap((a: T, b: T) => mst[getId(a)] - mst[getId(b)]);
@@ -35,12 +35,10 @@ function getMST<T>(originEntity: T, getId: (entity: T) => string, getConnectedEn
 
     // 3. Explore all of its connected entities
     const curDist = mst[closestEntityId];
-    const connections = getConnectedEntities(closestEntity);
-    for (const connection of connections) {
-      const destinationEntity = connection.entity;
-      const destinationDist = connection.distance;
-
-      const totalDist = curDist + destinationDist;
+    const connectedNodes: T[] = getConnectedNodes(closestEntity);
+    for (const destinationEntity of connectedNodes) {
+      const destinationDist: number = getDistance(destinationEntity);
+      const totalDist: number = curDist + destinationDist;
 
       exploreDestination(destinationEntity, totalDist);
     }
