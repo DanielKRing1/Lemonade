@@ -1,4 +1,4 @@
-import {divide} from 'react-native-reanimated';
+import * as DictUtil from '../dictionary/Operations';
 
 type ConnectedNode<N> = {
   node: N;
@@ -54,7 +54,7 @@ function pageRank<N, E>(
     // 1. Get edges
     const nodeEdges: E[] = getEdges(node);
     const allNodeEdgeAttrs: Dict<number>[] = nodeEdges.map((nodeEdge: E) => getEdgeAttrs(nodeEdge));
-    const summedNodeEdgeAttrs: Dict<number> = sumDicts(...allNodeEdgeAttrs);
+    const summedNodeEdgeAttrs: Dict<number> = DictUtil.sumDicts(...allNodeEdgeAttrs);
 
     for (const nodeEdge of nodeEdges) {
       // 2. Get each edge's destination node
@@ -63,13 +63,13 @@ function pageRank<N, E>(
 
       // 3. Get weight for each destination node, based its edge's attributes (sum of weights for all destination nodes should = 1)
       const edgeAttrs: Dict<number> = getEdgeAttrs(nodeEdge);
-      const weightedNodeEdgeAttrs: Dict<number> = divideDicts(edgeAttrs, summedNodeEdgeAttrs);
+      const weightedNodeEdgeAttrs: Dict<number> = DictUtil.divideDicts(edgeAttrs, summedNodeEdgeAttrs);
 
       const curNodeAttrWeights: Dict<number> = initialMap[nodeId];
-      const destinationNodeAddendWeights: Dict<number> = multiplyDicts(curNodeAttrWeights, weightedNodeEdgeAttrs);
+      const destinationNodeAddendWeights: Dict<number> = DictUtil.multiplyDicts(curNodeAttrWeights, weightedNodeEdgeAttrs);
 
       // 3. Add product of edge weight and current node weight to destination node
-      weightMap[destinationId] = sumDicts(weightMap[destinationId], destinationNodeAddendWeights);
+      weightMap[destinationId] = DictUtil.sumDicts(weightMap[destinationId], destinationNodeAddendWeights);
     }
   }
 
@@ -90,17 +90,17 @@ function getInitialWeights<N, E>(
     const nodeAttrs: Dict<number> = getNodeAttrs(node);
     allNodeAttrs.push(nodeAttrs);
   }
-  const summedNodeAttrs: Dict<number> = sumDicts(...allNodeAttrs);
+  const summedNodeAttrs: Dict<number> = DictUtil.sumDicts(...allNodeAttrs);
 
   let weightMap: Dict<Dict<number>> = {};
   for (const node of allNodes) {
     const nodeAttrs: Dict<number> = getNodeAttrs(node);
-    const weightedNodeAttrs: Dict<number> = divideDicts(nodeAttrs, summedNodeAttrs);
+    const weightedNodeAttrs: Dict<number> = DictUtil.divideDicts(nodeAttrs, summedNodeAttrs);
 
     // 2. Compute summed edge attributes for each node
     const nodeEdges: E[] = getEdges(node);
     const allNodeEdgeAttrs: Dict<number>[] = nodeEdges.map((nodeEdge: E) => getEdgeAttrs(nodeEdge));
-    const summedNodeEdgeAttrs: Dict<number> = sumDicts(...allNodeEdgeAttrs);
+    const summedNodeEdgeAttrs: Dict<number> = DictUtil.sumDicts(...allNodeEdgeAttrs);
 
     // 3. Get weighted attributes for each edge
     for (const nodeEdge of nodeEdges) {
@@ -110,110 +110,60 @@ function getInitialWeights<N, E>(
       const destinationId: string = getNodeId(destinationNode);
 
       // 4. Add weighted attributes to weightedMap
-      const weightedNodeEdgeAttrs: Dict<number> = divideDicts(edgeAttrs, summedNodeEdgeAttrs);
-      weightMap[destinationId] = multiplyDicts(weightedNodeAttrs, weightedNodeEdgeAttrs);
+      const weightedNodeEdgeAttrs: Dict<number> = DictUtil.divideDicts(edgeAttrs, summedNodeEdgeAttrs);
+      weightMap[destinationId] = DictUtil.multiplyDicts(weightedNodeAttrs, weightedNodeEdgeAttrs);
     }
   }
 
   return weightMap;
 }
 
-/**
- * "Add up" an array of Dictionaries to get the sum of each key in an array of Dictionaries
- *
- * @param dicts Array of Dictionaries attributes to be summed up into a single Dictionary
- */
-function sumDicts(...dicts: Dict<number>[]): Dict<number> {
-  const summedDict: Dict<number> = {};
+function redistributeWeight(initialWeights: Dict<Dict<number>>, targetCentralWeight: number, keysToRedistributeTo: string[]) {
+  // 1. Get "central" weights (in keysToRedistributeTo)
+  const centralWeights: Dict<Dict<number>> = DictUtil.filterDict<Dict<number>>(initialWeights, (key: string, value: Dict<number>) => keysToRedistributeTo.includes(key));
+  const centralNodeCount = Object.keys(centralWeights).length;
 
-  for (const dict of dicts) {
-    for (const key in dict) {
-      if (!summedDict.hasOwnProperty(key)) summedDict[key] = 0;
+  // 2. Get "other" weights (not in keysToRedistributeTo)
+  const otherWeights: Dict<Dict<number>> = DictUtil.filterDict<Dict<number>>(initialWeights, (key: string, value: Dict<number>) => !keysToRedistributeTo.includes(key));
+  const otherNodeCount = Object.keys(otherWeights).length;
 
-      const addend = dict[key];
-      summedDict[key] += addend;
+  // 3. Sum "central" weights and determine what percentage of weight to redistribute to these central nodes
+  const summedCentralWeights: Dict<number> = DictUtil.sumDicts(...Object.values(centralWeights));
+  const missingWeight: Dict<number> = DictUtil.subScalarDict(targetCentralWeight, summedCentralWeights);
+  const weightToRedistribute: Dict<number> = DictUtil.mutateDict<number>(missingWeight, (key: string, value: number) => Math.max(0, value));
+
+  // 4. Subtract out this percentage from each of the "other" weights
+  const dehydratedOtherWeights: Dict<Dict<number>> = DictUtil.mutateDict<Dict<number>>(otherWeights, (key: string, nestedDict: Dict<number>) => {
+    const dehydratedWeights: Dict<number> = {};
+
+    for (const nestedKey in nestedDict) {
+      const value: number = nestedDict[nestedKey];
+      // The weight to redistribute is equally redistributed among "other" nodes
+      const weightedWeightToRedistribute = weightToRedistribute[nestedKey] / otherNodeCount;
+
+      dehydratedWeights[nestedKey] = value - weightedWeightToRedistribute;
     }
-  }
 
-  return summedDict;
-}
+    return dehydratedWeights;
+  });
 
-/**
- * "Add up" an array of Dictionaries, then apply some averaging function to each key to get the (potentially weighted) "average" of each key in an array of Dictionaries
- *
- * @param dicts Array of Dictionaries attributes to be averaged up into a single Dictionary
- */
-function avgDicts(getAvg: (sum: number, count: number) => number, ...dicts: Dict<number>[]): Dict<number> {
-  const summedDict: Dict<number> = {};
-  const occurenceDict: Dict<number> = {};
+  // 5. Add in this percentage to the "central" weights
+  const hydratedCentralWeights: Dict<Dict<number>> = DictUtil.mutateDict<Dict<number>>(centralWeights, (key: string, nestedDict: Dict<number>) => {
+    const hydratedWeights: Dict<number> = {};
 
-  for (const dict of dicts) {
-    for (const key in dict) {
-      if (!summedDict.hasOwnProperty(key)) {
-        summedDict[key] = 0;
-        occurenceDict[key] = 0;
-      }
+    for (const nestedKey in nestedDict) {
+      const value = nestedDict[nestedKey];
+      // The weight to redistribute is not equally redistributed among "central" nodes: Central nodes with higher starting weight get a larger cut
+      const weightedWeightToRedistribute = weightToRedistribute[nestedKey] * (value / summedCentralWeights[key]);
 
-      const addend = dict[key];
-      summedDict[key] += addend;
-      occurenceDict[key]++;
+      hydratedWeights[nestedKey] = value + weightedWeightToRedistribute;
     }
-  }
 
-  const avgedDict: Dict<number> = {};
-  for (const key in summedDict) {
-    const sum = summedDict[key];
-    const count = occurenceDict[key];
+    return hydratedWeights;
+  });
 
-    avgedDict[key] = getAvg(sum, count);
-  }
-
-  return avgedDict;
-}
-
-function divideDicts(a: Dict<number>, b: Dict<number>): Dict<number> {
-  const keysToDivideOn: string[] = getIntersectingDictKeys(a, b);
-  const dividedDict: Dict<number> = {};
-
-  for (const key of keysToDivideOn) {
-    dividedDict[key] = a[key] / b[key];
-  }
-
-  return dividedDict;
-}
-
-function multiplyDicts(a: Dict<number>, b: Dict<number>): Dict<number> {
-  const keysToDivideOn: string[] = getIntersectingDictKeys(a, b);
-  const multipliedDict: Dict<number> = {};
-
-  for (const key of keysToDivideOn) {
-    multipliedDict[key] = a[key] * b[key];
-  }
-
-  return multipliedDict;
-}
-
-/**
- * Given n dicts, get the keys that are present in all n dicts
- *
- * @param dicts
- */
-function getIntersectingDictKeys(...dicts: Dict<any>[]): string[] {
-  const totalDicts: number = dicts.length;
-  const keyCounter: Dict<number> = {};
-
-  for (const dict of dicts) {
-    for (const key in dict) {
-      if (!keyCounter.hasOwnProperty(key)) keyCounter[key] = 0;
-      keyCounter[key]++;
-    }
-  }
-
-  const intersectingKeys: string[] = [];
-  for (const key in keyCounter) {
-    const count = keyCounter[key];
-    if (count === totalDicts) intersectingKeys.push(key);
-  }
-
-  return intersectingKeys;
+  return {
+    ...dehydratedOtherWeights,
+    ...hydratedCentralWeights,
+  };
 }
