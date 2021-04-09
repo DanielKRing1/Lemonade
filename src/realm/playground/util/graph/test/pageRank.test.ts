@@ -1,3 +1,4 @@
+import {filterDict} from '../../dictionary/Operations';
 import {pageRank} from '../pageRank';
 
 describe('PageRank alforithm', () => {
@@ -117,10 +118,7 @@ describe('PageRank alforithm', () => {
     };
     const getNodeId = (node: Node) => node.name;
     const getEdges = (node: Node): Edge[] => node.rels.map((relId: string) => edges[relId]);
-    const getEdgeAttrs = (edge: Edge) => ({
-      attrA: edge.attrA,
-      attrB: edge.attrA,
-    });
+    const getEdgeAttrs = (edge: Edge): Dict<number> => filterDict(edge, (key: string, value: string | number) => !['id', 'node1', 'node2'].includes(key)) as Dict<number>;
     const getDestinationNode = (node: Node, edge: Edge) => (edge.node1 === getNodeId(node) ? nodes[edge.node2] : nodes[edge.node1]);
 
     const weightedMap: Dict<Dict<number>> = pageRank(initialMap, allNodes, getNodeId, getEdges, getEdgeAttrs, getDestinationNode, 50);

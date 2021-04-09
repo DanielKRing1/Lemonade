@@ -1,3 +1,5 @@
+// MODIFICATION OPERATIONS
+
 export function filterDict<T>(originalDict: Dict<T>, conditionToPass: (key: string, value: T) => boolean): Dict<T> {
   const filteredDict: Dict<T> = {};
 
@@ -22,6 +24,8 @@ export function mutateDict<T>(originalDict: Dict<T>, mutate: (key: string, value
 
   return mutatedDict;
 }
+
+// OPERATOR OPERATIONS
 
 export function subDictScalar(dict: Dict<number>, scalar: number): Dict<number> {
   return mutateDict<number>(dict, (key: string, value: number) => value - scalar);
@@ -122,6 +126,8 @@ export function multiplyDicts(a: Dict<number>, b: Dict<number>): Dict<number> {
 
   return multipliedDict;
 }
+
+// UNION AND INTERSECTION OPERATIONS
 
 /**
  * Given n dicts, get the keys that are present in all n dicts
