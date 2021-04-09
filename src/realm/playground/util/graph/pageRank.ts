@@ -1,3 +1,4 @@
+import {current} from '@reduxjs/toolkit';
 import * as DictUtil from '../dictionary/Operations';
 
 type ConnectedNode<N> = {
@@ -37,7 +38,7 @@ type ConnectedEdge<E> = {
 //   return currentIteration < iterations ? pageRank(nextWeights, allNodes, getId, getConnectedNodes, iterations, currentIteration + 1) : nextWeights;
 // }
 
-function pageRank<N, E>(
+export function pageRank<N, E>(
   initialMap: Dict<Dict<number>>,
   allNodes: N[],
   getNodeId: (node: N) => string,
@@ -47,13 +48,19 @@ function pageRank<N, E>(
   iterations: number,
   curIteration: number = 0,
 ): Dict<Dict<number>> {
+  console.log(`Iteration ${curIteration}`);
+  console.log(initialMap);
   let weightMap: Dict<Dict<number>> = {};
   for (const node of allNodes) {
     const nodeId: string = getNodeId(node);
 
     // 1. Get edges
     const nodeEdges: E[] = getEdges(node);
-    const allNodeEdgeAttrs: Dict<number>[] = nodeEdges.map((nodeEdge: E) => getEdgeAttrs(nodeEdge));
+    const allNodeEdgeAttrs: Dict<number>[] = nodeEdges.map((nodeEdge: E) => {
+      //   console.log('heeee');
+      //   console.log(nodeEdges);
+      return getEdgeAttrs(nodeEdge);
+    });
     const summedNodeEdgeAttrs: Dict<number> = DictUtil.sumDicts(...allNodeEdgeAttrs);
 
     for (const nodeEdge of nodeEdges) {
@@ -69,6 +76,7 @@ function pageRank<N, E>(
       const destinationNodeAddendWeights: Dict<number> = DictUtil.multiplyDicts(curNodeAttrWeights, weightedNodeEdgeAttrs);
 
       // 3. Add product of edge weight and current node weight to destination node
+      //   console.log(`Destination id: ${destinationId}`);
       weightMap[destinationId] = DictUtil.sumDicts(weightMap[destinationId], destinationNodeAddendWeights);
     }
   }
@@ -76,7 +84,7 @@ function pageRank<N, E>(
   return curIteration < iterations ? pageRank(weightMap, allNodes, getNodeId, getEdges, getEdgeAttrs, getDestinationNode, iterations, curIteration + 1) : weightMap;
 }
 
-function getInitialWeights<N, E>(
+export function getInitialWeights<N, E>(
   allNodes: N[],
   getNodeId: (node: N) => string,
   getNodeAttrs: (node: N) => Dict<number>,
@@ -118,7 +126,7 @@ function getInitialWeights<N, E>(
   return weightMap;
 }
 
-function redistributeWeight(initialWeights: Dict<Dict<number>>, targetCentralWeight: number, keysToRedistributeTo: string[]) {
+export function redistributeWeight(initialWeights: Dict<Dict<number>>, targetCentralWeight: number, keysToRedistributeTo: string[]): Dict<Dict<number>> {
   // 1. Get "central" weights (in keysToRedistributeTo)
   const centralWeights: Dict<Dict<number>> = DictUtil.filterDict<Dict<number>>(initialWeights, (key: string, value: Dict<number>) => keysToRedistributeTo.includes(key));
   const centralNodeCount = Object.keys(centralWeights).length;
