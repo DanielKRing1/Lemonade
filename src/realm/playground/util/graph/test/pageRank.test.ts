@@ -1,5 +1,5 @@
 import {filterDict} from '../../dictionary/Operations';
-import {pageRank} from '../pageRank';
+import {pageRank, redistributeWeight} from '../pageRank';
 
 describe('PageRank alforithm', () => {
   beforeAll(async () => {});
@@ -125,6 +125,45 @@ describe('PageRank alforithm', () => {
 
     console.log('WEIGHTED MAP');
     console.log(weightedMap);
+
+    const initialWeights = {
+      a: {
+        attrA: 0.125,
+        attrB: 0.125,
+      },
+      b: {
+        attrA: 0.125,
+        attrB: 0.125,
+      },
+      c: {
+        attrA: 0.125,
+        attrB: 0.125,
+      },
+      d: {
+        attrA: 0.125,
+        attrB: 0.125,
+      },
+      e: {
+        attrA: 0.125,
+        attrB: 0.125,
+      },
+      f: {
+        attrA: 0.125,
+        attrB: 0.125,
+      },
+      g: {
+        attrA: 0.1,
+        attrB: 0.125,
+      },
+      h: {
+        attrA: 0.15,
+        attrB: 0.125,
+      },
+    };
+
+    const redistributedWeights = redistributeWeight(initialWeights, 0.5, ['a', 'b', 'c']);
+    console.log('Redistributed weights');
+    console.log(redistributedWeights);
 
     // expect(weightedMap).toBe(expectedWeightedMap);
   });

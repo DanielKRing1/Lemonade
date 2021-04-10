@@ -126,19 +126,29 @@ export function getInitialWeights<N, E>(
   return weightMap;
 }
 
-export function redistributeWeight(initialWeights: Dict<Dict<number>>, targetCentralWeight: number, keysToRedistributeTo: string[]): Dict<Dict<number>> {
+export function redistributeWeight(initialWeights: Dict<Dict<number>>, targetCentralWeight: number, keysToRedistributeTo: string[]) {
   // 1. Get "central" weights (in keysToRedistributeTo)
   const centralWeights: Dict<Dict<number>> = DictUtil.filterDict<Dict<number>>(initialWeights, (key: string, value: Dict<number>) => keysToRedistributeTo.includes(key));
   const centralNodeCount = Object.keys(centralWeights).length;
+  console.log(1);
+  console.log(centralWeights);
 
   // 2. Get "other" weights (not in keysToRedistributeTo)
   const otherWeights: Dict<Dict<number>> = DictUtil.filterDict<Dict<number>>(initialWeights, (key: string, value: Dict<number>) => !keysToRedistributeTo.includes(key));
   const otherNodeCount = Object.keys(otherWeights).length;
+  console.log(2);
+  console.log(otherWeights);
 
   // 3. Sum "central" weights and determine what percentage of weight to redistribute to these central nodes
   const summedCentralWeights: Dict<number> = DictUtil.sumDicts(...Object.values(centralWeights));
+  console.log('3.1. Central weights');
+  console.log(summedCentralWeights);
   const missingWeight: Dict<number> = DictUtil.subScalarDict(targetCentralWeight, summedCentralWeights);
+  console.log('3.2. Missing weights');
+  console.log(missingWeight);
   const weightToRedistribute: Dict<number> = DictUtil.mutateDict<number>(missingWeight, (key: string, value: number) => Math.max(0, value));
+  console.log('3.3. Weight to Redistribute');
+  console.log(weightToRedistribute);
 
   // 4. Subtract out this percentage from each of the "other" weights
   const dehydratedOtherWeights: Dict<Dict<number>> = DictUtil.mutateDict<Dict<number>>(otherWeights, (key: string, nestedDict: Dict<number>) => {
@@ -147,28 +157,46 @@ export function redistributeWeight(initialWeights: Dict<Dict<number>>, targetCen
     for (const nestedKey in nestedDict) {
       const value: number = nestedDict[nestedKey];
       // The weight to redistribute is equally redistributed among "other" nodes
-      const weightedWeightToRedistribute = weightToRedistribute[nestedKey] / otherNodeCount;
+      const totalWeightToRedistribute = weightToRedistribute[nestedKey];
+      const owedPercentage = 1 / otherNodeCount;
+      const owedWeight = totalWeightToRedistribute * owedPercentage;
 
-      dehydratedWeights[nestedKey] = value - weightedWeightToRedistribute;
+      dehydratedWeights[nestedKey] = value - owedWeight;
     }
 
     return dehydratedWeights;
   });
+  console.log(4);
+  console.log(dehydratedOtherWeights);
 
   // 5. Add in this percentage to the "central" weights
+  console.log('ONLY LOOK HERE---------------------------------');
   const hydratedCentralWeights: Dict<Dict<number>> = DictUtil.mutateDict<Dict<number>>(centralWeights, (key: string, nestedDict: Dict<number>) => {
     const hydratedWeights: Dict<number> = {};
 
     for (const nestedKey in nestedDict) {
+      console.log(nestedKey);
+      console.log(key);
+      console.log(weightToRedistribute[nestedKey]);
       const value = nestedDict[nestedKey];
-      // The weight to redistribute is not equally redistributed among "central" nodes: Central nodes with higher starting weight get a larger cut
-      const weightedWeightToRedistribute = weightToRedistribute[nestedKey] * (value / summedCentralWeights[key]);
+      console.log(value);
+      console.log(summedCentralWeights);
 
-      hydratedWeights[nestedKey] = value + weightedWeightToRedistribute;
+      const totalWeightToRedistribute = weightToRedistribute[nestedKey];
+      const earnedPercentage = value / summedCentralWeights[nestedKey];
+      // The weight to redistribute is not equally redistributed among "central" nodes: Central nodes with higher starting weight get a larger cut
+      const earnedWeight = totalWeightToRedistribute * earnedPercentage;
+      console.log(earnedWeight);
+
+      hydratedWeights[nestedKey] = value + earnedWeight;
     }
 
     return hydratedWeights;
   });
+  console.log('ONLY LOOK THERE^^^^---------------------------------');
+
+  console.log(5);
+  console.log(hydratedCentralWeights);
 
   return {
     ...dehydratedOtherWeights,
