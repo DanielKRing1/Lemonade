@@ -128,11 +128,11 @@ export function getInitialWeights<N, E>(
 
 export function redistributeWeight(initialWeights: Dict<Dict<number>>, targetCentralWeight: number, keysToRedistributeTo: string[]) {
   // 1. Get "central" weights (in keysToRedistributeTo)
-  const centralWeights: Dict<Dict<number>> = DictUtil.filterDict<Dict<number>>(initialWeights, (key: string, value: Dict<number>) => keysToRedistributeTo.includes(key));
+  const centralWeights: Dict<Dict<number>> = DictUtil.copyDictKeep<number>(initialWeights, keysToRedistributeTo);
   const centralNodeCount = Object.keys(centralWeights).length;
 
   // 2. Get "other" weights (not in keysToRedistributeTo)
-  const otherWeights: Dict<Dict<number>> = DictUtil.filterDict<Dict<number>>(initialWeights, (key: string, value: Dict<number>) => !keysToRedistributeTo.includes(key));
+  const otherWeights: Dict<Dict<number>> = DictUtil.copyDictRm<number>(initialWeights, keysToRedistributeTo);
   const otherNodeCount = Object.keys(otherWeights).length;
 
   // 3. Sum "central" weights and determine what percentage of weight to redistribute to these central nodes
