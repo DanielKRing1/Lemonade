@@ -25,6 +25,16 @@ export function mutateDict<T>(originalDict: Dict<T>, mutate: (key: string, value
   return mutatedDict;
 }
 
+// COPY OPERATIONS
+
+export function copyDictRm<T>(originalDict: Dict<Dict<T>>, blacklistKeys: string[]): Dict<Dict<T>> {
+  return filterDict<Dict<T>>(originalDict, (key: string, value: Dict<T>) => !blacklistKeys.includes(key));
+}
+
+export function copyDictKeep<T>(originalDict: Dict<Dict<T>>, whitelistKeys: string[]): Dict<Dict<T>> {
+  return filterDict<Dict<T>>(originalDict, (key: string, value: Dict<T>) => whitelistKeys.includes(key));
+}
+
 // OPERATOR OPERATIONS
 
 export function subDictScalar(dict: Dict<number>, scalar: number): Dict<number> {
