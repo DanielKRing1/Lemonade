@@ -1,5 +1,6 @@
 import {filterDict} from '../../dictionary/Operations';
-import {pageRank, redistributeWeight} from '../pageRank';
+import {getInitialWeights, pageRank, redistributeWeight} from '../pageRank';
+import * as DictUtil from '../../dictionary/Operations';
 
 describe('PageRank alforithm', () => {
   beforeAll(async () => {});
@@ -23,47 +24,6 @@ describe('PageRank alforithm', () => {
       attrB: number;
     };
 
-    const initialMap: Dict<Attrs> = {
-      a: {
-        attrA: 1 / 4,
-        attrB: 1 / 4,
-      },
-      b: {
-        attrA: 1 / 4,
-        attrB: 1 / 4,
-      },
-      c: {
-        attrA: 1 / 4,
-        attrB: 1 / 4,
-      },
-      d: {
-        attrA: 1 / 4,
-        attrB: 1 / 4,
-      },
-    };
-
-    const nodes: Dict<Node> = {
-      a: {
-        name: 'a',
-        rels: ['ab', 'ca', 'da', 'ae'],
-      },
-      b: {
-        name: 'b',
-        rels: ['ab', 'bc'],
-      },
-      c: {
-        name: 'c',
-        rels: ['bc', 'ca', 'cd'],
-      },
-      d: {
-        name: 'd',
-        rels: ['cd', 'da'],
-      },
-      e: {
-        name: 'e',
-        rels: ['ae'],
-      },
-    };
     const allNodes: Node[] = Object.values(nodes);
     const edges: Dict<Edge> = {
       ab: {
@@ -117,9 +77,54 @@ describe('PageRank alforithm', () => {
       },
     };
     const getNodeId = (node: Node) => node.name;
+    const getNodeAttrs = (node: Node) => DictUtil.;
     const getEdges = (node: Node): Edge[] => node.rels.map((relId: string) => edges[relId]);
     const getEdgeAttrs = (edge: Edge): Dict<number> => filterDict(edge, (key: string, value: string | number) => !['id', 'node1', 'node2'].includes(key)) as Dict<number>;
     const getDestinationNode = (node: Node, edge: Edge) => (edge.node1 === getNodeId(node) ? nodes[edge.node2] : nodes[edge.node1]);
+
+    const initialMap = getInitialWeights(allNodes, getNodeId, getNodeAttrs, getEdges, getEdgeAttrs, getDestinationNode);
+
+    const myInitialMap: Dict<Attrs> = {
+      a: {
+        attrA: 1 / 4,
+        attrB: 1 / 4,
+      },
+      b: {
+        attrA: 1 / 4,
+        attrB: 1 / 4,
+      },
+      c: {
+        attrA: 1 / 4,
+        attrB: 1 / 4,
+      },
+      d: {
+        attrA: 1 / 4,
+        attrB: 1 / 4,
+      },
+    };
+
+    const nodes: Dict<Node> = {
+      a: {
+        name: 'a',
+        rels: ['ab', 'ca', 'da', 'ae'],
+      },
+      b: {
+        name: 'b',
+        rels: ['ab', 'bc'],
+      },
+      c: {
+        name: 'c',
+        rels: ['bc', 'ca', 'cd'],
+      },
+      d: {
+        name: 'd',
+        rels: ['cd', 'da'],
+      },
+      e: {
+        name: 'e',
+        rels: ['ae'],
+      },
+    };
 
     const weightedMap: Dict<Dict<number>> = pageRank(initialMap, allNodes, getNodeId, getEdges, getEdgeAttrs, getDestinationNode, 50);
 
