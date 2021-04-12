@@ -84,14 +84,7 @@ export function pageRank<N, E>(
   return curIteration < iterations ? pageRank(weightMap, allNodes, getNodeId, getEdges, getEdgeAttrs, getDestinationNode, iterations, curIteration + 1) : weightMap;
 }
 
-export function getInitialWeights<N, E>(
-  allNodes: N[],
-  getNodeId: (node: N) => string,
-  getNodeAttrs: (node: N) => Dict<number>,
-  getEdges: (node: N) => E[],
-  getEdgeAttrs: (edge: E) => Dict<number>,
-  getDestinationNode: (node: N, edge: E) => N,
-): Dict<Dict<number>> {
+export function getInitialWeights<N, E>(allNodes: N[], getNodeId: (node: N) => string, getNodeAttrs: (node: N) => Dict<number>): Dict<Dict<number>> {
   // 1. Compute total summed node attributes
   const allNodeAttrs: Dict<number>[] = [];
   for (const node of allNodes) {
@@ -100,27 +93,18 @@ export function getInitialWeights<N, E>(
   }
   const summedNodeAttrs: Dict<number> = DictUtil.sumDicts(...allNodeAttrs);
 
+  console.log('1');
+  console.log('SUMMED NODE ATTRS');
+  console.log(summedNodeAttrs);
+
   let weightMap: Dict<Dict<number>> = {};
   for (const node of allNodes) {
     const nodeAttrs: Dict<number> = getNodeAttrs(node);
     const weightedNodeAttrs: Dict<number> = DictUtil.divideDicts(nodeAttrs, summedNodeAttrs);
 
     // 2. Compute summed edge attributes for each node
-    const nodeEdges: E[] = getEdges(node);
-    const allNodeEdgeAttrs: Dict<number>[] = nodeEdges.map((nodeEdge: E) => getEdgeAttrs(nodeEdge));
-    const summedNodeEdgeAttrs: Dict<number> = DictUtil.sumDicts(...allNodeEdgeAttrs);
-
-    // 3. Get weighted attributes for each edge
-    for (const nodeEdge of nodeEdges) {
-      const edgeAttrs: Dict<number> = getEdgeAttrs(nodeEdge);
-
-      const destinationNode: N = getDestinationNode(node, nodeEdge);
-      const destinationId: string = getNodeId(destinationNode);
-
-      // 4. Add weighted attributes to weightedMap
-      const weightedNodeEdgeAttrs: Dict<number> = DictUtil.divideDicts(edgeAttrs, summedNodeEdgeAttrs);
-      weightMap[destinationId] = DictUtil.multiplyDicts(weightedNodeAttrs, weightedNodeEdgeAttrs);
-    }
+    const nodeId: string = getNodeId(node);
+    weightMap[nodeId] = weightedNodeAttrs;
   }
 
   return weightMap;
@@ -128,11 +112,11 @@ export function getInitialWeights<N, E>(
 
 export function redistributeWeight(initialWeights: Dict<Dict<number>>, targetCentralWeight: number, keysToRedistributeTo: string[]) {
   // 1. Get "central" weights (in keysToRedistributeTo)
-  const centralWeights: Dict<Dict<number>> = DictUtil.copyDictKeep<number>(initialWeights, keysToRedistributeTo);
+  const centralWeights: Dict<Dict<number>> = DictUtil.copyDictKeep<Dict<number>>(initialWeights, keysToRedistributeTo);
   const centralNodeCount = Object.keys(centralWeights).length;
 
   // 2. Get "other" weights (not in keysToRedistributeTo)
-  const otherWeights: Dict<Dict<number>> = DictUtil.copyDictRm<number>(initialWeights, keysToRedistributeTo);
+  const otherWeights: Dict<Dict<number>> = DictUtil.copyDictRm<Dict<number>>(initialWeights, keysToRedistributeTo);
   const otherNodeCount = Object.keys(otherWeights).length;
 
   // 3. Sum "central" weights and determine what percentage of weight to redistribute to these central nodes

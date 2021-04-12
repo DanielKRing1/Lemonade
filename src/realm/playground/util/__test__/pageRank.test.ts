@@ -1,6 +1,8 @@
-import {filterDict} from '../../dictionary/Operations';
-import {getInitialWeights, pageRank, redistributeWeight} from '../pageRank';
-import * as DictUtil from '../../dictionary/Operations';
+import jest from 'jest';
+
+import {filterDict} from '../dictionary/Operations';
+import {getInitialWeights, pageRank, redistributeWeight} from '../graph/pageRank';
+import * as DictUtil from '../dictionary/Operations';
 
 describe('PageRank alforithm', () => {
   beforeAll(async () => {});
@@ -11,7 +13,7 @@ describe('PageRank alforithm', () => {
     type Node = {
       name: string;
       rels: string[];
-    };
+    } & Attrs;
 
     type Edge = {
       id: string;
@@ -22,6 +24,39 @@ describe('PageRank alforithm', () => {
     type Attrs = {
       attrA: number;
       attrB: number;
+    };
+
+    const nodes: Dict<Node> = {
+      a: {
+        name: 'a',
+        rels: ['ab', 'ca', 'da', 'ae'],
+        attrA: 1.5,
+        attrB: 1.5,
+      },
+      b: {
+        name: 'b',
+        rels: ['ab', 'bc'],
+        attrA: 1,
+        attrB: 1,
+      },
+      c: {
+        name: 'c',
+        rels: ['bc', 'ca', 'cd'],
+        attrA: 1,
+        attrB: 1,
+      },
+      d: {
+        name: 'd',
+        rels: ['cd', 'da'],
+        attrA: 1,
+        attrB: 1,
+      },
+      e: {
+        name: 'e',
+        rels: ['ae'],
+        attrA: 1,
+        attrB: 1,
+      },
     };
 
     const allNodes: Node[] = Object.values(nodes);
@@ -77,13 +112,12 @@ describe('PageRank alforithm', () => {
       },
     };
     const getNodeId = (node: Node) => node.name;
-    const getNodeAttrs = (node: Node) => DictUtil.;
+    const getNodeAttrs = (node: Node) => DictUtil.copyDictRm<any>(node, ['name', 'rels']) as Dict<number>;
     const getEdges = (node: Node): Edge[] => node.rels.map((relId: string) => edges[relId]);
     const getEdgeAttrs = (edge: Edge): Dict<number> => filterDict(edge, (key: string, value: string | number) => !['id', 'node1', 'node2'].includes(key)) as Dict<number>;
     const getDestinationNode = (node: Node, edge: Edge) => (edge.node1 === getNodeId(node) ? nodes[edge.node2] : nodes[edge.node1]);
 
-    const initialMap = getInitialWeights(allNodes, getNodeId, getNodeAttrs, getEdges, getEdgeAttrs, getDestinationNode);
-
+    // 1. Get initial map, evenly distributed
     const myInitialMap: Dict<Attrs> = {
       a: {
         attrA: 1 / 4,
@@ -102,29 +136,15 @@ describe('PageRank alforithm', () => {
         attrB: 1 / 4,
       },
     };
+    const initialMap = getInitialWeights(allNodes, getNodeId, getNodeAttrs);
+    console.log('INITIAL MAP');
+    console.log(initialMap);
 
-    const nodes: Dict<Node> = {
-      a: {
-        name: 'a',
-        rels: ['ab', 'ca', 'da', 'ae'],
-      },
-      b: {
-        name: 'b',
-        rels: ['ab', 'bc'],
-      },
-      c: {
-        name: 'c',
-        rels: ['bc', 'ca', 'cd'],
-      },
-      d: {
-        name: 'd',
-        rels: ['cd', 'da'],
-      },
-      e: {
-        name: 'e',
-        rels: ['ae'],
-      },
-    };
+    const redistributedWeights = redistributeWeight(initialMap, 0.5, ['a', 'b', 'c']);
+    console.log('Redistributed weights');
+    console.log(redistributedWeights);
+
+    // expect(redistributedWeights).toMatchSnapshot();
 
     const weightedMap: Dict<Dict<number>> = pageRank(initialMap, allNodes, getNodeId, getEdges, getEdgeAttrs, getDestinationNode, 50);
 
@@ -165,10 +185,6 @@ describe('PageRank alforithm', () => {
         attrB: 0.125,
       },
     };
-
-    const redistributedWeights = redistributeWeight(initialWeights, 0.5, ['a', 'b', 'c']);
-    console.log('Redistributed weights');
-    console.log(redistributedWeights);
 
     // expect(weightedMap).toBe(expectedWeightedMap);
   });
