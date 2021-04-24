@@ -1,4 +1,4 @@
-import Querent from './Querent';
+import Querent from '../Base/Querent';
 
 class EntityQuerent extends Querent {
   constructor(schema: string) {

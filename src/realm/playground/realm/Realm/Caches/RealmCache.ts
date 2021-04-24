@@ -4,6 +4,7 @@ import {SchemaBlueprint} from '../Schema/SchemaBlueprint';
 import {TrendCache} from './TrendCache';
 
 import {DEFAULT_PATH} from '../../../../../constants';
+import {TrendBlueprint} from '../Trends/TrendBlueprints';
 
 /**
  * A SINGLETON CACHE that caches all open Realm connections
@@ -31,7 +32,7 @@ export class RealmCache extends Singleton(Cache)<Realm> implements Loadable {
     if (!this.has(DEFAULT_PATH))
       // Init Default Realm
       this.add(DEFAULT_PATH, {
-        schemaBlueprints: [SchemaBlueprint.BLUEPRINT_SCHEMA],
+        schemaBlueprints: [TrendBlueprint.SCHEMA_BLUEPRINT],
         options: {},
       });
 

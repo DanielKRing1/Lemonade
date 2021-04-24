@@ -4,11 +4,17 @@ declare enum RelationshipTypeEnum {
   SEQURNTIAL_DENSE = 'seq_dense',
 }
 
+declare enum TrendNameSuffix {
+  Tag = 'tag',
+  Node = 'node',
+  Edge = 'edge',
+}
+
 declare type CompleteTrendBlueprints = {
-  [SchemaTypeEnum.TREND]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
-  [SchemaTypeEnum.TAG]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
-  [SchemaTypeEnum.TREND_RELS]: import('../Schema/SchemaBlueprint').SchemaBlueprint[];
-  [SchemaTypeEnum.TAG_RELS]: import('../Schema/SchemaBlueprint').SchemaBlueprint[];
+  [SchemaTypeEnum.TREND_NODE]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
+  [SchemaTypeEnum.TAG_NODE]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
+  [SchemaTypeEnum.TREND_EDGE]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
+  [SchemaTypeEnum.TAG_EDGE]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
 };
 
 declare type TrendCacheValue = {

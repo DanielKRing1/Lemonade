@@ -1,7 +1,4 @@
-type ErrorGeneratorParams = {
-  message?: string;
-};
-type ErrorGenerator = (params: ErrorGeneratorParams) => Error;
+type ErrorGenerator = (params: Dict<any>) => Error;
 
 declare enum ErrorCodeEnum {
   AbstractClass = 10,

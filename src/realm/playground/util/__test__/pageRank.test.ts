@@ -1,10 +1,8 @@
-import jest from 'jest';
-
 import {filterDict} from '../dictionary/Operations';
 import {getInitialWeights, pageRank, redistributeWeight} from '../graph/pageRank';
 import * as DictUtil from '../dictionary/Operations';
 
-describe('PageRank alforithm', () => {
+describe('PageRank algorithm', () => {
   beforeAll(async () => {});
 
   it('should return correct weighted map after 5 iterations', async () => {

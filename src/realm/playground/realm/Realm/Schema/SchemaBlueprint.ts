@@ -8,17 +8,17 @@ export class SchemaBlueprint implements SchemaBlueprintObj {
 
   // STATIC UTILITIES
 
-  static BLUEPRINT_SCHEMA_DEF: Realm.ObjectSchema = {
-    name: SchemaNameEnum.SchemaBlueprint,
-    primaryKey: 'schemaName',
-    properties: {
-      schemaName: 'string',
-      realmPath: 'string',
-      schemaType: 'string',
-      schemaStr: 'string',
-    },
-  };
-  static BLUEPRINT_SCHEMA: SchemaBlueprint = new SchemaBlueprint(SchemaNameEnum.SchemaBlueprint, DEFAULT_PATH, SchemaTypeEnum.Blueprint, SchemaBlueprint.BLUEPRINT_SCHEMA_DEF);
+  // static BLUEPRINT_SCHEMA_DEF: Realm.ObjectSchema = {
+  //   name: SchemaNameEnum.SchemaBlueprint,
+  //   primaryKey: 'schemaName',
+  //   properties: {
+  //     schemaName: 'string',
+  //     realmPath: 'string',
+  //     schemaType: 'string',
+  //     schemaStr: 'string',
+  //   },
+  // };
+  // static BLUEPRINT_SCHEMA: SchemaBlueprint = new SchemaBlueprint(SchemaNameEnum.SchemaBlueprint, DEFAULT_PATH, SchemaTypeEnum.Blueprint, SchemaBlueprint.BLUEPRINT_SCHEMA_DEF);
 
   constructor(schemaName: string, realmPath: string, schemaType: SchemaTypeEnum, schemaDef: Realm.ObjectSchema) {
     this.schemaName = schemaName;

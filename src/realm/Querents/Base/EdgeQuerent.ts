@@ -1,89 +1,183 @@
-import Heap from 'heap';
+//@ts-ignore
+import Heap from "heap";
+//@ts-ignore
+import { Override } from "../../Base";
 
-import RealmSchema from '../schemaNames';
+//@ts-ignore
+import { InstantiateAbstractError, NotImplementedError } from "../../Errors";
+import Querent from "./Querent";
+//@ts-ignore
+import Realm from "../Realm";
 
-import {InstantiateAbstractClassError, NotImplementedError} from '../../Errors';
-import Querent from './Querent';
+type Dict<T> = Record<string, T>;
 
-export default class RelQuerent extends Querent {
+type Node = {
+  name: string;
+  edges: Edge[];
+};
+
+type Edge = {
+  name: string;
+  nodes: Node[];
+};
+
+export default class EdgeQuerent extends Querent<Edge> {
+  private propertySuffix: string;
+
   static sortNamePair(n1: string, n2: string): string[] {
     return [n1, n2].sort((a, b) => (a < b ? -1 : 1));
   }
-  static getRelId(a1: string, a2: string): string {
-    return this.constructor.sortNamePair(a1, a2).join('-');
+  static getEdgeId(n1: string, n2: string): string {
+    //@ts-ignore
+    return this.constructor.sortNamePair(n1, n2).join("-");
   }
 
-  constructor(schema: RealmSchema | string) {
-    super(schema);
+  constructor(realmPath: string, schemaName: string, propertySuffix: string) {
+    super(realmPath, schemaName);
 
-    if (this.constructor === RelQuerent) throw new InstantiateAbstractClassError('RelQuerent');
+    this.propertySuffix = propertySuffix;
+
+    if (this.constructor === EdgeQuerent)
+      throw InstantiateAbstractError({ className: "EdgeQuerent" });
   }
 
-  get(realm: Realm, a1: string, a2: string): RealmRelationship<any> {
-    const id = RelQuerent.getRelId(a1, a2);
-    return this.getById(realm, id) as RealmRelationship<any>;
-  }
-  getOrCreateCombos = (realm: Realm, entityNames: string[]): RealmRelationship<any>[] => {
-    const allRels = [];
+  // CREATORS
 
-    for (let n1 of entityNames) {
-      for (let n2 of entityNames) {
-        if (n1 === n2) continue;
+  /**
+   * Create an Edge in the Realm database that is linked to Nodes 1 and 2
+   *
+   * @param realm
+   * @param node1
+   * @param node2
+   */
+  @Override("Querent")
+  //@ts-ignore
+  public create(
+    realm: Realm,
+    node1: Realm.Object & Node,
+    node2: Realm.Object & Node
+  ): Realm.Results<Edge> | undefined {
+    const edgeId: string = EdgeQuerent.getEdgeId(node1.name, node2.name);
 
-        const rel = this.getOrCreate(realm, n1, n2);
-        allRels.push(rel);
-      }
-    }
-
-    return allRels;
-  };
-  getCombos(realm: Realm, entities: string[]): RealmRelationship<any>[] {
-    const allRels = [];
-
-    for (let e1 of entities) {
-      for (let e2 of entities) {
-        if (e1 === e2) continue;
-
-        const rel = this.get(realm, e1, e2);
-        allRels.push(rel);
-      }
-    }
-
-    return allRels;
-  }
-
-  getByEntityId(realm: Realm, id: string): Realm.Results<Realm.Object> {
-    return realm.objects(this.schema).filtered(`entity1.id = "${id}" OR entity2.id = "${id}"`);
-  }
-
-  // create(n1: string, n2: string): AnyRel {
-  //   throw new NotImplementedError('RelQuerent.create');
-  // }
-  create(realm: Realm, e1: string, e2: string): RealmRelationship<any> {
-    const [entityName1, entityName2] = RelQuerent.sortNamePair(e1, e2);
-    const id = RelQuerent.getRelId(e1, e2);
-
-    const relObj: RealmRelationship<any> = {
-      id,
-      entity1: {
-        id: entityName1,
-      },
-      entity2: {
-        id: entityName2,
-      },
-      totalRatings: 0,
+    const edge: Edge = {
+      name: edgeId,
+      nodes: [node1, node2],
     };
 
-    const realmRel = this._create(realm, relObj);
-
-    return realmRel as RealmRelationship<any>;
+    const realmEdge = this._create(realm, edge);
+    return realmEdge;
   }
 
-  getOrCreate(realm: Realm, n1: string, n2: string): RealmRelationship<any> {
-    let rel = this.get(realm, n1, n2);
-    if (rel === undefined) rel = this.create(realm, n1, n2);
+  // GETTERS
 
-    return rel;
+  /**
+   * Get Edge row from Realm database
+   *
+   * @param realm
+   * @param nodeName1
+   * @param nodeName2
+   */
+  public getByNodeIds(
+    realm: Realm,
+    nodeName1: string,
+    nodeName2: string
+  ): Realm.Results<Edge> {
+    const id = EdgeQuerent.getEdgeId(nodeName1, nodeName2);
+    return this.getById(realm, id) as Realm.Results<Edge>;
+  }
+
+  public getByNodes(
+    realm: Realm,
+    node1: Realm.Results<Node>,
+    node2: Realm.Results<Node>,
+    create: boolean
+  ): Realm.Results<Edge> | undefined {
+    let edge = this.getByNodeIds(realm, node1.name, node2.name);
+    if (create && edge === undefined) edge = this.create(realm, node1, node2);
+
+    return edge;
+  }
+
+  // TODO Check if this works
+  /**
+   * Get all edges that connect to the given node id
+   *
+   * @param realm
+   * @param nodeId
+   */
+  getNodeEdges(realm: Realm, nodeId: string): Realm.Results<Edge> {
+    return this.getAll(realm).filtered(`"${nodeId}" == nodes.name`);
+  }
+
+  /**
+   * Get (or optionally create) edges between all nodes in a set of nodes
+   *
+   * @param realm
+   * @param nodes
+   * @param create
+   */
+  getDenseEdgeCombos(
+    realm: Realm,
+    nodes: (Realm.Object & Node)[],
+    weights: number[],
+    create: boolean = false
+  ): {
+    entity: Realm.Results<Edge>;
+    weight: number;
+  }[] {
+    const connectingEdges: {
+      entity: Realm.Results<Edge>;
+      weight: number;
+    }[] = [];
+
+    for (let i = 0; i < nodes.length; i++) {
+      const n1: Realm.Object & Node = nodes[i];
+
+      for (let j = 0; j < nodes.length; j++) {
+        const n2: Realm.Object & Node = nodes[j];
+
+        if (n1.name === n2.name) continue;
+
+        const edge: Realm.Results<Edge> = this.getByNodes(
+          realm,
+          n1,
+          n2,
+          create
+        );
+        const weight: number = (weights[i] + weights[j]) / 2;
+
+        if (edge !== undefined) connectingEdges.push({ entity: edge, weight });
+      }
+    }
+
+    return connectingEdges;
+  }
+
+  /**
+   * Get (or optionally create) edges between each sequential pair of nodes in a set of nodes
+   *
+   * @param realm
+   * @param nodes
+   * @param create
+   */
+  getSeqEdgeCombos(
+    realm: Realm,
+    nodes: (Realm.Object & Node)[],
+    create: boolean = false
+  ): Realm.Results<Edge>[] {
+    const connectingEdges: Realm.Results<Edge>[] = [];
+
+    for (let i = 0; i < nodes.length - 1; i++) {
+      const n1: Realm.Object & Node = nodes[i];
+      const n2: Realm.Object & Node = nodes[i + 1];
+
+      if (n1.name === n2.name) continue;
+
+      const edge: Realm.Results<Edge> = this.getByNodes(realm, n1, n2, create);
+      if (edge !== undefined) connectingEdges.push(edge);
+    }
+
+    return connectingEdges;
   }
 
   // Stock example:
@@ -107,15 +201,35 @@ export default class RelQuerent extends Querent {
   // This _rate method accepts this ^ Entity type and rating options:
   //    Uniform, then rating = rating1 + rating2 / 2
   //    Unique (Array), then rating = rating1 + rating2
-  _rate(realm: Realm, mood: string, rating: number, weight: number, e1: string, e2: string) {
-    const rel = this.getOrCreate(realm, e1, e2);
+  protected _rate(
+    mood: string,
+    rating: number,
+    weight: number,
+    edge: Realm.Object & Realm.Results<Edge>
+  ): number {
+    // TODO Call getCombos and execute rating process on each returned Edge
+    // const edge: Realm.Object & Realm.Results<Edge> = this.getByNodes(
+    //   realm,
+    //   node1,
+    //   node2,
+    //   true
+    // );
+    // 1. Compute weighted rating to add
+    const weightedRating: number = rating * weight;
 
-    const weightedRating = rating * weight;
-    const prevRating = rel[mood]!;
-    const newRating = (prevRating * rel.totalRatings + weightedRating) / (rel.totalRatings + weight);
+    // 2. Get mood keys
+    const avgRatingKey: string = `${mood}`;
+    const totalCountKey: string = `${mood}_count`;
 
-    rel[mood] = newRating;
-    rel.totalRatings += weight;
+    // 3. Compute new mood rating value
+    const prevRating: number = edge[avgRatingKey]!;
+    const newRating: number =
+      (prevRating * edge.totalRatings + weightedRating) /
+      (edge.totalRatings + weight);
+
+    // 4. Update mood values in Realm
+    edge[avgRatingKey] = newRating;
+    edge[totalCountKey] += weight;
 
     return newRating;
   }
@@ -134,7 +248,12 @@ export default class RelQuerent extends Querent {
    * @param branchCount Number of times to branhch out from each Entity (More will take longer to compute; also, branches out in ascending order)
    *
    */
-  getMostReflectiveEntities = (realm: Realm, startId: string, mood: Mood, branchCount: number): Array<string> => {
+  getMostReflectiveEntities = (
+    realm: Realm,
+    startId: string,
+    mood: string,
+    branchCount: number
+  ): Array<string> => {
     const reflectivityMap: Record<string, number> = {
       [startId]: 1,
     };
@@ -161,7 +280,10 @@ export default class RelQuerent extends Querent {
       // console.log(closestRels)
 
       for (let closestRel of closestRels) {
-        const otherEntityId = startId !== closestRel.entity1.id ? closestRel.entity1.id : closestRel.entity2.id;
+        const otherEntityId =
+          startId !== closestRel.entity1.id
+            ? closestRel.entity1.id
+            : closestRel.entity2.id;
 
         if (!reflectivityMap[otherEntityId]) {
           reflectivityMap[otherEntityId] = 1;
@@ -175,7 +297,9 @@ export default class RelQuerent extends Querent {
       id: string;
       count: number;
     };
-    const reflectivityMaxHeap = new Heap((a: IdCountType, b: IdCountType) => b.count - a.count);
+    const reflectivityMaxHeap = new Heap(
+      (a: IdCountType, b: IdCountType) => b.count - a.count
+    );
     for (let id in reflectivityMap) {
       const count = reflectivityMap[id];
       const idCount: IdCountType = {
@@ -190,7 +314,13 @@ export default class RelQuerent extends Querent {
   };
 
   // DEPRECATED BY getSCEntities of depth 1
-  getMostCorrelatedEntities = (realm: Realm, startId: string, mood: Mood, branchCount: number, entityCount: number): Array<string> => {
+  getMostCorrelatedEntities = (
+    realm: Realm,
+    startId: string,
+    mood: Mood,
+    branchCount: number,
+    entityCount: number
+  ): Array<string> => {
     const mostCorrelatedEntities = new Set([startId]);
 
     const run = () => {
@@ -206,7 +336,7 @@ export default class RelQuerent extends Querent {
         const allRel: Realm.Results<AnyRel> = this.getByEntityId(realm, id);
 
         allRel.forEach((rel) => {
-          const {entity1, entity2} = rel;
+          const { entity1, entity2 } = rel;
 
           if (mostCorrelatedEntities.size === 1) {
             entityMap[entity1.id] = {
@@ -232,14 +362,19 @@ export default class RelQuerent extends Querent {
       });
 
       const correlatedEntities = Object.entries(entityMap)
-        .filter(([entityId, entity]) => entity.counter === mostCorrelatedEntities.size)
+        .filter(
+          ([entityId, entity]) => entity.counter === mostCorrelatedEntities.size
+        )
         .map(([entityId, entity]) => entity);
 
       correlatedEntities.forEach((rel) => heap.push(rel));
 
       while (!heap.empty() && mostCorrelatedEntities.size < entityCount) {
         const closestRel = heap.pop();
-        const closestEntityId = startId !== closestRel.entity1.id ? closestRel.entity1.id : closestRel.entity2.id;
+        const closestEntityId =
+          startId !== closestRel.entity1.id
+            ? closestRel.entity1.id
+            : closestRel.entity2.id;
 
         if (!mostCorrelatedEntities.has(closestEntityId)) {
           mostCorrelatedEntities.add(closestEntityId);
@@ -253,7 +388,13 @@ export default class RelQuerent extends Querent {
     return Array.from(mostCorrelatedEntities);
   };
 
-  getMaximizedEntitiesAlongPath = (realm: Realm, startId: string, mood: Mood, branchCount: number, depth: number): Array<string> => {
+  getMaximizedEntitiesAlongPath = (
+    realm: Realm,
+    startId: string,
+    mood: Mood,
+    branchCount: number,
+    depth: number
+  ): Array<string> => {
     const maximizedEntities = new Set([startId]);
 
     const run = (startId: string, curDepth = 0) => {
@@ -273,7 +414,10 @@ export default class RelQuerent extends Querent {
       let curBranchCount = 0;
       while (!heap.empty() && curBranchCount < branchCount) {
         const closestRel = heap.pop();
-        const closestEntityId = startId !== closestRel.entity1.id ? closestRel.entity1.id : closestRel.entity2.id;
+        const closestEntityId =
+          startId !== closestRel.entity1.id
+            ? closestRel.entity1.id
+            : closestRel.entity2.id;
 
         if (!maximizedEntities.has(closestEntityId)) {
           curBranchCount++;
@@ -288,7 +432,13 @@ export default class RelQuerent extends Querent {
     return Array.from(maximizedEntities);
   };
 
-  getSCEntity(realm: Realm, startId: string, mood: Mood, branchCount: number, depth: number) {
+  getSCEntity(
+    realm: Realm,
+    startId: string,
+    mood: Mood,
+    branchCount: number,
+    depth: number
+  ) {
     type Path = Array<string>;
     type Paths = Array<Path>;
     const scEntityIds: Record<string, Paths> = {};
@@ -306,7 +456,10 @@ export default class RelQuerent extends Querent {
         curBranchCount++;
 
         const closestRel = heap.pop();
-        const closestEntityId = nextId !== closestRel.entity1.id ? closestRel.entity1.id : closestRel.entity2.id;
+        const closestEntityId =
+          nextId !== closestRel.entity1.id
+            ? closestRel.entity1.id
+            : closestRel.entity2.id;
 
         if (!scEntityIds.hasOwnProperty(closestEntityId)) {
           scEntityIds[closestEntityId] = [path];
@@ -325,23 +478,30 @@ export default class RelQuerent extends Querent {
       id: string;
       paths: Paths;
     };
-    const maxHeap = new Heap((a: EntityPath, b: EntityPath) => b.paths.length - a.paths.length);
+    const maxHeap = new Heap(
+      (a: EntityPath, b: EntityPath) => b.paths.length - a.paths.length
+    );
     Object.entries(scEntityIds).forEach(([entityId, pathsToEntity]) =>
       maxHeap.push({
         id: entityId,
         paths: pathsToEntity,
-      }),
+      })
     );
 
     return maxHeap.toArray();
   }
 
-  getMostRelevantEntity(realm: Realm, startId: string, mood: Mood, branchCount: number = 1) {
+  getMostRelevantEntity(
+    realm: Realm,
+    startId: string,
+    mood: Mood,
+    branchCount: number = 1
+  ) {
     this.getSCEntity(realm, startId, mood, branchCount, 1);
   }
 }
 
-const initHeap = (mood: Mood) => {
+const initHeap = (mood: string) => {
   const heap = new Heap((a: AnyRel, b: AnyRel) => {
     if (a !== undefined && b !== undefined) return a[mood] - b[mood];
     else return a === undefined ? 1 : -1;
