@@ -1,14 +1,13 @@
 import {Cache, LoadParams, Singleton, Override, Implement} from '../../Base';
-import {SchemaBlueprint} from '../Schema/SchemaBlueprint';
 
-import {buildTrendBlueprints, getTrendTagSchemaName, TrendTracker} from '../Trends';
+import {TrendTracker} from '../Trends';
 import {TrendBlueprint} from '../Trends/TrendBlueprints';
 
 /**
  * A SINGLETON CACHE that caches all TrendSchemas and their TrendTracker
  *
  */
-export class TrendCache extends Singleton(Cache)<TrendCacheValue> {
+export class TrendCache extends Singleton(Cache)<TrendTracker> {
   constructor() {
     super();
 

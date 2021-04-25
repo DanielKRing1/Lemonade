@@ -20,8 +20,3 @@ declare type CompleteTrendSB = {
   [SchemaTypeEnum.TREND_EDGE]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
   [SchemaTypeEnum.TAG_EDGE]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
 };
-
-declare type TrendCacheValue = {
-  [SchemaTypeEnum.TREND]: import('../Trends/TrendTracker').TrendTracker;
-  [SchemaTypeEnum.TAG]: import('../Trends/TrendTracker').TrendTracker;
-};

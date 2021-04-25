@@ -5,6 +5,7 @@ import {RealmUtils} from './Utility';
 
 import {SchemaBlueprint} from './Schema/SchemaBlueprint';
 import {TrendBlueprint} from './Trends/TrendBlueprints';
+import {TrendTracker} from './Trends';
 
 export class RealmInterface extends Singleton(Object) {
   private _realmCache: RealmCache;
@@ -62,6 +63,24 @@ export class RealmInterface extends Singleton(Object) {
 
       return remainingSchemas;
     }
+  }
+
+  /**
+   * Get lsit of available Trends in TrendCache
+   */
+  public getTrendNames(): string[] {
+    return this._trendCache.getKeys();
+  }
+
+  /**
+   * Get properties of a Trend in TrendCache
+   *
+   * @param trendName String, Trend with properties in TrendCache
+   */
+  public getTrendProperties(trendName: string): string[] | undefined {
+    const trendTracker: TrendTracker | undefined = this._trendCache.get(trendName);
+
+    if (!!trendTracker) return trendTracker.trendProperties;
   }
 
   // PRIVATE API
