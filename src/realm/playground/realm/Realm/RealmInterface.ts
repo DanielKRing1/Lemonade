@@ -4,6 +4,7 @@ import {RealmCache, SchemaCache, TrendCache} from './Caches';
 import {RealmUtils} from './Utility';
 
 import {SchemaBlueprint} from './Schema/SchemaBlueprint';
+import {TrendBlueprint} from './Trends/TrendBlueprints';
 
 export class RealmInterface extends Singleton(Object) {
   private _realmCache: RealmCache;
@@ -20,24 +21,24 @@ export class RealmInterface extends Singleton(Object) {
     return this.getSingleton() as RealmInterface;
   }
 
-  public loadRealms(): SchemaBlueprint[] {
-    return this._realmCache.load();
-  }
+  // PUBLIC API
 
-  public addRealm(realmPath: string, valueParams: {schemaBlueprints: Array<SchemaBlueprint>; options?: any}) {
-    this._realmCache.add(realmPath, valueParams);
-  }
-  public rmRealm(realmPath: string, options?: any) {
-    this._realmCache.rm(realmPath, options);
-  }
+  // TREND API
 
-  public addTrend(trendName: string, attributeNames: string[], relTypes: RelationshipTypeEnum[] = Object.values(RelationshipTypeEnum), options?: Dict<string>): SchemaBlueprint[] | undefined {
+  public addTrend(trendName: string, trendProperties: string[], relTypes: RelationshipTypeEnum[] = Object.values(RelationshipTypeEnum), options?: Dict<string>): SchemaBlueprint[] | undefined {
     const realmPath = DEFAULT_PATH;
-    const schemaType = SchemaTypeEnum.TREND;
 
-    // Add to TrendCache
-    const schemaBlueprints: SchemaBlueprint[] = this._trendCache.add(trendName, {realmPath, attributeNames, relTypes});
+    // 1. Add to TrendCache
+    const trendBlueprint: TrendBlueprint = this._trendCache.add(trendName, {realmPath, trendProperties});
 
+    // 2. Save TrendBlueprint to disk
+    trendBlueprint.save(this._realmCache.getDefault());
+
+    // 3. Get list of relevant SchemaBlueprints from TrendBlueprint
+    const completeTrendSB: CompleteTrendSB = trendBlueprint.toSchemaBlueprints();
+    const schemaBlueprints: SchemaBlueprint[] = Object.values(completeTrendSB);
+
+    // 4. Add Schemas to SchemaCache, will reload Realm in RealmCache
     const addedSchemas: SchemaBlueprint[] | undefined = this._addSchemas(realmPath, schemaBlueprints);
 
     return addedSchemas;
@@ -45,24 +46,53 @@ export class RealmInterface extends Singleton(Object) {
   public rmTrend(trendName: string, options?: Dict<string>): Array<SchemaBlueprint> | undefined {
     const defaultRealmPath = DEFAULT_PATH;
 
-    this._trendCache.rm(trendName);
-    const remainingSchemas: SchemaBlueprint[] | undefined = this._rmSchemas(defaultRealmPath, [trendName], options);
+    // 1. Rm from TrendCache
+    const trendBlueprint: TrendBlueprint | undefined = this._trendCache.rm(trendName) as TrendBlueprint | undefined;
 
-    return remainingSchemas;
+    if (!!trendBlueprint) {
+      // 2. Delete TrendBlueprint from disk
+      trendBlueprint.delete(this._realmCache.getDefault());
+
+      // 3. Get Schema names to remove from SchemaCache
+      const completeTrendSB: CompleteTrendSB = trendBlueprint.toSchemaBlueprints();
+      const schemaNamesToRm: string[] = Object.values(completeTrendSB).map((sb: SchemaBlueprint) => sb.schemaName);
+
+      // 4. Rm from SchemaCache, will reload Realm in RealmCache
+      const remainingSchemas: SchemaBlueprint[] | undefined = this._rmSchemas(defaultRealmPath, schemaNamesToRm, options);
+
+      return remainingSchemas;
+    }
   }
+
+  // PRIVATE API
+
+  // REALM API
+
+  public loadRealms(): SchemaBlueprint[] {
+    return this._realmCache.load();
+  }
+
+  private addRealm(realmPath: string, valueParams: {schemaBlueprints: Array<SchemaBlueprint>; options?: any}) {
+    this._realmCache.add(realmPath, valueParams);
+  }
+  private rmRealm(realmPath: string, options?: any) {
+    this._realmCache.rm(realmPath, options);
+  }
+
+  // SCHEMA API
 
   private _addSchemas(realmPath: string, schemaBlueprints: SchemaBlueprint[], options?: Dict<string>): SchemaBlueprint[] | undefined {
     // 1. Get Realm
     const realm = this._realmCache.get(realmPath);
 
     if (!!realm) {
-      // 2. Save to Realm
-      this._realmCache.save(realm, schemaBlueprints);
+      // 2. Save SchemaBlueprint to Realm
+      // schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprint) => schemaBlueprint.save(realm));
 
-      // 3. Reload Realm
+      // 3. Reload Realm with added SchemaBlueprints
       const allSchemas: Array<SchemaBlueprint> = RealmUtils.mergeSchemasFromRealm(realm, schemaBlueprints);
       // NOTE: Adding also reloads the Realm
-      this._realmCache.add(realmPath, {
+      this.addRealm(realmPath, {
         schemaBlueprints: allSchemas,
         options,
       });
@@ -78,20 +108,20 @@ export class RealmInterface extends Singleton(Object) {
     // 1. Get Realm
     const realm: Realm | undefined = this._realmCache.get(realmPath);
 
-    // 2. Get SchemaBlueprints
+    // 2. Get SchemaBlueprints to remove
     const schemaBlueprints: SchemaBlueprint[] = schemaNames
       .map((schemaName: string) => this._schemaCache.get(schemaName))
-      .filter((schemaBlueprint: SchemaBlueprint | undefined) => schemaBlueprints !== undefined) as SchemaBlueprint[];
+      .filter((schemaBlueprint: SchemaBlueprint | undefined) => schemaBlueprint !== undefined) as SchemaBlueprint[];
 
     if (!!realm) {
-      // 3. Remove from Realm
-      this._realmCache.delete(realm, schemaBlueprints);
+      // 3. Remove SchemaBlueprints from Realm
+      // schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprint) => schemaBlueprint.delete(realm));
 
-      // 4. Reload Realm
+      // 4. Reload Realm without Schemas
       const schemaNamesToRm: string[] = schemaBlueprints.map((sb) => sb.schemaName);
       const remainingSchemas: Array<SchemaBlueprint> = RealmUtils.filterSchemasfromRealm(realm, schemaNamesToRm);
       // NOTE: Adding also reloads the Realm
-      this._realmCache.add(realmPath, {
+      this.addRealm(realmPath, {
         schemaBlueprints: remainingSchemas,
         options,
       });
@@ -103,16 +133,7 @@ export class RealmInterface extends Singleton(Object) {
     }
   }
 
-  // Main TODOS
-  // 1. Save SchemaBlueprints in a Singleton SchemaCache
-  // 2. Fetch and Pass appropriate SchemaBlueprints to rate method
-
   //   TODO
-  // 1. Design Base Trend Schema + TrendTags Schema: Think about all properties needed
-  // 2. Design RealmInterface.rate method: Accepts list of entity names, 'mood' , single rating for the set of entities, weights for each entity (defaults to 1/# entities) + Call rate on all of a Schema's defined Querent types
-  // 3. Design Querent.rate method
-  // 4. Define Querent types: Enum dense, sequential, sequential_dense
-  // 5. Define variable Trend attributes (hasTags - Create Seperate Graph for tags, Enum relationshipTypes - dense, sequential, sequential_dense, ...)
   // 6. Define DayPart Schema: Timestamp, entities, rating, mood
   // 7. Define Day Schema: Timestamp, List reference to DayParts
 }

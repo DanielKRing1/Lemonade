@@ -40,7 +40,10 @@ export class RealmCache extends Singleton(Cache)<Realm> implements Loadable {
   }
 
   /**
-   * Call this method for an existing realmPath, with new SchemaBlueprints to 'reload' the realm with these schemas
+   * Call this method for:
+   * - a new realmPath to open the realm with these schems
+   * OR
+   * - an existing realmPath, with new SchemaBlueprints to 'reload' the realm with these schemas
    *
    * @param realmPath
    * @param valueParams
@@ -105,13 +108,13 @@ export class RealmCache extends Singleton(Cache)<Realm> implements Loadable {
     return schemas;
   }
 
-  public save(realm: Realm, schemaBlueprints: SchemaBlueprint[]) {
-    schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprint) => schemaBlueprint.save(realm));
-  }
+  // public save(realm: Realm, schemaBlueprints: SchemaBlueprint[]) {
+  //   schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprint) => schemaBlueprint.save(realm));
+  // }
 
-  public delete(realm: Realm, schemaBlueprints: SchemaBlueprint[]) {
-    schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprint) => schemaBlueprint.delete(realm));
-  }
+  // public delete(realm: Realm, schemaBlueprints: SchemaBlueprint[]) {
+  //   schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprint) => schemaBlueprint.delete(realm));
+  // }
 
   /**
    * Same as this.add for now

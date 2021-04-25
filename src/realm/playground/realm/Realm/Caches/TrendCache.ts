@@ -1,4 +1,5 @@
 import {Cache, LoadParams, Singleton, Override, Implement} from '../../Base';
+import {SchemaBlueprint} from '../Schema/SchemaBlueprint';
 
 import {buildTrendBlueprints, getTrendTagSchemaName, TrendTracker} from '../Trends';
 import {TrendBlueprint} from '../Trends/TrendBlueprints';
@@ -15,7 +16,7 @@ export class TrendCache extends Singleton(Cache)<TrendCacheValue> {
   }
 
   @Override('Cache')
-  add(trendName: string, valueParams: {realmPath: string; trendProperties: string[]}): CompleteTrendSB {
+  add(trendName: string, valueParams: {realmPath: string; trendProperties: string[]}): TrendBlueprint {
     const {realmPath, trendProperties} = valueParams;
 
     // 1. Add to cache
@@ -23,9 +24,6 @@ export class TrendCache extends Singleton(Cache)<TrendCacheValue> {
 
     // 2. Construct new TrendBlueprint
     const trendBlueprint: TrendBlueprint = new TrendBlueprint(trendName, realmPath, trendProperties);
-
-    // 3. Return list of relevant SchemaBlueprints
-    const completeTrendSB: CompleteTrendSB = trendBlueprint.toSchemaBlueprints();
-    return completeTrendSB;
+    return trendBlueprint;
   }
 }

@@ -1,7 +1,7 @@
 import {SchemaBlueprint} from '../Schema/SchemaBlueprint';
 
 export abstract class RealmUtils {
-  static getSchemasFromRealm(realm: Realm): Array<SchemaBlueprint> {
+  static getSchemasFromRealm(realm: Realm): SchemaBlueprint[] {
     const realmPath: string = realm.path;
 
     return realm.schema.map((oldSchema: Realm.ObjectSchema) => {
@@ -11,14 +11,14 @@ export abstract class RealmUtils {
     });
   }
 
-  static mergeSchemasFromRealm(realm: Realm, newSchemas: Array<SchemaBlueprint>) {
+  static mergeSchemasFromRealm(realm: Realm, newSchemas: SchemaBlueprint[]): SchemaBlueprint[] {
     const allSchemas = RealmUtils.getSchemasFromRealm(realm);
     allSchemas.push(...newSchemas);
 
     return allSchemas;
   }
 
-  static filterSchemasfromRealm(realm: Realm, schemaNameBlacklist: Array<string>) {
+  static filterSchemasfromRealm(realm: Realm, schemaNameBlacklist: string[]): SchemaBlueprint[] {
     const allSchemas = RealmUtils.getSchemasFromRealm(realm);
 
     return allSchemas.filter((schema: SchemaBlueprint) => !schemaNameBlacklist.includes(schema.schemaName));
