@@ -18,13 +18,11 @@ export class TrendBlueprint {
 
   // FOR CREATING NEW SCHEMABLUEPRINTS
 
-  public static PROPERTY_COUNT_SUFFIX = 'count';
-
   public static getPropertyKey(propertyName: string): string {
     return `${propertyName}`;
   }
   public static getPropertyCountKey(propertyName: string): string {
-    return `${propertyName}_${TrendBlueprint.PROPERTY_COUNT_SUFFIX}`;
+    return `${propertyName}_${TrendPropertySuffix.Count}`;
   }
 
   public static getSchemaName(trendName: string, schemaType: SchemaTypeEnum) {
@@ -43,6 +41,16 @@ export class TrendBlueprint {
     }
 
     return `${trendName}_Unknown`;
+  }
+
+  private trendName: string;
+  private realmPath: string;
+  private properties: string[];
+
+  constructor(trendName: string, realmPath: string, properties: string[]) {
+    this.trendName = trendName;
+    this.realmPath = realmPath;
+    this.properties = properties;
   }
 
   private getTrendNodeSchemaDef = (schemaName: string): Realm.ObjectSchema => {
@@ -121,22 +129,13 @@ export class TrendBlueprint {
     const tagEdgeName: string = TrendBlueprint.getSchemaName(this.trendName, SchemaTypeEnum.TAG_EDGE);
     const tagEdgeSB: SchemaBlueprint = new SchemaBlueprint(tagEdgeName, this.realmPath, SchemaTypeEnum.TAG_EDGE, this.getTrendEdgeSchemaDef(tagEdgeName));
 
+    // 5. Compile and return
     return {
       [SchemaTypeEnum.TREND_NODE]: trendNodeSB,
       [SchemaTypeEnum.TAG_NODE]: trendEdgeSB,
       [SchemaTypeEnum.TREND_EDGE]: tagNodeSB,
       [SchemaTypeEnum.TAG_EDGE]: tagEdgeSB,
     };
-  }
-
-  private trendName: string;
-  private realmPath: string;
-  private properties: string[];
-
-  constructor(trendName: string, realmPath: string, properties: string[]) {
-    this.trendName = trendName;
-    this.realmPath = realmPath;
-    this.properties = properties;
   }
 
   // GETTERS
@@ -191,32 +190,32 @@ export class TrendBlueprint {
 
   //   SAVE
 
-  static save(realm: Realm, trendName: string, realmPath: string, properties: string[]): TrendBlueprint {
+  static save(defaultRealm: Realm, trendName: string, realmPath: string, properties: string[]): TrendBlueprint {
     const trendBlueprint = new TrendBlueprint(trendName, realmPath, properties);
-    trendBlueprint.save(realm);
+    trendBlueprint.save(defaultRealm);
 
     return trendBlueprint;
   }
 
-  save(realm: Realm): TrendBlueprintRow {
+  save(defaultRealm: Realm): TrendBlueprintRow {
     const trendBlueprintRow: TrendBlueprintRow = this.toRow();
 
-    realm.write(() => {
-      realm.create(SchemaNameEnum.TrendBlueprint, trendBlueprintRow);
+    defaultRealm.write(() => {
+      defaultRealm.create(SchemaNameEnum.TrendBlueprint, trendBlueprintRow);
     });
 
     return trendBlueprintRow;
   }
 
-  delete(realm: Realm): boolean {
+  delete(defaultRealm: Realm): boolean {
     const primaryKey: string = this.trendName;
 
     if (primaryKey) {
-      realm.write(() => {
-        const realmObj: Realm.Results<any> | undefined = realm.objectForPrimaryKey(SchemaNameEnum.TrendBlueprint, primaryKey);
+      defaultRealm.write(() => {
+        const realmObj: Realm.Results<any> | undefined = defaultRealm.objectForPrimaryKey(SchemaNameEnum.TrendBlueprint, primaryKey);
 
         if (realmObj) {
-          realm.delete(realmObj);
+          defaultRealm.delete(realmObj);
 
           return true;
         }
