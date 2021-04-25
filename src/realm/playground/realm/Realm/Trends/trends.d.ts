@@ -14,7 +14,7 @@ declare enum TrendPropertySuffix {
   Count = 'count',
 }
 
-declare type CompleteTrendBlueprints = {
+declare type CompleteTrendSB = {
   [SchemaTypeEnum.TREND_NODE]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
   [SchemaTypeEnum.TAG_NODE]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
   [SchemaTypeEnum.TREND_EDGE]: import('../Schema/SchemaBlueprint').SchemaBlueprint;

@@ -21,11 +21,6 @@ type Edge = {
   nodes: string[];
 };
 
-type EntityWeight<T> = {
-  entity: T;
-  weight: number;
-};
-
 export default class EdgeQuerent extends Querent<Edge> {
   static sortNamePair(n1: string, n2: string): string[] {
     return [n1, n2].sort((a, b) => (a < b ? -1 : 1));

@@ -1,40 +1,33 @@
 import RealmCache from './RealmCache';
 
-import EntityQuerent from '../../../../Querents/EntityQuerent';
-import DenseRelQuerent from '../../../../Querents/DenseRelQuerent';
-import SeqRelQuerent from '../../../../Querents/SeqRelQuerent';
-import DPSeqRelQuerent from '../../../../Querents/DayPartSeqRelQuerent';
+import NodeQuerent from '../../Querents/Nodes/NodeQuerent';
+import DenseEdgeQuerent from '../../Querents/Edges/DenseEdgeQuerent';
+// TODO Add Querent for Days
+// import DPSeqRelQuerent from '../../../../Querents/DayPartSeqRelQuerent';
 
 export class TrendTracker {
-  realmPath: string;
   trendName: string;
+  trendProperties: string[];
 
-  entityQ: EntityQuerent;
-  denseQ: DenseRelQuerent;
-  seqQ: SeqRelQuerent;
-  dpSeqQ: DPSeqRelQuerent;
+  nodeQ: NodeQuerent;
+  edgeQ: DenseEdgeQuerent;
 
-  constructor(realmPath: string, trendName: string) {
-    this.realmPath = realmPath;
+  // dayQ: DPSeqRelQuerent;
+
+  constructor(realmPath: string, trendName: string, trendProperties: string[]) {
     this.trendName = trendName;
+    this.trendProperties = trendProperties;
 
-    this.entityQ = new EntityQuerent(trendName);
-    this.denseQ = new DenseRelQuerent(trendName);
-    this.seqQ = new SeqRelQuerent(trendName);
-    this.dpSeqQ = new DPSeqRelQuerent(trendName);
+    this.nodeQ = new NodeQuerent(realmPath, trendName);
+    this.edgeQ = new DenseEdgeQuerent(realmPath, trendName);
+
+    // this.dayQ = new DPSeqRelQuerent(trendName);
   }
 
-  rate(entities: Array<string>, mood: string, rating: number, weights: null | number | Array<number>) {
-    const realm = this.getRealm();
+  rate(realm: Realm, entities: Array<string>, mood: string, rating: number, weights: null | number | Array<number>, options: Dict<any>) {
+    this.nodeQ.rate(realm, entities, mood, rating, weights, options);
+    this.edgeQ.rate(realm, entities, mood, rating, weights, options);
 
-    // TODO Add weights to Querent.rate methods
-    this.entityQ.rate(realm, entities, mood, rating, weights);
-    this.denseQ.rate(realm, entities, mood, rating, weights);
-    this.seqQ.rate(realm, entities, mood, rating, weights);
-    this.dpSeqQ.rate(realm, entities, mood, rating, weights);
-  }
-
-  getRealm() {
-    return RealmCache.get(this.realmPath);
+    // this.dayQ.rate(realm, entities, mood, rating, weights);
   }
 }

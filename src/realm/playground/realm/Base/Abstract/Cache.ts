@@ -14,7 +14,7 @@ export class Cache<T> {
    * @param key String key
    * @param valueParams Object of data needed to build a value for the key
    */
-  add(key: string, valueParams: Record<string, any>) {
+  add(key: string, valueParams: Record<string, any>): any {
     throw NotImplementedError({});
   }
 

@@ -14,7 +14,7 @@ import {ObjectBuilder} from '../Utility';
  * @param attributeNames
  * @param relTypes
  */
-export const buildTrendBlueprints = (trendName: string, realmPath: string, attributeNames: string[], relTypes: RelationshipTypeEnum[]): CompleteTrendBlueprints => {
+export const buildTrendBlueprints = (trendName: string, realmPath: string, attributeNames: string[], relTypes: RelationshipTypeEnum[]): CompleteTrendSB => {
   // Build Trend blueprint obj with custom attributes and relationship arrays
   const trendSchemaDef: Realm.ObjectSchema = getBaseTrendSchemaDef(trendName);
 

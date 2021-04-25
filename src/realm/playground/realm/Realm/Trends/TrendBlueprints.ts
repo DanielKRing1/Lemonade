@@ -112,7 +112,7 @@ export class TrendBlueprint {
 
   // SCHEMABLUEPRINT UTILS
 
-  public toSchemaBlueprints(): CompleteTrendBlueprints {
+  public toSchemaBlueprints(): CompleteTrendSB {
     // 1. Get Trend Node Schema
     const trendNodeName: string = TrendBlueprint.getSchemaName(this.trendName, SchemaTypeEnum.TREND_NODE);
     const trendNodeSB: SchemaBlueprint = new SchemaBlueprint(trendNodeName, this.realmPath, SchemaTypeEnum.TREND_NODE, this.getTrendNodeSchemaDef(trendNodeName));
