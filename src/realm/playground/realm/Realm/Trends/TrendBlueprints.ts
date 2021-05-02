@@ -47,12 +47,14 @@ export class TrendBlueprint {
   private realmPath: string;
   private properties: string[];
   private existingTrendEntities: string[];
+  private existingTrendTags: string[];
 
-  constructor(trendName: string, realmPath: string, properties: string[], existingTrendEntities: string[] = []) {
+  constructor(trendName: string, realmPath: string, properties: string[], existingTrendEntities: string[] = [], existingTrendTags: string[] = []) {
     this.trendName = trendName;
     this.realmPath = realmPath;
     this.properties = properties;
     this.existingTrendEntities = existingTrendEntities;
+    this.existingTrendTags = existingTrendTags;
   }
 
   // GENERATE PREDICTABLE SCHEMA DEFINITIONS FOR NEW SCHEMABLUEPRINTS
@@ -160,22 +162,27 @@ export class TrendBlueprint {
     return this.existingTrendEntities;
   }
 
+  public getExistingTrendTags(): string[] {
+    return this.existingTrendTags;
+  }
+
   // JSON/OBJECT DE/SERIALIZATION
 
   static fromObj(obj: TrendBlueprintObj): TrendBlueprint {
-    const {trendName, realmPath, properties, existingTrendEntities} = obj;
+    const {trendName, realmPath, properties, existingTrendEntities, exisitingTrendTags} = obj;
 
     return new TrendBlueprint(trendName, realmPath, properties, existingTrendEntities);
   }
 
   static fromRow(rowObj: TrendBlueprintRow): TrendBlueprint {
-    const {trendName, realmPath, properties, existingTrendEntities} = rowObj;
+    const {trendName, realmPath, properties, existingTrendEntities, exisitingTrendTags} = rowObj;
 
     const obj = {
       trendName,
       realmPath,
       properties,
       existingTrendEntities,
+      exisitingTrendTags,
     };
 
     return TrendBlueprint.fromObj(obj);
@@ -187,6 +194,7 @@ export class TrendBlueprint {
       realmPath: this.realmPath,
       properties: this.properties,
       existingTrendEntities: this.existingTrendEntities,
+      exisitingTrendTags: this.existingTrendTags,
     };
   }
 
@@ -196,6 +204,7 @@ export class TrendBlueprint {
       realmPath: this.realmPath,
       properties: this.properties,
       existingTrendEntities: this.existingTrendEntities,
+      exisitingTrendTags: this.existingTrendTags,
     };
   }
 
@@ -239,6 +248,7 @@ export class TrendBlueprint {
 
   // High level disk operations
 
+  // Trend entities
   public addExistingTrendEntity(realm: Realm, trendEntitiesToAdd: string[]) {
     this.existingTrendEntities.push(...trendEntitiesToAdd);
     this.save(realm);
@@ -246,6 +256,17 @@ export class TrendBlueprint {
 
   public rmExistingTrendEntity(realm: Realm, trendEntitiesToRm: string[]) {
     this.existingTrendEntities = this.existingTrendEntities.filter((existingTrendEntity: string) => !trendEntitiesToRm.includes(existingTrendEntity));
+    this.save(realm);
+  }
+
+  // Trend tags
+  public addExistingTrendTags(realm: Realm, trendTagsToAdd: string[]) {
+    this.existingTrendEntities.push(...trendTagsToAdd);
+    this.save(realm);
+  }
+
+  public rmExistingTrendTags(realm: Realm, trendTagsToRm: string[]) {
+    this.existingTrendEntities = this.existingTrendEntities.filter((existingTrendEntity: string) => !trendTagsToRm.includes(existingTrendEntity));
     this.save(realm);
   }
 }

@@ -14,6 +14,7 @@ declare interface TrendBlueprintObj {
   realmPath: string;
   properties: string[];
   existingTrendEntities: string[];
+  exisitingTrendTags: string[];
 }
 
 // User Defined Table Definitions
