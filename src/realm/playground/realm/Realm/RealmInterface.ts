@@ -127,7 +127,7 @@ export class RealmInterface extends Singleton(Object) {
   public getTrendProperties(trendName: string): string[] | undefined {
     const trendTracker: TrendTracker | undefined = this._trendCache.get(trendName);
 
-    if (!!trendTracker) return trendTracker.trendProperties;
+    if (!!trendTracker) return trendTracker.getTrendBlueprint().getProperties();
   }
 
   // PRIVATE API
