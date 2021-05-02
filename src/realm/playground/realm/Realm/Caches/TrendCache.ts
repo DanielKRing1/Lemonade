@@ -15,14 +15,10 @@ export class TrendCache extends Singleton(Cache)<TrendTracker> {
   }
 
   @Override('Cache')
-  add(trendName: string, valueParams: {realmPath: string; trendProperties: string[]}): TrendBlueprint {
+  add(trendName: string, valueParams: {realmPath: string; trendProperties: string[]}): void {
     const {realmPath, trendProperties} = valueParams;
 
     // 1. Add to cache
     this._map[trendName] = new TrendTracker(realmPath, trendName, trendProperties);
-
-    // 2. Construct new TrendBlueprint
-    const trendBlueprint: TrendBlueprint = new TrendBlueprint(trendName, realmPath, trendProperties);
-    return trendBlueprint;
   }
 }

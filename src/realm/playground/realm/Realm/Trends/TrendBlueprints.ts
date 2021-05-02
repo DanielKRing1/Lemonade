@@ -46,6 +46,7 @@ export class TrendBlueprint {
   private trendName: string;
   private realmPath: string;
   private properties: string[];
+
   private existingTrendEntities: string[];
   private existingTrendTags: string[];
 
@@ -53,6 +54,7 @@ export class TrendBlueprint {
     this.trendName = trendName;
     this.realmPath = realmPath;
     this.properties = properties;
+
     this.existingTrendEntities = existingTrendEntities;
     this.existingTrendTags = existingTrendTags;
   }
@@ -150,7 +152,7 @@ export class TrendBlueprint {
     return this.trendName;
   }
 
-  public getrealmPath(): string {
+  public getRealmPath(): string {
     return this.realmPath;
   }
 
@@ -249,12 +251,12 @@ export class TrendBlueprint {
   // High level disk operations
 
   // Trend entities
-  public addExistingTrendEntity(realm: Realm, trendEntitiesToAdd: string[]) {
+  public addExistingTrendEntities(realm: Realm, trendEntitiesToAdd: string[]) {
     this.existingTrendEntities.push(...trendEntitiesToAdd);
     this.save(realm);
   }
 
-  public rmExistingTrendEntity(realm: Realm, trendEntitiesToRm: string[]) {
+  public rmExistingTrendEntities(realm: Realm, trendEntitiesToRm: string[]) {
     this.existingTrendEntities = this.existingTrendEntities.filter((existingTrendEntity: string) => !trendEntitiesToRm.includes(existingTrendEntity));
     this.save(realm);
   }

@@ -26,21 +26,22 @@ export class RealmInterface extends Singleton(Object) {
 
   // TREND API
 
-  public addTrend(trendName: string, trendProperties: string[], relTypes: RelationshipTypeEnum[] = Object.values(RelationshipTypeEnum), options?: Dict<string>): SchemaBlueprint[] | undefined {
+  public addTrend(trendName: string, trendProperties: string[], options?: Dict<string>): SchemaBlueprint[] | undefined {
     const realmPath = DEFAULT_PATH;
 
     // 1. Add to TrendCache
-    const trendBlueprint: TrendBlueprint = this._trendCache.add(trendName, {realmPath, trendProperties});
+    this._trendCache.add(trendName, {realmPath, trendProperties});
+    const trendTracker: TrendTracker = this._trendCache.get(trendName) as TrendTracker;
 
     // 2. Save TrendBlueprint to disk
-    trendBlueprint.save(this._realmCache.getDefault());
+    trendTracker.getTrendBlueprint().save(this._realmCache.getDefault());
 
     // 3. Get list of relevant SchemaBlueprints from TrendBlueprint
-    const completeTrendSB: CompleteTrendSB = trendBlueprint.toSchemaBlueprints();
+    const completeTrendSB: CompleteTrendSB = trendTracker.getTrendBlueprint().toSchemaBlueprints();
     const schemaBlueprints: SchemaBlueprint[] = Object.values(completeTrendSB);
 
     // 4. Add Schemas to SchemaCache, will reload Realm in RealmCache
-    const addedSchemas: SchemaBlueprint[] | undefined = this._addSchemas(realmPath, schemaBlueprints);
+    const addedSchemas: SchemaBlueprint[] | undefined = this._addSchemas(realmPath, schemaBlueprints, options);
 
     return addedSchemas;
   }
@@ -65,8 +66,54 @@ export class RealmInterface extends Singleton(Object) {
     }
   }
 
+  // Trend entities
+  public addExistingTrendEntities(trendName: string, trendEntitiesToAdd: string[]) {
+    // 1. Get TrendTracker from TrendCache
+    const trendTracker: TrendTracker = this._trendCache.get(trendName) as TrendTracker;
+
+    // 2. Get Realm from RealmCache
+    const realm: Realm = this._realmCache.get(trendTracker.getTrendBlueprint().getRealmPath()) as Realm;
+
+    // 3. Save TrendBlueprint to disk
+    trendTracker.getTrendBlueprint().addExistingTrendEntities(realm, trendEntitiesToAdd);
+  }
+
+  public rmExistingTrendEntities(trendName: string, trendEntitiesToRm: string[]) {
+    // 1. Get TrendTracker from TrendCache
+    const trendTracker: TrendTracker = this._trendCache.get(trendName) as TrendTracker;
+
+    // 2. Get Realm from RealmCache
+    const realm: Realm = this._realmCache.get(trendTracker.getTrendBlueprint().getRealmPath()) as Realm;
+
+    // 3. Save TrendBlueprint to disk
+    trendTracker.getTrendBlueprint().rmExistingTrendEntities(realm, trendEntitiesToRm);
+  }
+
+  // Trend entitiestags
+  public addExistingTrendTags(trendName: string, trendTagsToAdd: string[]) {
+    // 1. Get TrendTracker from TrendCache
+    const trendTracker: TrendTracker = this._trendCache.get(trendName) as TrendTracker;
+
+    // 2. Get Realm from RealmCache
+    const realm: Realm = this._realmCache.get(trendTracker.getTrendBlueprint().getRealmPath()) as Realm;
+
+    // 3. Save TrendBlueprint to disk
+    trendTracker.getTrendBlueprint().addExistingTrendTags(realm, trendTagsToAdd);
+  }
+
+  public rmExistingTrendTags(trendName: string, trendTagsToRm: string[]) {
+    // 1. Get TrendTracker from TrendCache
+    const trendTracker: TrendTracker = this._trendCache.get(trendName) as TrendTracker;
+
+    // 2. Get Realm from RealmCache
+    const realm: Realm = this._realmCache.get(trendTracker.getTrendBlueprint().getRealmPath()) as Realm;
+
+    // 3. Save TrendBlueprint to disk
+    trendTracker.getTrendBlueprint().rmExistingTrendTags(realm, trendTagsToRm);
+  }
+
   /**
-   * Get lsit of available Trends in TrendCache
+   * Get list of available Trends in TrendCache
    */
   public getTrendNames(): string[] {
     return this._trendCache.getKeys();
