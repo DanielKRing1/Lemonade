@@ -71,7 +71,7 @@ export class RealmCache extends Singleton(Cache)<Realm> implements Loadable {
   // Loadable
 
   @Implement('Loadable')
-  public load(params?: {options?: Dict<string>}): Array<SchemaBlueprint> {
+  public load(params?: {options?: Dict<string>}): LoadedBlueprints {
     // Get SchemaBlueprints
     const allParams = {
       ...params,
@@ -80,20 +80,25 @@ export class RealmCache extends Singleton(Cache)<Realm> implements Loadable {
 
     // TODO
     // Does Realm.Results work in place of Array?
-    const schemas: Array<SchemaBlueprint> = this._loader.load(allParams);
+    // 1. Get all Trend Blueprints saved to disk
+    const loadedBlueprints: LoadedBlueprints = this._loader.load(allParams);
 
     // TODO Make utility for this
     // Index SchemaBlueprints by realmPath
+    // 2. Prepare Data Structure to organize all loaded SchemaBlueprints by realmPath
     const schemasIndexedByRealmPath: Dict<Array<SchemaBlueprint>> = {};
 
-    for (const schema of schemas) {
-      const realmPath = schema.realmPath;
-
+    // 3. Convert all loaded TrendBlueprints to SchemaBlueprints
+    for (const trendBlueprint of loadedBlueprints[BlueprintNameEnum.Trend]) {
+      // 3.1. Init realmPath
+      const realmPath = trendBlueprint.getRealmPath();
       if (!schemasIndexedByRealmPath.hasOwnProperty(realmPath)) schemasIndexedByRealmPath[realmPath] = [];
-      schemasIndexedByRealmPath[realmPath].push(schema);
+
+      // 3.2. Add all TrendBlueprint's Schemas to Data Structure
+      schemasIndexedByRealmPath[realmPath].push(...Object.values(trendBlueprint.toSchemaBlueprints()));
     }
 
-    // Add a Realm to the RealmCache for each set of indexed SchemaBlueprints
+    // 4. Add a Realm to the RealmCache for each set of indexed SchemaBlueprints
     const realmPaths = Object.keys(schemasIndexedByRealmPath);
     for (const realmPath of realmPaths) {
       const schemaBlueprints = schemasIndexedByRealmPath[realmPath];
@@ -105,16 +110,9 @@ export class RealmCache extends Singleton(Cache)<Realm> implements Loadable {
       });
     }
 
-    return schemas;
+    // 5. Return LoadedBlueprints object
+    return loadedBlueprints;
   }
-
-  // public save(realm: Realm, schemaBlueprints: SchemaBlueprint[]) {
-  //   schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprint) => schemaBlueprint.save(realm));
-  // }
-
-  // public delete(realm: Realm, schemaBlueprints: SchemaBlueprint[]) {
-  //   schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprint) => schemaBlueprint.delete(realm));
-  // }
 
   /**
    * Same as this.add for now
@@ -154,12 +152,17 @@ class SchemaLoader extends Loader {
     super();
   }
 
-  load(params: LoadParams & {defaultRealm: Realm}): Array<SchemaBlueprint> {
+  load(params: LoadParams & {defaultRealm: Realm}): LoadedBlueprints {
     const {defaultRealm} = params;
 
-    // Load
-    const schemaBlueprints: Array<SchemaBlueprint> = Array.from(defaultRealm.objects(SchemaNameEnum.SchemaBlueprint));
+    // 1. Load
+    const loadedTrendBlueprints: TrendBlueprint[] = Array.from(defaultRealm.objects(BlueprintNameEnum.Trend)).map(
+      (row: TrendBlueprintRow) => new TrendBlueprint(row.trendName, row.realmPath, row.properties, row.existingTrendEntities, row.exisitingTrendTags),
+    );
 
-    return schemaBlueprints;
+    // 2. Format and return
+    return {
+      [BlueprintNameEnum.Trend]: loadedTrendBlueprints,
+    };
   }
 }

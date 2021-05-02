@@ -80,7 +80,7 @@ export class SchemaBlueprint implements SchemaBlueprintObj {
     const schemaBlueprintRow: SchemaBlueprintRow = this.toRow();
 
     defaultRealm.write(() => {
-      defaultRealm.create(SchemaNameEnum.SchemaBlueprint, schemaBlueprintRow);
+      defaultRealm.create(BlueprintNameEnum.Schema, schemaBlueprintRow);
     });
 
     return schemaBlueprintRow;
@@ -91,7 +91,7 @@ export class SchemaBlueprint implements SchemaBlueprintObj {
 
     if (primaryKey) {
       defaultRealm.write(() => {
-        const realmObj: Realm.Results<any> | undefined = defaultRealm.objectForPrimaryKey(SchemaNameEnum.SchemaBlueprint, primaryKey);
+        const realmObj: Realm.Results<any> | undefined = defaultRealm.objectForPrimaryKey(BlueprintNameEnum.Schema, primaryKey);
 
         if (realmObj) defaultRealm.delete(realmObj);
       });

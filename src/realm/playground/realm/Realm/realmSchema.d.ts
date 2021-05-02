@@ -29,16 +29,25 @@ declare type TrendBlueprintRow = TrendBlueprintObj;
 
 // Schema Types
 declare enum SchemaTypeEnum {
+  // Schema, Trend, etc Blueprints
   Blueprint = 'blueprint',
+
+  // Trends
   TREND_NODE = 'trend_node',
   TAG_NODE = 'tag_node',
   TREND_EDGE = 'trend_edge',
   TAG_EDGE = 'tag_edge',
+
+  // Other
   Unknown = 'unknown',
 }
 
-// Schema Names
-declare enum SchemaNameEnum {
-  SchemaBlueprint = 'SchemaBlueprint',
-  TrendBlueprint = 'TrendBlueprint',
+// Blueprint names
+declare type LoadedBlueprints = {
+  [BlueprintNameEnum.Trend]: import('./Trends/TrendBlueprints').TrendBlueprint[];
+};
+
+declare enum BlueprintNameEnum {
+  Schema = 'SchemaBlueprint',
+  Trend = 'TrendBlueprint',
 }

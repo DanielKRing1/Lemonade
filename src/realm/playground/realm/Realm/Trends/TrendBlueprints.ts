@@ -6,7 +6,7 @@ export class TrendBlueprint {
   // FOR SAVING/LOADING TRENDSCHEMABLUEPRINTS TO/FROM REALM
 
   public static SCHEMA_BLUEPRINT_SCHEMA_DEF: Realm.ObjectSchema = {
-    name: SchemaNameEnum.TrendBlueprint,
+    name: BlueprintNameEnum.Trend,
     primaryKey: 'trendName',
     properties: {
       trendName: 'string',
@@ -14,7 +14,7 @@ export class TrendBlueprint {
       properties: 'string[]',
     },
   };
-  public static SCHEMA_BLUEPRINT: SchemaBlueprint = new SchemaBlueprint(SchemaNameEnum.TrendBlueprint, DEFAULT_PATH, SchemaTypeEnum.Blueprint, TrendBlueprint.SCHEMA_BLUEPRINT_SCHEMA_DEF);
+  public static SCHEMA_BLUEPRINT: SchemaBlueprint = new SchemaBlueprint(BlueprintNameEnum.Trend, DEFAULT_PATH, SchemaTypeEnum.Blueprint, TrendBlueprint.SCHEMA_BLUEPRINT_SCHEMA_DEF);
 
   // GENERATE PREDICTABLE NAMES FOR NEW SCHEMABLUEPRINTS
 
@@ -223,7 +223,7 @@ export class TrendBlueprint {
     const trendBlueprintRow: TrendBlueprintRow = this.toRow();
 
     defaultRealm.write(() => {
-      defaultRealm.create(SchemaNameEnum.TrendBlueprint, trendBlueprintRow);
+      defaultRealm.create(BlueprintNameEnum.Trend, trendBlueprintRow);
     });
 
     return trendBlueprintRow;
@@ -234,7 +234,7 @@ export class TrendBlueprint {
 
     if (primaryKey) {
       defaultRealm.write(() => {
-        const realmObj: Realm.Results<any> | undefined = defaultRealm.objectForPrimaryKey(SchemaNameEnum.TrendBlueprint, primaryKey);
+        const realmObj: Realm.Results<any> | undefined = defaultRealm.objectForPrimaryKey(BlueprintNameEnum.Trend, primaryKey);
 
         if (realmObj) {
           defaultRealm.delete(realmObj);

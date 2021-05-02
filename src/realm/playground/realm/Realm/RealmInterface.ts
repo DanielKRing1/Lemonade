@@ -134,7 +134,7 @@ export class RealmInterface extends Singleton(Object) {
 
   // REALM API
 
-  public loadRealms(): SchemaBlueprint[] {
+  public loadRealms(): LoadedBlueprints {
     return this._realmCache.load();
   }
 
