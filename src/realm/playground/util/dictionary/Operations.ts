@@ -37,6 +37,7 @@ export function copyDictKeep<T>(originalDict: Dict<T>, whitelistKeys: string[]):
 
 // OPERATOR OPERATIONS
 
+// Subtraction
 export function subDictScalar(dict: Dict<number>, scalar: number): Dict<number> {
   return mutateDict<number>(dict, (key: string, value: number) => value - scalar);
 }
@@ -45,6 +46,29 @@ export function subScalarDict(scalar: number, dict: Dict<number>): Dict<number> 
   return mutateDict<number>(dict, (key: string, value: number) => scalar - value);
 }
 
+/**
+ * Subtract subsequent Dictionaries from the first provided Dictionaries to get the sum of each key in an array of Dictionaries
+ *
+ * @param dicts Array of Dictionaries attributes to be summed up into a single Dictionary
+ */
+export function subDicts(...dicts: Dict<number>[]): Dict<number> {
+  // 1. Init to first dict
+  const minuendDict: Dict<number> = Object.assign({}, dicts[0]);
+
+  // 2. Subtract each subsequent dict from difference
+  for (let i = 1; i < dicts.length; i++) {
+    const subtrahendDict: Dict<number> = dicts[i];
+
+    for (const key in subtrahendDict) {
+      const subtrahend = subtrahendDict[key];
+      minuendDict[key] -= subtrahend;
+    }
+  }
+
+  return minuendDict;
+}
+
+// Division
 export function divideDictScalar(dict: Dict<number>, scalar: number): Dict<number> {
   return mutateDict<number>(dict, (key: string, value: number) => value / scalar);
 }
@@ -53,17 +77,26 @@ export function divideScalarDict(scalar: number, dict: Dict<number>): Dict<numbe
   return mutateDict<number>(dict, (key: string, value: number) => scalar / value);
 }
 
+export function divideDicts(a: Dict<number>, b: Dict<number>): Dict<number> {
+  const keysToDivideOn: string[] = getIntersectingDictKeys(a, b);
+  const dividedDict: Dict<number> = {};
+
+  for (const key of keysToDivideOn) {
+    dividedDict[key] = a[key] / b[key];
+  }
+
+  return dividedDict;
+}
+
+// Addition
+
 export function sumDictScalar(dict: Dict<number>, scalar: number): Dict<number> {
   const newDict: Dict<number> = {};
   return mutateDict<number>(dict, (key: string, value: number) => value + scalar);
 }
 
-export function multiplyDictScalar(dict: Dict<number>, scalar: number): Dict<number> {
-  return mutateDict<number>(dict, (key: string, value: number) => value * scalar);
-}
-
 /**
- * "Add up" an array of Dictionaries to get the sum of each key in an array of Dictionaries
+ * Add up an array of Dictionaries to get the sum of each key in an array of Dictionaries
  *
  * @param dicts Array of Dictionaries attributes to be summed up into a single Dictionary
  */
@@ -81,6 +114,25 @@ export function sumDicts(...dicts: Dict<number>[]): Dict<number> {
 
   return summedDict;
 }
+
+// Multiplication
+
+export function multiplyDictScalar(dict: Dict<number>, scalar: number): Dict<number> {
+  return mutateDict<number>(dict, (key: string, value: number) => value * scalar);
+}
+
+export function multiplyDicts(a: Dict<number>, b: Dict<number>): Dict<number> {
+  const keysToDivideOn: string[] = getIntersectingDictKeys(a, b);
+  const multipliedDict: Dict<number> = {};
+
+  for (const key of keysToDivideOn) {
+    multipliedDict[key] = a[key] * b[key];
+  }
+
+  return multipliedDict;
+}
+
+// Other operations
 
 /**
  * "Add up" an array of Dictionaries, then apply some averaging export function to each key to get the (potentially weighted) "average" of each key in an array of Dictionaries
@@ -113,28 +165,6 @@ export function avgDicts(getAvg: (sum: number, count: number) => number, ...dict
   }
 
   return avgedDict;
-}
-
-export function divideDicts(a: Dict<number>, b: Dict<number>): Dict<number> {
-  const keysToDivideOn: string[] = getIntersectingDictKeys(a, b);
-  const dividedDict: Dict<number> = {};
-
-  for (const key of keysToDivideOn) {
-    dividedDict[key] = a[key] / b[key];
-  }
-
-  return dividedDict;
-}
-
-export function multiplyDicts(a: Dict<number>, b: Dict<number>): Dict<number> {
-  const keysToDivideOn: string[] = getIntersectingDictKeys(a, b);
-  const multipliedDict: Dict<number> = {};
-
-  for (const key of keysToDivideOn) {
-    multipliedDict[key] = a[key] * b[key];
-  }
-
-  return multipliedDict;
 }
 
 // UNION AND INTERSECTION OPERATIONS

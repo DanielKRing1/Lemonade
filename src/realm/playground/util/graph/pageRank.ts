@@ -85,24 +85,26 @@ export function pageRank<N, E>(
 }
 
 export function getInitialWeights<N, E>(allNodes: N[], getNodeId: (node: N) => string, getNodeAttrs: (node: N) => Dict<number>): Dict<Dict<number>> {
-  // 1. Compute total summed node attributes
+  // 1.1. Get each node's attributes
   const allNodeAttrs: Dict<number>[] = [];
   for (const node of allNodes) {
     const nodeAttrs: Dict<number> = getNodeAttrs(node);
     allNodeAttrs.push(nodeAttrs);
   }
+  // 1.2. Compute total summed node attributes
   const summedNodeAttrs: Dict<number> = DictUtil.sumDicts(...allNodeAttrs);
 
   console.log('1');
   console.log('SUMMED NODE ATTRS');
   console.log(summedNodeAttrs);
 
+  // 2.1. Get each node's attributes
   let weightMap: Dict<Dict<number>> = {};
   for (const node of allNodes) {
     const nodeAttrs: Dict<number> = getNodeAttrs(node);
     const weightedNodeAttrs: Dict<number> = DictUtil.divideDicts(nodeAttrs, summedNodeAttrs);
 
-    // 2. Compute summed edge attributes for each node
+    // 2. Compute node's weighted edge attributes for each node: weighted node attrs = (node's attrs) / (total summed attrs)
     const nodeId: string = getNodeId(node);
     weightMap[nodeId] = weightedNodeAttrs;
   }
@@ -121,39 +123,30 @@ export function redistributeWeight(initialWeights: Dict<Dict<number>>, targetCen
 
   // 3. Sum "central" weights and determine what percentage of weight to redistribute to these central nodes
   const summedCentralWeights: Dict<number> = DictUtil.sumDicts(...Object.values(centralWeights));
-  const missingWeight: Dict<number> = DictUtil.subScalarDict(targetCentralWeight, summedCentralWeights);
-  const weightToRedistribute: Dict<number> = DictUtil.mutateDict<number>(missingWeight, (key: string, value: number) => Math.max(0, value));
+  const missingWeights: Dict<number> = DictUtil.subScalarDict(targetCentralWeight, summedCentralWeights);
+  const totalWeightToRedistribute: Dict<number> = DictUtil.mutateDict<number>(missingWeights, (key: string, value: number) => Math.max(0, value));
+  const individualWeightToRedistribute: Dict<number> = DictUtil.divideDictScalar(totalWeightToRedistribute, otherNodeCount);
 
   // 4. Subtract out this percentage from each of the "other" weights
-  const dehydratedOtherWeights: Dict<Dict<number>> = DictUtil.mutateDict<Dict<number>>(otherWeights, (key: string, nestedDict: Dict<number>) => {
-    const dehydratedWeights: Dict<number> = {};
-
-    for (const nestedKey in nestedDict) {
-      const value: number = nestedDict[nestedKey];
-      // The weight to redistribute is equally redistributed among "other" nodes
-      const totalWeightToRedistribute = weightToRedistribute[nestedKey];
-      const owedPercentage = 1 / otherNodeCount;
-      const owedWeight = totalWeightToRedistribute * owedPercentage;
-
-      dehydratedWeights[nestedKey] = value - owedWeight;
-    }
-
-    return dehydratedWeights;
-  });
+  const dehydratedOtherWeights: Dict<Dict<number>> = DictUtil.mutateDict<Dict<number>>(otherWeights, (key: string, attrDict: Dict<number>) =>
+    DictUtil.subDicts(attrDict, individualWeightToRedistribute),
+  );
 
   // 5. Add in this percentage to the "central" weights
-  const hydratedCentralWeights: Dict<Dict<number>> = DictUtil.mutateDict<Dict<number>>(centralWeights, (key: string, nestedDict: Dict<number>) => {
+  const hydratedCentralWeights: Dict<Dict<number>> = DictUtil.mutateDict<Dict<number>>(centralWeights, (key: string, nodeAttrs: Dict<number>) => {
     const hydratedWeights: Dict<number> = {};
 
-    for (const nestedKey in nestedDict) {
-      const value = nestedDict[nestedKey];
+    // 5.1. For each central node
+    for (const attrKey in nodeAttrs) {
+      const attrVal = nodeAttrs[attrKey];
 
-      const totalWeightToRedistribute = weightToRedistribute[nestedKey];
-      const earnedPercentage = value / summedCentralWeights[nestedKey];
+      // 5.2. Compute the weight of each central node, relative to the other central nodes
+      const totalWeight = totalWeightToRedistribute[attrKey];
+      const nodeWeight = attrVal / summedCentralWeights[attrKey];
       // The weight to redistribute is not equally redistributed among "central" nodes: Central nodes with higher starting weight get a larger cut
-      const earnedWeight = totalWeightToRedistribute * earnedPercentage;
+      const earnedWeight = totalWeight * nodeWeight;
 
-      hydratedWeights[nestedKey] = value + earnedWeight;
+      hydratedWeights[attrKey] = attrVal + earnedWeight;
     }
 
     return hydratedWeights;
