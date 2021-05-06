@@ -51,3 +51,14 @@ declare enum BlueprintNameEnum {
   Schema = 'SchemaBlueprint',
   Trend = 'TrendBlueprint',
 }
+
+// Node and Edge Properties
+declare type TrendNode = {
+  id: string;
+  edges: string[];
+};
+
+declare type TrendEdge = {
+  id: string;
+  nodes: string[];
+};

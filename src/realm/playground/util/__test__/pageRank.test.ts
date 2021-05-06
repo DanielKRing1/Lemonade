@@ -1,6 +1,7 @@
 import {filterDict} from '../dictionary/Operations';
 import {getInitialWeights, pageRank, redistributeWeight} from '../graph/pageRank';
 import * as DictUtil from '../dictionary/Operations';
+import {TrendBlueprint} from '../../realm/Realm/Trends/TrendBlueprints';
 
 describe('PageRank algorithm', () => {
   beforeAll(async () => {});
@@ -114,6 +115,8 @@ describe('PageRank algorithm', () => {
     const getEdges = (node: Node): Edge[] => node.rels.map((relId: string) => edges[relId]);
     const getEdgeAttrs = (edge: Edge): Dict<number> => filterDict(edge, (key: string, value: string | number) => !['id', 'node1', 'node2'].includes(key)) as Dict<number>;
     const getDestinationNode = (node: Node, edge: Edge) => (edge.node1 === getNodeId(node) ? nodes[edge.node2] : nodes[edge.node1]);
+    const ITERATIONS: number = 50;
+    const DAMPING_FACTOR: number = 0.8;
 
     // 1. Get initial map, evenly distributed
     const myInitialMap: Dict<Attrs> = {
@@ -144,7 +147,7 @@ describe('PageRank algorithm', () => {
 
     // expect(redistributedWeights).toMatchSnapshot();
 
-    const weightedMap: Dict<Dict<number>> = pageRank(initialMap, allNodes, getNodeId, getEdges, getEdgeAttrs, getDestinationNode, 50);
+    const weightedMap: Dict<Dict<number>> = pageRank(initialMap, allNodes, getNodeId, getEdges, getEdgeAttrs, getDestinationNode, ITERATIONS, DAMPING_FACTOR);
 
     console.log('WEIGHTED MAP');
     console.log(weightedMap);
@@ -185,5 +188,110 @@ describe('PageRank algorithm', () => {
     };
 
     // expect(weightedMap).toBe(expectedWeightedMap);
+  });
+});
+
+describe('PageRank algorithm', () => {
+  beforeAll(async () => {});
+
+  it('should return correct weighted map after 5 iterations', async () => {
+    // expect.assertions(1);
+
+    type Node = {
+      name: string;
+      rels: string[];
+    } & Attrs;
+
+    type Edge = {
+      id: string;
+      node1: string;
+      node2: string;
+    } & Attrs;
+
+    type Attrs = {
+      attrA: number;
+      attrB: number;
+    };
+
+    const nodes: Dict<Node> = {
+      a: {
+        name: 'a',
+        rels: ['ab', 'ca', 'da', 'ae'],
+        attrA: 1.5,
+        attrB: 1.5,
+      },
+      b: {
+        name: 'b',
+        rels: ['ab', 'bc'],
+        attrA: 1,
+        attrB: 1,
+      },
+      c: {
+        name: 'c',
+        rels: ['bc', 'ca', 'cd'],
+        attrA: 1,
+        attrB: 1,
+      },
+      d: {
+        name: 'd',
+        rels: ['cd', 'da'],
+        attrA: 1,
+        attrB: 1,
+      },
+      e: {
+        name: 'e',
+        rels: ['ae'],
+        attrA: 1,
+        attrB: 1,
+      },
+    };
+
+    // Realm implementation
+
+    const REALM: any = {};
+    const TREND_NAME: string = 'test trend';
+    const REALM_PATH: string = 'default.path';
+    const TREND_PROPERTIES: string[] = ['a', 'b', 'c'];
+    const TREND_BLUEPRINT: TrendBlueprint = new TrendBlueprint(TREND_NAME, REALM_PATH, TREND_PROPERTIES);
+    const TREND_NODE_NAME: string = 'node';
+    const TREND_EDGE_NAME: string = 'edge';
+
+    const REALM_NODES: TrendNode[] = Array.from(REALM.objects(TREND_NODE_NAME));
+    const TREND_NODES: TrendNode[] = REALM_NODES.map((node: Dict<any>) => node.toJSON());
+    const TREND_NODES_DICT: Dict<TrendNode> = TREND_NODES.reduce((acc: Dict<TrendNode>, curNode: TrendNode) => {
+      const edgeId: string = curNode.id;
+      acc[edgeId] = curNode;
+
+      return acc;
+    }, {});
+
+    const REALM_EDGES: TrendEdge[] = Array.from(REALM.objects(TREND_EDGE_NAME));
+    const TREND_EDGES: TrendEdge[] = REALM_EDGES.map((edge: Dict<any>) => edge.toJSON());
+    const TREND_EDGES_DICT: Dict<TrendEdge> = TREND_EDGES.reduce((acc: Dict<TrendEdge>, curEdge: TrendEdge) => {
+      const edgeId: string = curEdge.id;
+      acc[edgeId] = curEdge;
+
+      return acc;
+    }, {});
+    const TARGET_CENTRAL_WEIGHT: number = 0.5;
+    const CENTRAL_NODE_IDS: string[] = ['a', 'b', 'c', 'd'];
+    const ITERATIONS: number = 50;
+    const DAMPING_FACTOR: number = 0.8;
+
+    const getNodeId2 = (node: TrendNode) => node.id;
+    const getNodeAttrs2 = (node: TrendNode): Dict<number> => (DictUtil.copyDictKeep(node, TREND_BLUEPRINT.getProperties()) as unknown) as Dict<number>;
+    const getEdges2 = (node: TrendNode): TrendEdge[] => node.edges.map((edgeId: string) => TREND_EDGES_DICT[edgeId]);
+    const getEdgeAttrs2 = (edge: TrendEdge): Dict<number> => (DictUtil.copyDictKeep(edge, TREND_BLUEPRINT.getProperties()) as unknown) as Dict<number>;
+    const getDestinationNode2 = (node: TrendNode, edge: TrendEdge): TrendNode => {
+      const destinationNodeId: string = edge.nodes.filter((nodeId: string) => nodeId !== getNodeId2(node))[0];
+
+      return TREND_NODES_DICT[destinationNodeId];
+    };
+
+    const initialMap2 = getInitialWeights<TrendNode, TrendEdge>(TREND_NODES, getNodeId2, getNodeAttrs2);
+
+    const redistributedWeights2 = redistributeWeight(initialMap2, TARGET_CENTRAL_WEIGHT, CENTRAL_NODE_IDS);
+
+    const weightedMap2: Dict<Dict<number>> = pageRank(initialMap2, TREND_NODES, getNodeId2, getEdges2, getEdgeAttrs2, getDestinationNode2, ITERATIONS, DAMPING_FACTOR);
   });
 });
