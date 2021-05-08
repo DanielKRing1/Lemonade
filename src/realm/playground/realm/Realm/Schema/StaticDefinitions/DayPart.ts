@@ -1,7 +1,5 @@
-import RealmSchema from '../schemaNames';
-
 export const DayPart = {
-  name: RealmSchema.DayPart,
+  name: StaticSchemaName.DayPart,
   primaryKey: 'date',
   properties: {
     date: 'date',
@@ -18,19 +16,9 @@ export const DayPart = {
   },
 };
 
-export type DayPartType = {
-  date: string;
-  entityType: string;
-  entities: EntityEntryType[];
-  mood: string;
-  expectedMood: string;
-  rating: string;
-  expectedRating: string;
-};
-
 export const EntityEntry = {
   // Change this to 'EntityEntry'
-  name: RealmSchema.DayPart,
+  name: StaticSchemaName.DayPart,
   properties: {
     name: 'string',
     tags: {
@@ -39,9 +27,4 @@ export const EntityEntry = {
       objectType: 'string',
     },
   },
-};
-
-export type EntityEntryType = {
-  name: string;
-  tags: string[];
 };

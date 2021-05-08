@@ -11,3 +11,8 @@ export const Day = {
     },
   },
 };
+
+export type DayType = {
+  date: string;
+  dayParts: DayPartType[];
+};

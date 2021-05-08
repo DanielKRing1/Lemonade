@@ -27,6 +27,12 @@ declare type SchemaBlueprintRow = {
 
 declare type TrendBlueprintRow = TrendBlueprintObj;
 
+// Static Schema Names
+declare enum StaticSchemaName {
+  Day = 'day',
+  DayPart = 'day part',
+}
+
 // Schema Types
 declare enum SchemaTypeEnum {
   // Schema, Trend, etc Blueprints
@@ -43,6 +49,7 @@ declare enum SchemaTypeEnum {
 }
 
 // Blueprint names
+// Only contains TrendBlueprint atm
 declare type LoadedBlueprints = {
   [BlueprintNameEnum.Trend]: import('./Trends/TrendBlueprints').TrendBlueprint[];
 };
