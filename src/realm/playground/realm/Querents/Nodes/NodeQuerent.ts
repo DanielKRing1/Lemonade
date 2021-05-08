@@ -1,17 +1,12 @@
 //@ts-ignore
 import Realm from "realm";
-import { Override } from "../Base";
+import { Override } from "../../Base";
 
 import Querent from "../Base/Querent";
 //@ts-ignore
 import Realm from "../Realm";
 
-type Node = {
-  name: string;
-  edges: string[];
-};
-
-export default class NodeQuerent extends Querent<Node> {
+export default class NodeQuerent extends Querent<TrendNode> {
   constructor(realmPath: string, schemaName: string) {
     super(realmPath, schemaName);
   }
@@ -26,9 +21,10 @@ export default class NodeQuerent extends Querent<Node> {
     realm: Realm,
     entityName: string,
     properties: Dict<any> = {}
-  ): Realm.Results<Node> | undefined {
+  ): Realm.Results<TrendNode> | undefined {
     const entityObj = {
       id: entityName,
+      edges: [],
       ...properties,
     };
 
@@ -37,13 +33,13 @@ export default class NodeQuerent extends Querent<Node> {
   }
 
   @Override('Querent');
-  get(realm: Realm, create: boolean, nodeId: string): Realm.Results<Node> {
+  get(realm: Realm, create: boolean, nodeId: string): Realm.Results<TrendNode> {
     let node = this.getById(realm, nodeId);
 
     // Optionally create if does not exist
     if (create && node === undefined) node = this.create(realm, nodeId);
 
-    return node;
+    return node as Realm.Results<TrendNode>;
   }
 
   @Override('Querent');
@@ -52,14 +48,14 @@ export default class NodeQuerent extends Querent<Node> {
     nodeIds: string[],
     weights: number[],
     options: Object = {}
-  ): EntityWeight<Node>[] {
-    const entityWeights: EntityWeight<Node>[] = [];
+  ): EntityWeight<Realm.Results<TrendNode>>[] {
+    const entityWeights: EntityWeight<Realm.Results<TrendNode>>[] = [];
 
     // 1. For each Node
     for(let i = 0; i < nodeIds.length; i++) {
       // 2. Create if it does not exist
       const nodeId: string = nodeIds[i];
-      const node: Realm.Result<Node> = this.get(realm, true, nodeId);
+      const node: Realm.Results<TrendNode> = this.get(realm, true, nodeId);
       
       // 3. Add Node and its weight
       entityWeights.push({
@@ -76,7 +72,7 @@ export default class NodeQuerent extends Querent<Node> {
     mood: string,
     rating: number,
     weight: number,
-    node: Realm.Results<Node> & Node,
+    node: Realm.Results<TrendNode> & TrendNode,
   ): number {
     // 1. Compute weighted rating to add
     const weightedRating = rating * weight;

@@ -1,8 +1,8 @@
 //@ts-ignore
-import Realm from "realm";
-import { InstantiateAbstractError, NotImplementedError } from "../../Errors";
+import Realm from 'realm';
+import {InstantiateAbstractError, NotImplementedError} from '../../Errors';
 //@ts-ignore
-import Realm from "../Realm";
+import Realm from '../Realm';
 
 type EntityAndWeight<T> = {
   entity: T;
@@ -16,8 +16,7 @@ export default class Querent<T> {
   protected schemaName: string;
 
   constructor(realmPath: string, schemaName: string) {
-    if (this.constructor === Querent)
-      throw InstantiateAbstractError({ className: "Querent" });
+    if (this.constructor === Querent) throw InstantiateAbstractError({className: 'Querent'});
 
     this.realmPath = realmPath;
     this.schemaName = schemaName;
@@ -44,8 +43,7 @@ export default class Querent<T> {
   public getAllAsPojos(realm: Realm): Object[] | undefined {
     const all: Realm.Results<T> | undefined = this.getAll(realm);
 
-    const pojos: Object[] | undefined =
-      all && all.map((realmResult) => realmResult.toJSON());
+    const pojos: Object[] | undefined = all && all.map((realmResult) => realmResult.toJSON());
 
     return pojos;
   }
@@ -59,11 +57,7 @@ export default class Querent<T> {
    */
   // TODO Check which UpdateMode to use
   protected _create(realm: Realm, row: T): Realm.Results<T> | undefined {
-    const entry: Realm.Results<T> | undefined = realm.create(
-      this.schemaName,
-      row,
-      Realm.UpdateMode.Modified
-    );
+    const entry: Realm.Results<T> | undefined = realm.create(this.schemaName, row, Realm.UpdateMode.Modified);
 
     return entry;
   }
@@ -75,10 +69,10 @@ export default class Querent<T> {
    * @param args Any parameters necessary for creating row to insert
    */
   public create(realm: Realm, ...args: any[]): Realm.Results<T> | undefined {
-    throw NotImplementedError("Querent.create");
+    throw NotImplementedError('Querent.create');
   }
   public getOrCreate(realm: Realm, ...args: any[]): Realm.Results<T> {
-    throw NotImplementedError("Querent.getOrCreate");
+    throw NotImplementedError('Querent.getOrCreate');
   }
 
   /**
@@ -93,13 +87,8 @@ export default class Querent<T> {
    * @param rating
    * @param options
    */
-  protected _group(
-    realm: Realm,
-    entities: string[],
-    weights: number[],
-    options: Dict<any> = {}
-  ): EntityWeight<T>[] {
-    throw NotImplementedError("Querent._group");
+  protected _group(realm: Realm, entities: string[], weights: number[], options: Dict<any> = {}): EntityWeight<Realm.Results<T>>[] {
+    throw NotImplementedError('Querent._group');
   }
 
   /**
@@ -111,13 +100,8 @@ export default class Querent<T> {
    * @param weight
    * @param entities
    */
-  protected _rate(
-    mood: string,
-    rating: number,
-    weight: number,
-    ...args: Realm.Results<T> & T
-  ): number {
-    throw NotImplementedError("Querent._rate");
+  protected _rate(mood: string, rating: number, weight: number, entity: Realm.Results<T> & T): number {
+    throw NotImplementedError('Querent._rate');
   }
 
   /**
@@ -130,32 +114,19 @@ export default class Querent<T> {
    * @param rating
    * @param options
    */
-  public rate(
-    realm: Realm,
-    entityIds: string[],
-    mood: string,
-    rating: number,
-    weights: null | number | number[],
-    options: Dict<any> = {}
-  ) {
+  public rate(realm: Realm, entityIds: string[], mood: string, rating: number, weights: null | number | number[], options: Dict<any> = {}) {
     // 1. Format weights as a number array
 
     // null to number
     if (weights === null) weights = 1 / entityIds.length;
     // number to number[]
-    if (!Array.isArray(weights))
-      weights = new Array(entityIds.length).fill(weights);
+    if (!Array.isArray(weights)) weights = new Array(entityIds.length).fill(weights);
 
     // 2. Execute rating process
     realm.write(() => {
-      const entityAndWeights: EntityWeight<T>[] = this._group(
-        realm,
-        entityIds,
-        weights as number[],
-        options
-      );
+      const entityAndWeights: EntityWeight<T>[] = this._group(realm, entityIds, weights as number[], options);
 
-      for (const { entity, weight } of entityAndWeights) {
+      for (const {entity, weight} of entityAndWeights) {
         this._rate(realm, mood, rating, weight, entity);
       }
     });
