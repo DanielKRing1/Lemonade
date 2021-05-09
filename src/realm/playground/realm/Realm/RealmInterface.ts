@@ -208,15 +208,11 @@ export class RealmInterface extends Singleton(Object) {
     // 2. Get Realm
     const realm: Realm = this._realmCache.get(realmPath) as Realm;
 
-    // 3. Rate
+    // 3. Rate through the given trendName's TrendTracker
 
     // At this point, Trend should have been loaded/added to TrendCache
     // If not, then where did the user get this trendName? The UI should only offer existing Trends
     const trendTracker: TrendTracker = this._trendCache.get(trendName) as TrendTracker;
     trendTracker.rate(realm, entityIds, mood, rating, weights, options);
   }
-
-  //   TODO
-  // 6. Define DayPart Schema: Timestamp, entities, rating, mood
-  // 7. Define Day Schema: Timestamp, List reference to DayParts
 }
