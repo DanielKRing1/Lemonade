@@ -122,10 +122,10 @@ export default abstract class Querent<T> {
 
     // 2. Execute rating process
     realm.write(() => {
-      const entityAndWeights: EntityWeight<T>[] = this._group(realm, entityIds, weights as number[], options);
+      const entityAndWeights: EntityWeight<Realm.Results<T>>[] = this._group(realm, entityIds, weights as number[], options);
 
       for (const {entity, weight} of entityAndWeights) {
-        this._rate(realm, mood, rating, weight, entity);
+        this._rate(mood, rating, weight, entity);
       }
     });
   }
