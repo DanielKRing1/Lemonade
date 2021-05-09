@@ -32,6 +32,13 @@ export default abstract class Querent<T> {
 
   // GETTERS
 
+  /**
+   * Get or create entry into Realm
+   *
+   * @param realm
+   * @param create
+   * @param args
+   */
   public abstract get(realm: Realm, create: boolean, ...args: any): Realm.Results<T>;
 
   public getById(realm: Realm, id: string): Realm.Results<T> | undefined {
@@ -69,7 +76,6 @@ export default abstract class Querent<T> {
    * @param args Any parameters necessary for creating row to insert
    */
   public abstract create(realm: Realm, ...args: any[]): Realm.Results<T> | undefined;
-  public abstract getOrCreate(realm: Realm, ...args: any[]): Realm.Results<T>;
 
   /**
    * Receives all entities associated with rating process
