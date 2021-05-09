@@ -68,9 +68,9 @@ declare enum BlueprintNameEnum {
 declare type TrendNode = {
   id: string;
   edges: string[];
-};
+} & Dict<number>;
 
 declare type TrendEdge = {
   id: string;
   nodes: string[];
-};
+} & Dict<number>;

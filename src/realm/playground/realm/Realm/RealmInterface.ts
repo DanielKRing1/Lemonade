@@ -199,6 +199,23 @@ export class RealmInterface extends Singleton(Object) {
     }
   }
 
+  // PUBLIC RATING API
+
+  public rate(trendName: string, entityIds: string[], mood: string, rating: number, weights: null | number | number[], options: Dict<any>): void {
+    // 1. Get realmPath associate with the given Trend
+    const realmPath: string = this._schemaCache.getRealmPath(trendName) as string;
+
+    // 2. Get Realm
+    const realm: Realm = this._realmCache.get(realmPath) as Realm;
+
+    // 3. Rate
+
+    // At this point, Trend should have been loaded/added to TrendCache
+    // If not, then where did the user get this trendName? The UI should only offer existing Trends
+    const trendTracker: TrendTracker = this._trendCache.get(trendName) as TrendTracker;
+    trendTracker.rate(realm, entityIds, mood, rating, weights, options);
+  }
+
   //   TODO
   // 6. Define DayPart Schema: Timestamp, entities, rating, mood
   // 7. Define Day Schema: Timestamp, List reference to DayParts
