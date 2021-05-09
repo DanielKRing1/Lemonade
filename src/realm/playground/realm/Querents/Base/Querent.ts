@@ -41,7 +41,7 @@ export default abstract class Querent<T> {
    */
   public abstract get(realm: Realm, create: boolean, ...args: any): Realm.Results<T>;
 
-  public getById(realm: Realm, id: string): Realm.Results<T> | undefined {
+  public getById(realm: Realm, id: any): Realm.Results<T> | undefined {
     return realm.objectForPrimaryKey(this.schemaName, id);
   }
   public getAll(realm: Realm): Realm.Results<T> | undefined {

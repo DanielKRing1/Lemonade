@@ -30,7 +30,12 @@ declare type TrendBlueprintRow = TrendBlueprintObj;
 // Static Schema Names
 declare enum StaticSchemaName {
   Day = 'day',
+  TrendSnapshot = 'trend snapshot',
+  EntitySnapshot = 'entity snapshot',
+  MoodSnapshot = 'mood snapshot',
+
   DayPart = 'day part',
+  TrendEntry = 'trend entry',
 }
 
 // Schema Types

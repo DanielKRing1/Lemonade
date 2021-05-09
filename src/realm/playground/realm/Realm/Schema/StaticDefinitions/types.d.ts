@@ -1,19 +1,29 @@
-declare type DayType = {
-  date: string;
-  dayParts: DayPartType[];
+declare type TrendDay = {
+  date: Date;
+  dayParts: TrendDayPart[];
+  // The ratings of this Trend entity at the start of this day
+  trendSnapshots: TrendSnapshot[];
 };
 
-export type DayPartType = {
-  date: string;
-  entityType: string;
-  entities: EntityEntryType[];
+// Snapshots of Trends on a specific day in the past
+declare type TrendSnapshot = {
+  trendName: string;
+  entitySnapshots: EntitySnapshot[];
+};
+declare type EntitySnapshot = {
+  entityName: string;
+  moodSnapshots: MoodSnapshot[];
+};
+declare type MoodSnapshot = {
+  moodName: string;
+  rating: number;
+};
+
+declare type TrendDayPart = {
+  date: Date;
+  entities: string[];
   mood: string;
   expectedMood: string;
-  rating: string;
-  expectedRating: string;
-};
-
-export type EntityEntryType = {
-  name: string;
-  tags: string[];
+  rating: number;
+  expectedRating: number;
 };

@@ -3,11 +3,10 @@ export const DayPart = {
   primaryKey: 'date',
   properties: {
     date: 'date',
-    entityType: 'string',
-    entities: {
+    entries: {
       type: 'list',
       // Entity name
-      objectType: 'EntityEntry',
+      objectType: StaticSchemaName.TrendEntry,
     },
     mood: 'string',
     expectedMood: 'string',
@@ -16,9 +15,9 @@ export const DayPart = {
   },
 };
 
-export const EntityEntry = {
-  // Change this to 'EntityEntry'
-  name: StaticSchemaName.DayPart,
+// Single entry for this part of the day
+export const TrendEntry = {
+  name: StaticSchemaName.TrendEntry,
   properties: {
     name: 'string',
     tags: {
