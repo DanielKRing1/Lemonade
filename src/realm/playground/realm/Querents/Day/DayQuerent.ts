@@ -1,12 +1,16 @@
-//@ts-ignore
 import Realm from "realm";
 import { Override } from "../../Base";
+import { NotImplementedError } from "../../Errors";
 
 import Querent from "../Base/Querent";
-//@ts-ignore
-import Realm from "../Realm";
 
 export default class DayQuerent extends Querent<TrendDay> {
+  protected _group(realm: Realm, entities: string[], weights: number[], options: Record<string, any>): EntityWeight<Realm.Results<TrendDay>>[] {
+    throw NotImplementedError();
+  }
+  protected _rate(mood: string, rating: number, weight: number, entity: Realm.Results<TrendDay> & TrendDay): number {
+    throw NotImplementedError();
+  }
   constructor(realmPath: string, schemaName: string) {
     super(realmPath, schemaName);
   }
