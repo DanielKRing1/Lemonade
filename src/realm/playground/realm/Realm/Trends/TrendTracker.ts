@@ -24,7 +24,7 @@ export class TrendTracker {
   }
 
   public rate(realm: Realm, entities: string[], mood: string, rating: number, weights: null | number | number[], options: Dict<any>) {
-    // 1.1. Create TrendSnapshot for the TrendDay (The rating for each entity's' moods at the start of this day/ before rating the entities)
+    // 1.1. Create TrendSnapshot for the TrendDay (The rating for each entity's' moods at the start of this day/ before rating the entities today)
     const trendSnapshot: TrendSnapshot = {
       // TrendSnapshot
 

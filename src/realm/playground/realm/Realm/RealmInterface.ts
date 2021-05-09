@@ -134,8 +134,14 @@ export class RealmInterface extends Singleton(Object) {
 
   // REALM API
 
-  public loadRealms(): LoadedBlueprints {
-    return this._realmCache.load();
+  public loadRealms(options: Dict<any> = {}): LoadedBlueprints {
+    // 1. Read the TrendBlueprints from disk
+    const loadedBlueprints: LoadedBlueprints = this._realmCache.load();
+
+    // 2. Add the TrendBlueprints to the app the same way a new, user-added Trend would be added
+    loadedBlueprints[BlueprintNameEnum.Trend].forEach((trendBlueprint) => this.addTrend(trendBlueprint.getTrendName(), trendBlueprint.getProperties(), options));
+
+    return loadedBlueprints;
   }
 
   private addRealm(realmPath: string, valueParams: {schemaBlueprints: Array<SchemaBlueprint>; options?: any}) {
@@ -203,7 +209,10 @@ export class RealmInterface extends Singleton(Object) {
 
   public rate(trendName: string, entityIds: string[], mood: string, rating: number, weights: null | number | number[], options: Dict<any>): void {
     // 1. Get realmPath associate with the given Trend
-    const realmPath: string = this._schemaCache.getRealmPath(trendName) as string;
+
+    // Must choose a specific schema to query on, so just use the node schema to get the realmPath
+    const trendNodeSchemaName: string = TrendBlueprint.genSchemaName(trendName, SchemaTypeEnum.TREND_NODE);
+    const realmPath: string = this._schemaCache.getRealmPath(trendNodeSchemaName) as string;
 
     // 2. Get Realm
     const realm: Realm = this._realmCache.get(realmPath) as Realm;
