@@ -22,8 +22,6 @@ export class RealmInterface extends Singleton(Object) {
     return this.getSingleton() as RealmInterface;
   }
 
-  // PUBLIC API
-
   // TREND API
 
   public addTrend(trendName: string, trendProperties: string[], options?: Dict<string>): SchemaBlueprint[] | undefined {
@@ -89,7 +87,7 @@ export class RealmInterface extends Singleton(Object) {
     trendTracker.getTrendBlueprint().rmExistingTrendEntities(realm, trendEntitiesToRm);
   }
 
-  // Trend entitiestags
+  // Trend entity tags
   public addExistingTrendTags(trendName: string, trendTagsToAdd: string[]) {
     // 1. Get TrendTracker from TrendCache
     const trendTracker: TrendTracker = this._trendCache.get(trendName) as TrendTracker;
@@ -129,8 +127,6 @@ export class RealmInterface extends Singleton(Object) {
 
     if (!!trendTracker) return trendTracker.getTrendBlueprint().getProperties();
   }
-
-  // PRIVATE API
 
   // REALM API
 
@@ -207,7 +203,7 @@ export class RealmInterface extends Singleton(Object) {
 
   // PUBLIC RATING API
 
-  public rate(trendName: string, entityIds: string[], mood: string, rating: number, weights: null | number | number[], options: Dict<any>): void {
+  public rate(trendName: string, entityIds: string[], tags: string[], mood: string, rating: number, weights: null | number | number[], options: Dict<any>): void {
     // 1. Get realmPath associate with the given Trend
 
     // Must choose a specific schema to query on, so just use the node schema to get the realmPath
@@ -222,6 +218,6 @@ export class RealmInterface extends Singleton(Object) {
     // At this point, Trend should have been loaded/added to TrendCache
     // If not, then where did the user get this trendName? The UI should only offer existing Trends
     const trendTracker: TrendTracker = this._trendCache.get(trendName) as TrendTracker;
-    trendTracker.rate(realm, entityIds, mood, rating, weights, options);
+    trendTracker.rate(realm, entityIds, tags, mood, rating, weights, options);
   }
 }

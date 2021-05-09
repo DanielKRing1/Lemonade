@@ -22,7 +22,7 @@ export default class NodeQuerent extends Querent<TrendNode> {
     entityName: string,
     properties: Dict<any> = {}
   ): Realm.Results<TrendNode> | undefined {
-    const entityObj = {
+    const entityObj: TrendNode = {
       id: entityName,
       edges: [],
       ...properties,
