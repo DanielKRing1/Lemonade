@@ -1,6 +1,6 @@
 import {combineReducers} from 'redux';
-import schemasReducer from './schemas';
+import updateUIReducer from './updateUI';
 
 export default combineReducers({
-  schemas: schemasReducer,
+  updateUI: updateUIReducer,
 });
