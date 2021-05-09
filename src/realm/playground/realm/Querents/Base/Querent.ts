@@ -11,13 +11,11 @@ type EntityAndWeight<T> = {
 
 type Dict<T> = Record<string, T>;
 
-export default class Querent<T> {
+export default abstract class Querent<T> {
   protected realmPath: string;
   protected schemaName: string;
 
   constructor(realmPath: string, schemaName: string) {
-    if (this.constructor === Querent) throw InstantiateAbstractError({className: 'Querent'});
-
     this.realmPath = realmPath;
     this.schemaName = schemaName;
   }
@@ -33,6 +31,8 @@ export default class Querent<T> {
   }
 
   // GETTERS
+
+  public abstract get(realm: Realm, create: boolean, ...args: any): Realm.Results<T>;
 
   public getById(realm: Realm, id: string): Realm.Results<T> | undefined {
     return realm.objectForPrimaryKey(this.schemaName, id);
@@ -68,12 +68,8 @@ export default class Querent<T> {
    * @param realm Realm to insert into
    * @param args Any parameters necessary for creating row to insert
    */
-  public create(realm: Realm, ...args: any[]): Realm.Results<T> | undefined {
-    throw NotImplementedError('Querent.create');
-  }
-  public getOrCreate(realm: Realm, ...args: any[]): Realm.Results<T> {
-    throw NotImplementedError('Querent.getOrCreate');
-  }
+  public abstract create(realm: Realm, ...args: any[]): Realm.Results<T> | undefined;
+  public abstract getOrCreate(realm: Realm, ...args: any[]): Realm.Results<T>;
 
   /**
    * Receives all entities associated with rating process
@@ -87,9 +83,7 @@ export default class Querent<T> {
    * @param rating
    * @param options
    */
-  protected _group(realm: Realm, entities: string[], weights: number[], options: Dict<any> = {}): EntityWeight<Realm.Results<T>>[] {
-    throw NotImplementedError('Querent._group');
-  }
+  protected abstract _group(realm: Realm, entities: string[], weights: number[], options: Dict<any>): EntityWeight<Realm.Results<T>>[];
 
   /**
    * Executes rating process on a subset of entities (1 entity for Node and 2 entities for Edge, instead of rating whole group) and saves in Realm
@@ -100,9 +94,7 @@ export default class Querent<T> {
    * @param weight
    * @param entities
    */
-  protected _rate(mood: string, rating: number, weight: number, entity: Realm.Results<T> & T): number {
-    throw NotImplementedError('Querent._rate');
-  }
+  protected abstract _rate(mood: string, rating: number, weight: number, entity: Realm.Results<T> & T): number;
 
   /**
    * Public method for initiating rate process on a group of entities

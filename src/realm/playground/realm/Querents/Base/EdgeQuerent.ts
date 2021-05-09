@@ -1,12 +1,11 @@
 import Heap from "heap";
 import { Override } from "../../Base";
 
-import { InstantiateAbstractError } from "../../Errors";
 import Querent from "./Querent";
 import Realm from "realm";
 
 
-export default class EdgeQuerent extends Querent<TrendEdge> {
+export default abstract class EdgeQuerent extends Querent<TrendEdge> {
   static sortNamePair(n1: string, n2: string): string[] {
     return [n1, n2].sort((a, b) => (a < b ? -1 : 1));
   }
@@ -17,9 +16,6 @@ export default class EdgeQuerent extends Querent<TrendEdge> {
 
   constructor(realmPath: string, schemaName: string) {
     super(realmPath, schemaName);
-
-    if (this.constructor === EdgeQuerent)
-      throw InstantiateAbstractError({ className: "EdgeQuerent" });
   }
 
   // CREATORS
