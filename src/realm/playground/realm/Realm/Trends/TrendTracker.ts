@@ -31,6 +31,28 @@ export class TrendTracker {
     this.dayQ = new DayQuerent(realmPath, trendName);
   }
 
+  /**
+   * Make the Node Querents publicly available
+   *
+   * Get the Node Querent for either the 'default' entity nodes or for their tag nodes
+   *
+   * @param nodeType Either get the NodeQuerent for the set of all user-input ENITIES or for the user-input TAGS
+   */
+  public getNodeQ(nodeType: SchemaTypeEnum.TREND_NODE | SchemaTypeEnum.TAG_NODE = SchemaTypeEnum.TREND_NODE) {
+    return nodeType === SchemaTypeEnum.TREND_NODE ? this.nodeQ : this.nodeTagQ;
+  }
+
+  /**
+   * Make the Edge Querents publicly available
+   *
+   * Get the Edge Querent for either the 'default' entity edges or for their tag edge
+   *
+   * @param nodeType Either get the EdgeQuerent for the set of all user-input ENITIES or for the user-input TAGS
+   */
+  public getEdgeQ(edgeType: SchemaTypeEnum.TREND_EDGE | SchemaTypeEnum.TAG_EDGE = SchemaTypeEnum.TREND_EDGE) {
+    return edgeType === SchemaTypeEnum.TREND_EDGE ? this.edgeQ : this.edgeTagQ;
+  }
+
   public rate(realm: Realm, entities: string[], tags: string[], mood: string, rating: number, weights: null | number | number[], options: Dict<any>) {
     // 1.1. Create TrendSnapshot for the TrendDay (The rating for each entity's' moods at the start of this day/ before rating the entities today)
     const trendSnapshot: TrendSnapshot = {
