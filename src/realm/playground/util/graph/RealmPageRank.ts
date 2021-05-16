@@ -2,7 +2,7 @@ import {TrendBlueprint} from '../../realm/Realm/Trends/TrendBlueprints';
 import * as DictUtil from '../dictionary/Operations';
 import {getInitialWeights, redistributeWeight, pageRank} from './pageRank';
 
-type RedistributionOptions = {
+export type RedistributionOptions = {
   targetCentralWeight: number;
   centralNodeIds: string[];
 };

@@ -8,6 +8,7 @@ import {TrendBlueprint} from './Trends/TrendBlueprints';
 import {TrendTracker} from './Trends';
 import NodeQuerent from '../Querents/Nodes/NodeQuerent';
 import EdgeQuerent from '../Querents/Base/EdgeQuerent';
+import {realmPageRank, RedistributionOptions} from '../../util/graph/RealmPageRank';
 
 export class RealmInterface extends Singleton(Object) {
   private _realmCache: RealmCache;
@@ -225,11 +226,74 @@ export class RealmInterface extends Singleton(Object) {
    * @param trendName
    * @param mood
    */
-  public getMostInfluentialOfAll(trendName: string, mood: string) {
+  public getMostInfluentialOfAll(trendName: string, nodeType: SchemaTypeEnum.TREND_NODE | SchemaTypeEnum.TAG_NODE, mood: string, iterations: number, dampingFactor: number = 0.85) {
+    // 1. Create empty redistribution options, ie do not redistribute weights.
+    // Instead, just get the most influential nodes in the Realm graph, as is
+    const emptyOptions: RedistributionOptions = {
+      targetCentralWeight: 0,
+      centralNodeIds: [],
+    };
+
+    // 2. Execute PageRank on all nodes
+    const mostInfluentialNodes: Dict<Dict<number>> = this.getPageRank(trendName, nodeType, mood, iterations, dampingFactor, emptyOptions);
+
+    return mostInfluentialNodes;
+  }
+
+  /**
+   * Get most influential nodes in graph
+   *
+   * @param trendName
+   * @param mood
+   */
+  public getMostInfluentialOfToday(
+    trendName: string,
+    nodeType: SchemaTypeEnum.TREND_NODE | SchemaTypeEnum.TAG_NODE,
+    mood: string,
+    iterations: number,
+    dampingFactor: number = 0.85,
+    redistributionOptions: RedistributionOptions,
+  ) {
+    // 1. Execute PageRank on all nodes
+    const mostInfluentialNodes: Dict<Dict<number>> = this.getPageRank(trendName, nodeType, mood, iterations, dampingFactor, redistributionOptions);
+
+    return mostInfluentialNodes;
+  }
+
+  /**
+   * Get most influential nodes in graph
+   *
+   * @param trendName
+   * @param mood
+   */
+  private getPageRank(
+    trendName: string,
+    nodeType: SchemaTypeEnum.TREND_NODE | SchemaTypeEnum.TAG_NODE,
+    mood: string,
+    iterations: number,
+    dampingFactor: number = 0.85,
+    redistributionOptions: RedistributionOptions,
+  ) {
     // 1. Get Realm associate with the given Trend
     const realm: Realm = this.getTrendRealm(trendName);
 
-    // 2. Execute PageRank on all nodes
+    // 2. Get TrendTracker and Node/Edge Querents for given Trend
+    const trendTracker: TrendTracker = this._trendCache.get(trendName) as TrendTracker;
+    // Get appropriate trend Node Querent
+    const nodeQ: NodeQuerent = trendTracker.getNodeQ(nodeType);
+    // Get appropriate trend Edge Querent
+    const edgeType: SchemaTypeEnum = nodeType === SchemaTypeEnum.TREND_NODE ? SchemaTypeEnum.TREND_EDGE : SchemaTypeEnum.TAG_EDGE;
+    const edgeQ: EdgeQuerent = trendTracker.getEdgeQ(edgeType);
+
+    // 3. Construct args for Page Rank
+    const trendBlueprint: TrendBlueprint = this._trendCache.get(trendName)?.getTrendBlueprint() as TrendBlueprint;
+    const allNodes: TrendNode[] = Array.from(nodeQ.getAll(realm) as Realm.Results<TrendNode>);
+    const allEdges: TrendEdge[] = Array.from(edgeQ.getAll(realm) as Realm.Results<TrendEdge>);
+
+    // 4. Execute PageRank on all nodes
+    const mostInfluentialNodes: Dict<Dict<number>> = realmPageRank(trendBlueprint, allNodes, allEdges, iterations, dampingFactor, redistributionOptions);
+
+    return mostInfluentialNodes;
   }
 
   /**
