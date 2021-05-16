@@ -6,6 +6,8 @@ import {RealmUtils} from './Utility';
 import {SchemaBlueprint} from './Schema/SchemaBlueprint';
 import {TrendBlueprint} from './Trends/TrendBlueprints';
 import {TrendTracker} from './Trends';
+import NodeQuerent from '../Querents/Nodes/NodeQuerent';
+import EdgeQuerent from '../Querents/Base/EdgeQuerent';
 
 export class RealmInterface extends Singleton(Object) {
   private _realmCache: RealmCache;
@@ -204,20 +206,120 @@ export class RealmInterface extends Singleton(Object) {
   // PUBLIC RATING API
 
   public rate(trendName: string, entityIds: string[], tags: string[], mood: string, rating: number, weights: null | number | number[], options: Dict<any>): void {
-    // 1. Get realmPath associate with the given Trend
+    // 1. Get Realm associate with the given Trend
+    const realm: Realm = this.getTrendRealm(trendName);
 
-    // Must choose a specific schema to query on, so just use the node schema to get the realmPath
-    const trendNodeSchemaName: string = TrendBlueprint.genSchemaName(trendName, SchemaTypeEnum.TREND_NODE);
-    const realmPath: string = this._schemaCache.getRealmPath(trendNodeSchemaName) as string;
-
-    // 2. Get Realm
-    const realm: Realm = this._realmCache.get(realmPath) as Realm;
-
-    // 3. Rate through the given trendName's TrendTracker
+    // 2. Rate through the given trendName's TrendTracker
 
     // At this point, Trend should have been loaded/added to TrendCache
     // If not, then where did the user get this trendName? The UI should only offer existing Trends
     const trendTracker: TrendTracker = this._trendCache.get(trendName) as TrendTracker;
     trendTracker.rate(realm, entityIds, tags, mood, rating, weights, options);
+  }
+
+  // PUBLIC QUERENT API
+
+  /**
+   * Get most influential nodes in graph
+   *
+   * @param trendName
+   * @param mood
+   */
+  public getMostInfluentialOfAll(trendName: string, mood: string) {
+    // 1. Get Realm associate with the given Trend
+    const realm: Realm = this.getTrendRealm(trendName);
+
+    // 2. Execute PageRank on all nodes
+  }
+
+  /**
+   * Get all nodes connected by an edge to the given node
+   *
+   * Requires access to both Node Querent and Edge Querent
+   *
+   * @param trendName
+   * @param nodeId
+   * @param nodeType Either SchemaTypeEnum.TREND_NODE or SchemaTypeEnum.TAG_NODE, determines whether to query the Trend's main Trend Schema or the Tag Schema
+   */
+  public getConnectedNodes(trendName: string, nodeId: string, nodeType: SchemaTypeEnum.TREND_NODE | SchemaTypeEnum.TAG_NODE = SchemaTypeEnum.TREND_NODE): TrendNode[] {
+    // 0. Init TrendNode array to return
+    const connectedNodes: TrendNode[] = [];
+
+    // 1. Get Realm associate with the given Trend
+    const realm: Realm = this.getTrendRealm(trendName);
+
+    // 2. Get TrendTracker and Node/Edge Querents for given Trend
+    const trendTracker: TrendTracker = this._trendCache.get(trendName) as TrendTracker;
+    // Get appropriate trend Node Querent
+    const nodeQ: NodeQuerent = trendTracker.getNodeQ(nodeType);
+    // Get appropriate trend Edge Querent
+    const edgeType: SchemaTypeEnum = nodeType === SchemaTypeEnum.TREND_NODE ? SchemaTypeEnum.TREND_EDGE : SchemaTypeEnum.TAG_EDGE;
+    const edgeQ: EdgeQuerent = trendTracker.getEdgeQ(edgeType);
+
+    // 3. Get node from NodeQuerent
+    const nodeRealmResults: Realm.Results<TrendNode> = nodeQ.getById(realm, nodeId) as Realm.Results<TrendNode>;
+    // Short circuit
+    if (nodeRealmResults.length === 0) return connectedNodes;
+    const node: TrendNode = nodeRealmResults[0];
+
+    // 4. Get edges connected to the node
+    node.edges.forEach((edgeId: string) => {
+      // 4.1. Get edge from EdgeQuerent
+      const edgeRealmResults: Realm.Results<TrendEdge> = edgeQ.getById(realm, edgeId) as Realm.Results<TrendEdge>;
+      const edge: TrendEdge = edgeRealmResults[0];
+
+      // 4.2. Get connected node on 'other side' of edge
+      // It's either index 0 or 1, whichever index is not the given 'nodeId'
+      const connectedNodeId: string = edge.nodes[0] !== nodeId ? edge.nodes[0] : edge.nodes[1];
+
+      const connectedNodeRealmResults: Realm.Results<TrendNode> = nodeQ.getById(realm, connectedNodeId) as Realm.Results<TrendNode>;
+      const connectedNode: TrendNode = connectedNodeRealmResults[0];
+
+      // 4.3. Add to list of influential nodes
+      connectedNodes.push(connectedNode);
+    });
+
+    return connectedNodes;
+  }
+
+  /**
+   * Get most influential nodes connected by an edge to the given node
+   *
+   * @param trendName
+   * @param nodeId
+   * @param mood
+   */
+  public getMostInfluentialOfNode(trendName: string, nodeId: string, mood: string, nodeType: SchemaTypeEnum.TREND_NODE | SchemaTypeEnum.TAG_NODE = SchemaTypeEnum.TREND_NODE): TrendNode[] {
+    // 1. Get connected nodes
+    const connectedNodes: TrendNode[] = this.getConnectedNodes(trendName, nodeId, nodeType);
+
+    // 2. Sort connected nodes: Most 'influential' first
+    const moodKey: string = TrendBlueprint.genPropertyKey(mood);
+    connectedNodes.sort((a: TrendNode, b: TrendNode) => b[moodKey] - a[moodKey]);
+
+    return connectedNodes;
+  }
+
+  // PRIVATE UTILS
+
+  private getTrendRealm(trendName: string): Realm {
+    // 1. Get trend's schema name
+    // Must choose a specific schema to query on, so just use the node schema to get the realmPath
+    const trendNodeSchemaName: string = TrendBlueprint.genSchemaName(trendName, SchemaTypeEnum.TREND_NODE);
+
+    // 2. Get Realm
+    const realm: Realm = this.getRealm(trendNodeSchemaName);
+
+    return realm;
+  }
+
+  private getRealm(schemaName: string): Realm {
+    // 1. Get realmPath
+    const realmPath: string = this._schemaCache.getRealmPath(schemaName) as string;
+
+    // 2. Get Realm
+    const realm: Realm = this._realmCache.get(realmPath) as Realm;
+
+    return realm;
   }
 }
