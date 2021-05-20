@@ -405,8 +405,8 @@ export class RealmInterface extends Singleton(Object) {
     // 2. Get DayQuerent
     const dayQ: DayQuerent = this._trendCache.get(trendName)?.getDailyQ() as DayQuerent;
 
-    // 3. Get all daily entries for given Trend, as POJO's
-    const allDays: TrendDay[] = dayQ.getAllAsPojos(realm) as TrendDay[];
+    // 3. Get all daily entries for given Trend from the given startDate, as POJO's
+    const allDays: TrendDay[] = (dayQ.getAllAsPojos(realm) as TrendDay[]).filter((day: TrendDay) => day.date >= startDate);
 
     // 4. Sort days by ascending Date
     // TODO Make sure Realm stores 'Date' as an actual date object, not as a ms timestamp
@@ -418,6 +418,60 @@ export class RealmInterface extends Singleton(Object) {
 
     return dominantMoods;
   }
+
+  public getNodeDailyMoods = (trendName: string, nodeName: string, startDate: Date) => {
+    // 1. Get Trend Realm
+    const realm: Realm = this.getTrendRealm(trendName);
+
+    // 2. Get DayQuerent
+    const dayQ: DayQuerent = this._trendCache.get(trendName)?.getDailyQ() as DayQuerent;
+
+    // 3. Get all daily entries for given Trend from the given startDate, as POJO's
+    const allDays: TrendDay[] = (dayQ.getAllAsPojos(realm) as TrendDay[]).filter((day: TrendDay) => day.date >= startDate);
+
+    // 4. Sort days by ascending Date
+    // TODO Make sure Realm stores 'Date' as an actual date object, not as a ms timestamp
+    // If not a Date object, update TrendDay.date's declared type to the appropriate type and also update the way TrendDays are sorted here
+    allDays.sort((a: TrendDay, b: TrendDay) => a.date.getTime() - b.date.getTime());
+
+    // 5. Get moods for each day
+    type DailyMoods = {date: Date; moods: Dict<number>}[];
+    const dailyMoods: DailyMoods = allDays.reduce((acc: DailyMoods, day: TrendDay) => {
+      // 5.1 Get the current date
+      const date: Date = day.date;
+
+      // 5.2. Drill down to the given trend name
+      const trendSnapshot: TrendSnapshot | undefined = day.trendSnapshots.find((trendSnapshot: TrendSnapshot) => trendSnapshot.trendName === trendName);
+      if (!trendSnapshot) return acc;
+
+      // 5.3. Drill further down to the given node name
+      const entitySnapshot: EntitySnapshot | undefined = trendSnapshot?.entitySnapshots.find((entitySnapshot: EntitySnapshot) => entitySnapshot.entityName === nodeName);
+      if (!entitySnapshot) return acc;
+
+      // 5.4. Drill to the 'bottom' and get the moods associated with the given Trend.Node for the current day
+      const moodSnapshot: MoodSnapshot[] | undefined = entitySnapshot?.moodSnapshots;
+      if (!moodSnapshot) return acc;
+
+      // 5.5. Format the moods
+      const moodDict: Dict<number> = moodSnapshot!.reduce((acc2: Dict<number>, cur: MoodSnapshot) => {
+        const {moodName, rating} = cur;
+        acc2[moodName] = rating;
+
+        return acc2;
+      }, {});
+
+      // 5.6. Add snapshot to list
+      const snapshot = {
+        date,
+        moods: moodDict,
+      };
+      acc.push(snapshot);
+
+      return acc;
+    }, []);
+
+    return dailyMoods;
+  };
 
   // PRIVATE UTILS
 
