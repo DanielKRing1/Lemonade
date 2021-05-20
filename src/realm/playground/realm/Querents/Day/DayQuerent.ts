@@ -65,7 +65,7 @@ export default class DayQuerent extends Querent<TrendDay> {
         day[0].dayParts.push(newDayPart);
 
         // 4. Add new TrendSnapshot to the TrendDay's snapshots if it is not already recorded
-        if(!day[0].trendSnapshots.some((existingTrendSnapshot: TrendSnapshot) => existingTrendSnapshot.trendName === newTrendSnapshot.trendName)) day[0].trendSnapshots.push();
+        if(!day[0].trendSnapshots.some((existingTrendSnapshot: TrendSnapshot) => existingTrendSnapshot.trendName === newTrendSnapshot.trendName)) day[0].trendSnapshots.push(newTrendSnapshot);
     });
   }
 }
