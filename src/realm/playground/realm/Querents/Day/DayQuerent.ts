@@ -58,6 +58,7 @@ export default class DayQuerent extends Querent<TrendDay> {
           date: new Date(),
           entities: entityIds,
           mood,
+          // TODO Update this label to an actual expected mood
           expectedMood: 'unknown',
           rating,
           expectedRating: -1,
