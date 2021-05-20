@@ -1,6 +1,7 @@
 import Realm from "realm";
 import { Override } from "../../Base";
 import { NotImplementedError } from "../../Errors";
+import { EntitySnapshot } from "../../Realm/Schema/StaticDefinitions/Day";
 
 import Querent from "../Base/Querent";
 
@@ -50,7 +51,7 @@ export default class DayQuerent extends Querent<TrendDay> {
     const newTrendSnapshot: TrendSnapshot = options.trendSnapshot;
     
     // 2. Get the current TrendDay from Realm, create if does not exist
-    const day: Realm.Results<TrendDay> = this.get(realm, true);
+    const day: TrendDay = this.get(realm, true)[0];
 
     realm.write(() => {
         // 3. Record rating as a TrendDayPart under the TrendDay
@@ -63,10 +64,22 @@ export default class DayQuerent extends Querent<TrendDay> {
           rating,
           expectedRating: -1,
         }
-        day[0].dayParts.push(newDayPart);
+        day.dayParts.push(newDayPart);
 
         // 4. Add new TrendSnapshot to the TrendDay's snapshots if it is not already recorded
-        if(!day[0].trendSnapshots.some((existingTrendSnapshot: TrendSnapshot) => existingTrendSnapshot.trendName === newTrendSnapshot.trendName)) day[0].trendSnapshots.push(newTrendSnapshot);
+        const existingTrendSnapshot: TrendSnapshot | undefined = day.trendSnapshots.find((trendSnapshot: TrendSnapshot) => trendSnapshot.trendName === newTrendSnapshot.trendName);
+        // 4.1. First entry for given trend
+        if(!existingTrendSnapshot) day.trendSnapshots.push(newTrendSnapshot);
+        // 4.2. If is a new Trend, then add an entry for each provided entity
+        else {
+          newTrendSnapshot.entitySnapshots.forEach((newEntitySnapshot: EntitySnapshot) => {
+            const existingEntitySnapshot: EntitySnapshot | undefined = existingTrendSnapshot.entitySnapshots.find((entitySnapshot: EntitySnapshot) => entitySnapshot.entityName === newEntitySnapshot.entityName);
+            if(!existingEntitySnapshot) existingTrendSnapshot.entitySnapshots.push(newEntitySnapshot);
+            else {
+              // Already recorded moods for the given entity
+            }
+          })
+        }
     });
   }
 }
