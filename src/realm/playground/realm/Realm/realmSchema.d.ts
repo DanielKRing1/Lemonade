@@ -72,17 +72,18 @@ declare type TrendNode = {
   id: string;
   edges: string[];
 
-  // List of snapshots of the TrendNode's moods in the past
-  dailySnapshots: NodeDailySnapshot[];
+  // // List of snapshots of the TrendNode's moods in the past
+  // dailySnapshots: NodeSnapshots;
 } & Dict<number>;
-declare type NodeDailySnapshot = {
-  date: Date;
-  moodsSnapshot: NodeMoodSnapshot[];
-};
-declare type NodeMoodSnapshot = {
-  moodName: string;
-  rating: number;
-};
+// declare type NodeSnapshots = {
+//   nodeName: string;
+//   snapshots: NodeDailySnapshot[];
+// };
+// declare type NodeDailySnapshot = {
+//   date: Date;
+//   moodName: string;
+//   rating: number;
+// };
 
 declare type TrendEdge = {
   id: string;

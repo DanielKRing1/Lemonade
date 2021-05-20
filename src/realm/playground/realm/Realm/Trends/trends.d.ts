@@ -21,6 +21,6 @@ declare type CompleteTrendSB = {
   [SchemaTypeEnum.TAG_NODE]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
   [SchemaTypeEnum.TREND_EDGE]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
   [SchemaTypeEnum.TAG_EDGE]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
-  [SchemaTypeEnum.DAILY_SNAPSHOTS]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
-  [SchemaTypeEnum.MOOD_SNAPSHOT]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
-};
+//   [SchemaTypeEnum.DAILY_SNAPSHOTS]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
+//   [SchemaTypeEnum.MOOD_SNAPSHOT]: import('../Schema/SchemaBlueprint').SchemaBlueprint;
+// };

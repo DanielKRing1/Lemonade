@@ -39,11 +39,11 @@ export class TrendBlueprint {
       case SchemaTypeEnum.TAG_EDGE:
         return `${trendName}_${TrendNameSuffix.Tag}_${TrendNameSuffix.Edge}`;
 
-      case SchemaTypeEnum.DAILY_SNAPSHOTS:
-        return `${trendName}_${TrendNameSuffix.DailySnapshot}`;
+      // case SchemaTypeEnum.DAILY_SNAPSHOTS:
+      //   return `${trendName}_${TrendNameSuffix.DailySnapshot}`;
 
-      case SchemaTypeEnum.MOOD_SNAPSHOT:
-        return `${trendName}_${TrendNameSuffix.MoodSnapshot}`;
+      // case SchemaTypeEnum.MOOD_SNAPSHOT:
+      //   return `${trendName}_${TrendNameSuffix.MoodSnapshot}`;
     }
 
     return `${trendName}_Unknown`;
@@ -106,25 +106,27 @@ export class TrendBlueprint {
     };
   };
 
-  private genTrendDailySnapshotSchemaDef = (schemaName: string, moodSnapshotsSchemaName: string): Realm.ObjectSchema => {
-    return {
-      name: schemaName,
-      properties: {
-        date: 'date',
-        moodSnapshot: `${moodSnapshotsSchemaName}[]`,
-      },
-    };
-  };
+  // private genTrendDailySnapshotSchemaDef = (schemaName: string, moodSnapshotsSchemaName: string): Realm.ObjectSchema => {
+  //   return {
+  //     name: schemaName,
+  //     primaryKey: 'nodeName',
+  //     properties: {
+  //       nodeName: 'string',
+  //       moodSnapshot: `${moodSnapshotsSchemaName}[]`,
+  //     },
+  //   };
+  // };
 
-  private genTrendMoodSnapshotSchemaDef = (schemaName: string): Realm.ObjectSchema => {
-    return {
-      name: schemaName,
-      properties: {
-        moodName: 'string',
-        rating: 'number',
-      },
-    };
-  };
+  // private genTrendMoodSnapshotSchemaDef = (schemaName: string): Realm.ObjectSchema => {
+  //   return {
+  //     name: schemaName,
+  //     properties: {
+  //       date: 'date',
+  //       moodName: 'string',
+  //       rating: 'number',
+  //     },
+  //   };
+  // };
 
   private genTrendProperties(): Dict<Realm.ObjectSchemaProperty> {
     const propertyKeys: string[] = this.properties.map((propertyName) => TrendBlueprint.genPropertyKey(propertyName));
@@ -147,34 +149,34 @@ export class TrendBlueprint {
   // SCHEMABLUEPRINT SERIALIZE UTILS
 
   public toSchemaBlueprints(): CompleteTrendSB {
-    // 1. Get Trend Node Schema
+    // // 1. Get NodeMoodSnapshot Schema
+    // const nodeMoodSnapshotName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.MOOD_SNAPSHOT);
+    // const nodeMoodSnapshotSB: SchemaBlueprint = new SchemaBlueprint(nodeMoodSnapshotName, this.realmPath, SchemaTypeEnum.DAILY_SNAPSHOTS, this.genTrendMoodSnapshotSchemaDef(nodeMoodSnapshotName));
+
+    // // 2. Get NodeDailySnapshot Schema
+    // const nodeDailySnapshotName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.DAILY_SNAPSHOTS);
+    // const nodeDailySnapshotSB: SchemaBlueprint = new SchemaBlueprint(
+    //   nodeDailySnapshotName,
+    //   this.realmPath,
+    //   SchemaTypeEnum.DAILY_SNAPSHOTS,
+    //   this.genTrendDailySnapshotSchemaDef(nodeDailySnapshotName, nodeMoodSnapshotName),
+    // );
+
+    // 3. Get Trend Node Schema
     const trendNodeName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.TREND_NODE);
     const trendNodeSB: SchemaBlueprint = new SchemaBlueprint(trendNodeName, this.realmPath, SchemaTypeEnum.TREND_NODE, this.genTrendNodeSchemaDef(trendNodeName));
 
-    // 2. Get Trend Edge Schema
+    // 4. Get Trend Edge Schema
     const trendEdgeName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.TREND_EDGE);
     const trendEdgeSB: SchemaBlueprint = new SchemaBlueprint(trendEdgeName, this.realmPath, SchemaTypeEnum.TREND_EDGE, this.genTrendNodeSchemaDef(trendEdgeName));
 
-    // 3. Get Trend Tag Node Schema
+    // 5. Get Trend Tag Node Schema
     const tagNodeName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.TAG_NODE);
     const tagNodeSB: SchemaBlueprint = new SchemaBlueprint(tagNodeName, this.realmPath, SchemaTypeEnum.TAG_NODE, this.genTrendEdgeSchemaDef(tagNodeName));
 
-    // 4. Get Trend Tag Node Schema
+    // 6. Get Trend Tag Node Schema
     const tagEdgeName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.TAG_EDGE);
     const tagEdgeSB: SchemaBlueprint = new SchemaBlueprint(tagEdgeName, this.realmPath, SchemaTypeEnum.TAG_EDGE, this.genTrendEdgeSchemaDef(tagEdgeName));
-
-    // 5. Get NodeMoodSnapshot Schema
-    const nodeMoodSnapshotName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.MOOD_SNAPSHOT);
-    const nodeMoodSnapshotSB: SchemaBlueprint = new SchemaBlueprint(nodeMoodSnapshotName, this.realmPath, SchemaTypeEnum.DAILY_SNAPSHOTS, this.genTrendMoodSnapshotSchemaDef(nodeMoodSnapshotName));
-
-    // 6. Get NodeDailySnapshot Schema
-    const nodeDailySnapshotName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.DAILY_SNAPSHOTS);
-    const nodeDailySnapshotSB: SchemaBlueprint = new SchemaBlueprint(
-      nodeDailySnapshotName,
-      this.realmPath,
-      SchemaTypeEnum.DAILY_SNAPSHOTS,
-      this.genTrendDailySnapshotSchemaDef(nodeDailySnapshotName, nodeMoodSnapshotName),
-    );
 
     // 7. Compile and return
     return {
@@ -182,8 +184,8 @@ export class TrendBlueprint {
       [SchemaTypeEnum.TAG_NODE]: trendEdgeSB,
       [SchemaTypeEnum.TREND_EDGE]: tagNodeSB,
       [SchemaTypeEnum.TAG_EDGE]: tagEdgeSB,
-      [SchemaTypeEnum.DAILY_SNAPSHOTS]: nodeDailySnapshotSB,
-      [SchemaTypeEnum.MOOD_SNAPSHOT]: nodeMoodSnapshotSB,
+      // [SchemaTypeEnum.DAILY_SNAPSHOTS]: nodeDailySnapshotSB,
+      // [SchemaTypeEnum.MOOD_SNAPSHOT]: nodeMoodSnapshotSB,
     };
   }
 

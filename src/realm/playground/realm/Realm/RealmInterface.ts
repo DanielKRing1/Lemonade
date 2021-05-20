@@ -158,6 +158,7 @@ export class RealmInterface extends Singleton(Object) {
     const realm = this._realmCache.get(realmPath);
 
     if (!!realm) {
+      // SAVE (TREND) SCHEMABLUEPRINTS BEFORE CALLING THIS METHOD
       // 2. Save SchemaBlueprint to Realm
       // schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprint) => schemaBlueprint.save(realm));
 
@@ -374,7 +375,7 @@ export class RealmInterface extends Singleton(Object) {
    * @param startDate The date to start querying from for the given Trend's history
    */
   public getDailyMoods(trendName: string, startDate: Date): string[] {
-    // 0. Define a method to get the dominant mood for a given day
+    // 0. Define a callback method to get the dominant mood for a given day
     const getDominantMood = (day: TrendDay): string => {
       // 0.1. Iterate over the TrendDayParts
       const moodWeights: Dict<number> = day.dayParts.reduce((acc: Dict<number>, cur: TrendDayPart) => {

@@ -25,6 +25,7 @@ export default class NodeQuerent extends Querent<TrendNode> {
     const entityObj: TrendNode = {
       id: entityName,
       edges: [],
+      dailySnapshots: [],
       ...properties,
     };
 
