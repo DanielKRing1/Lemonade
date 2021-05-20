@@ -7,11 +7,11 @@ export const Day = {
       type: 'list',
       objectType: StaticSchemaName.DayPart,
     },
-    trendSnapshots: {
-      type: 'list',
-      // String with mood name + mood rating at the time of rating
-      objectType: StaticSchemaName.TrendSnapshot,
-    },
+    // trendSnapshots: {
+    //   type: 'list',
+    //   // String with mood name + mood rating at the time of rating
+    //   objectType: StaticSchemaName.TrendSnapshot,
+    // },
   },
 };
 

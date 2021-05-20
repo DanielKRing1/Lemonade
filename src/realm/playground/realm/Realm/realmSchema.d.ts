@@ -49,6 +49,9 @@ declare enum SchemaTypeEnum {
   TREND_EDGE = 'trend_edge',
   TAG_EDGE = 'tag_edge',
 
+  DAILY_SNAPSHOTS = 'daily_snapshots',
+  MOOD_SNAPSHOT = 'mood_snapshot',
+
   // Other
   Unknown = 'unknown',
 }
@@ -68,7 +71,18 @@ declare enum BlueprintNameEnum {
 declare type TrendNode = {
   id: string;
   edges: string[];
+
+  // List of snapshots of the TrendNode's moods in the past
+  dailySnapshots: NodeDailySnapshot[];
 } & Dict<number>;
+declare type NodeDailySnapshot = {
+  date: Date;
+  moodsSnapshot: NodeMoodSnapshot[];
+};
+declare type NodeMoodSnapshot = {
+  moodName: string;
+  rating: number;
+};
 
 declare type TrendEdge = {
   id: string;
