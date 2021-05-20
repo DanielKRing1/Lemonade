@@ -9,6 +9,7 @@ import {TrendTracker} from './Trends';
 import NodeQuerent from '../Querents/Nodes/NodeQuerent';
 import EdgeQuerent from '../Querents/Base/EdgeQuerent';
 import {realmPageRank, RedistributionOptions} from '../../util/graph/RealmPageRank';
+import DayQuerent from '../Querents/Day/DayQuerent';
 
 export class RealmInterface extends Singleton(Object) {
   private _realmCache: RealmCache;
@@ -220,6 +221,8 @@ export class RealmInterface extends Singleton(Object) {
 
   // PUBLIC QUERENT API
 
+  // PAGE RANK API
+
   /**
    * Get most influential nodes in graph
    *
@@ -362,6 +365,57 @@ export class RealmInterface extends Singleton(Object) {
     connectedNodes.sort((a: TrendNode, b: TrendNode) => b[moodKey] - a[moodKey]);
 
     return connectedNodes;
+  }
+
+  /**
+   * Get the dominant mood for each day since the given 'startDate'
+   *
+   * @param trendName The Trend to query on for past days
+   * @param startDate The date to start querying from for the given Trend's history
+   */
+  public getDailyMoods(trendName: string, startDate: Date): string[] {
+    // 0. Define a method to get the dominant mood for a given day
+    const getDominantMood = (day: TrendDay): string => {
+      // 0.1. Iterate over the TrendDayParts
+      const moodWeights: Dict<number> = day.dayParts.reduce((acc: Dict<number>, cur: TrendDayPart) => {
+        const {mood, rating} = cur;
+        const entityCount: number = cur.entities.length;
+        const moodWeight: number = entityCount * rating;
+
+        // 0.2. Record the # of entities associated with each mood
+        if (!acc.hasOwnProperty(mood)) acc[mood] = 0;
+        acc[mood] += moodWeight;
+
+        return acc;
+      }, {});
+
+      // 0.3. Sort moods, so moods with most weight are at the beginning of the array
+      const moodWeightArr: Dict<string | number>[] = Object.keys(moodWeights).map((moodName: string, i) => ({x: moodName, y: moodWeights[moodName]}));
+      moodWeightArr.sort((a: Dict<string | number>, b: Dict<string | number>) => (b.y as number) - (a.y as number));
+
+      // 0.4. Get most weighted mood
+      const dominantMood: string = moodWeightArr[0].x as string;
+      return dominantMood;
+    };
+
+    // 1. Get Trend Realm
+    const realm: Realm = this.getTrendRealm(trendName);
+
+    // 2. Get DayQuerent
+    const dayQ: DayQuerent = this._trendCache.get(trendName)?.getDailyQ() as DayQuerent;
+
+    // 3. Get all daily entries for given Trend, as POJO's
+    const allDays: TrendDay[] = dayQ.getAllAsPojos(realm) as TrendDay[];
+
+    // 4. Sort days by ascending Date
+    // TODO Make sure Realm stores 'Date' as an actual date object, not as a ms timestamp
+    // If not a Date object, update TrendDay.date's declared type to the appropriate type and also update the way TrendDays are sorted here
+    allDays.sort((a: TrendDay, b: TrendDay) => a.date.getTime() - b.date.getTime());
+
+    // 5. Record dominant mood for each day
+    const dominantMoods: string[] = allDays.map(getDominantMood);
+
+    return dominantMoods;
   }
 
   // PRIVATE UTILS

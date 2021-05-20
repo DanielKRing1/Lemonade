@@ -32,6 +32,17 @@ export class TrendTracker {
   }
 
   /**
+   * Make the Day Querent publicly available
+   *
+   * Get the Day Querent for the given Trend
+   *
+   * @param nodeType Either get the NodeQuerent for the set of all user-input ENITIES or for the user-input TAGS
+   */
+  public getDailyQ() {
+    return this.dayQ;
+  }
+
+  /**
    * Make the Node Querents publicly available
    *
    * Get the Node Querent for either the 'default' entity nodes or for their tag nodes
