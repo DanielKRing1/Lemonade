@@ -436,39 +436,39 @@ export class RealmInterface extends Singleton(Object) {
 
     // 5. Get moods for each day
     type DailyMoods = {date: Date; moods: Dict<number>}[];
-    const dailyMoods: DailyMoods = allDays.reduce((acc: DailyMoods, day: TrendDay) => {
-      // 5.1 Get the current date
-      const date: Date = day.date;
+    // const dailyMoods: DailyMoods = allDays.reduce((acc: DailyMoods, day: TrendDay) => {
+    //   // 5.1 Get the current date
+    //   const date: Date = day.date;
 
-      // 5.2. Drill down to the given trend name
-      const trendSnapshot: TrendSnapshot | undefined = day.trendSnapshots.find((trendSnapshot: TrendSnapshot) => trendSnapshot.trendName === trendName);
-      if (!trendSnapshot) return acc;
+    //   // 5.2. Drill down to the given trend name
+    //   const trendSnapshot: TrendSnapshot | undefined = day.trendSnapshots.find((trendSnapshot: TrendSnapshot) => trendSnapshot.trendName === trendName);
+    //   if (!trendSnapshot) return acc;
 
-      // 5.3. Drill further down to the given node name
-      const entitySnapshot: EntitySnapshot | undefined = trendSnapshot?.entitySnapshots.find((entitySnapshot: EntitySnapshot) => entitySnapshot.entityName === nodeName);
-      if (!entitySnapshot) return acc;
+    //   // 5.3. Drill further down to the given node name
+    //   const entitySnapshot: EntitySnapshot | undefined = trendSnapshot?.entitySnapshots.find((entitySnapshot: EntitySnapshot) => entitySnapshot.entityName === nodeName);
+    //   if (!entitySnapshot) return acc;
 
-      // 5.4. Drill to the 'bottom' and get the moods associated with the given Trend.Node for the current day
-      const moodSnapshot: MoodSnapshot[] | undefined = entitySnapshot?.moodSnapshots;
-      if (!moodSnapshot) return acc;
+    //   // 5.4. Drill to the 'bottom' and get the moods associated with the given Trend.Node for the current day
+    //   const moodSnapshot: MoodSnapshot[] | undefined = entitySnapshot?.moodSnapshots;
+    //   if (!moodSnapshot) return acc;
 
-      // 5.5. Format the moods
-      const moodDict: Dict<number> = moodSnapshot!.reduce((acc2: Dict<number>, cur: MoodSnapshot) => {
-        const {moodName, rating} = cur;
-        acc2[moodName] = rating;
+    //   // 5.5. Format the moods
+    //   const moodDict: Dict<number> = moodSnapshot!.reduce((acc2: Dict<number>, cur: MoodSnapshot) => {
+    //     const {moodName, rating} = cur;
+    //     acc2[moodName] = rating;
 
-        return acc2;
-      }, {});
+    //     return acc2;
+    //   }, {});
 
-      // 5.6. Add snapshot to list
-      const snapshot = {
-        date,
-        moods: moodDict,
-      };
-      acc.push(snapshot);
+    //   // 5.6. Add snapshot to list
+    //   const snapshot = {
+    //     date,
+    //     moods: moodDict,
+    //   };
+    //   acc.push(snapshot);
 
-      return acc;
-    }, []);
+    //   return acc;
+    // }, []);
 
     return dailyMoods;
   };

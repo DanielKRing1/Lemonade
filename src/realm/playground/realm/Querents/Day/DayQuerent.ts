@@ -28,7 +28,7 @@ export default class DayQuerent extends Querent<TrendDay> {
     const dayObj: TrendDay = {
         date: new Date(),
         dayParts: [],
-        trendSnapshots: [],
+        // trendSnapshots: [],
     };
 
     const realmRel = this._create(realm, dayObj);
@@ -66,20 +66,20 @@ export default class DayQuerent extends Querent<TrendDay> {
         }
         day.dayParts.push(newDayPart);
 
-        // 4. Add new TrendSnapshot to the TrendDay's snapshots if it is not already recorded
-        const existingTrendSnapshot: TrendSnapshot | undefined = day.trendSnapshots.find((trendSnapshot: TrendSnapshot) => trendSnapshot.trendName === newTrendSnapshot.trendName);
-        // 4.1. First entry for given trend
-        if(!existingTrendSnapshot) day.trendSnapshots.push(newTrendSnapshot);
-        // 4.2. If is a new Trend, then add an entry for each provided entity
-        else {
-          newTrendSnapshot.entitySnapshots.forEach((newEntitySnapshot: EntitySnapshot) => {
-            const existingEntitySnapshot: EntitySnapshot | undefined = existingTrendSnapshot.entitySnapshots.find((entitySnapshot: EntitySnapshot) => entitySnapshot.entityName === newEntitySnapshot.entityName);
-            if(!existingEntitySnapshot) existingTrendSnapshot.entitySnapshots.push(newEntitySnapshot);
-            else {
-              // Already recorded moods for the given entity
-            }
-          })
-        }
+        // // 4. Add new TrendSnapshot to the TrendDay's snapshots if it is not already recorded
+        // const existingTrendSnapshot: TrendSnapshot | undefined = day.trendSnapshots.find((trendSnapshot: TrendSnapshot) => trendSnapshot.trendName === newTrendSnapshot.trendName);
+        // // 4.1. First entry for given trend
+        // if(!existingTrendSnapshot) day.trendSnapshots.push(newTrendSnapshot);
+        // // 4.2. If is a new Trend, then add an entry for each provided entity
+        // else {
+        //   newTrendSnapshot.entitySnapshots.forEach((newEntitySnapshot: EntitySnapshot) => {
+        //     const existingEntitySnapshot: EntitySnapshot | undefined = existingTrendSnapshot.entitySnapshots.find((entitySnapshot: EntitySnapshot) => entitySnapshot.entityName === newEntitySnapshot.entityName);
+        //     if(!existingEntitySnapshot) existingTrendSnapshot.entitySnapshots.push(newEntitySnapshot);
+        //     else {
+        //       // Already recorded moods for the given entity
+        //     }
+        //   })
+        // }
     });
   }
 }
