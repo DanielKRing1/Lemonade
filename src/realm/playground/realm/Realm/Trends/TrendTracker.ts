@@ -65,31 +65,9 @@ export class TrendTracker {
   }
 
   public rate(realm: Realm, entities: string[], tags: string[], mood: string, rating: number, weights: null | number | number[], options: Dict<any>) {
-    // 1.1. Create TrendSnapshot for the TrendDay (The rating for each entity's' moods at the start of this day/ before rating the entities today)
-    const trendSnapshot: TrendSnapshot = {
-      // TrendSnapshot
-
-      trendName: this.trendBlueprint.getTrendName(),
-      entitySnapshots: entities.map((entityName: string) => ({
-        // EntitySnapshot
-
-        entityName,
-        moodSnapshots: this.trendBlueprint
-          .getProperties()
-          .map((basePropertyName: string) => TrendBlueprint.genPropertyKey(basePropertyName))
-          .map((moodName: string) => ({
-            // MoodSnapshot
-
-            moodName,
-            rating: this.nodeQ.get(realm, true, entityName)[0][moodName],
-          })),
-      })),
-    };
-
-    // 1.2. Update today's TrendDay
+    // 1. Update today's TrendDay
     const dayQOptions = {
       ...options,
-      trendSnapshot,
     };
     this.dayQ.rate(realm, entities, mood, rating, weights, dayQOptions);
 

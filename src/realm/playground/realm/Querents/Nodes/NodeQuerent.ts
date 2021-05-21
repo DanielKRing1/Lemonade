@@ -1,5 +1,6 @@
 //@ts-ignore
 import Realm from "realm";
+import { getTodaysDate } from "../../../util";
 import { Override } from "../../Base";
 
 import Querent from "../Base/Querent";
@@ -93,6 +94,28 @@ export default class NodeQuerent extends Querent<TrendNode> {
     // 4. Update mood values in Realm
     node[moodRatingKey] = newMoodRating;
     node[totalMoodRatingsCountKey] += weight;
+
+    // 5. Add/Update Node's Daily Snapshot with most up-to-date (current) snapshot of moods
+    // 5.1. Get the date at the start of today
+    const todaysDate: Date = getTodaysDate();
+
+    // 5.2. Create snapshot
+    // Hopefully this will automatically filter out
+    const newSnapshot: TrendNodeDailySnapshot | any = {
+      date: todaysDate,
+      ...node
+    }
+
+    // 5.3. Check existing snapshots, with the intent of removing an existing snapshot for today
+    const latestSnapshotIndex: number = node.dailySnapshots.length - 1;
+    if(latestSnapshotIndex >= 0) {
+      const latestSnapshot: TrendNodeDailySnapshot = node.dailySnapshots[latestSnapshotIndex];
+      // Already has a snapshot for today... Remove it!
+      if(latestSnapshot.date.getTime() === todaysDate.getTime()) node.dailySnapshots.pop();
+    }
+    
+    // 5.4. Add snapshot for today!
+    node.dailySnapshots.push(newSnapshot);
 
     return newMoodRating;
   }
