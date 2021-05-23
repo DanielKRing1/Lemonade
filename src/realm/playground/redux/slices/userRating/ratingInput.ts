@@ -37,10 +37,12 @@ const ratingInputSlice = createSlice({
 // 3. THUNKS
 
 export const startRate = createAsyncThunk(
-  'daysTracker/rateDay',
+  'ratingInput/startRate',
   async (args: RatingInputState, {dispatch, getState}): Promise<any> => {
     try {
+      // 1. Set rating inputs
       dispatch(ratingInputSlice.actions.rate(args));
+      // 2. Update UI
       dispatch(updateUI());
 
       return args;
