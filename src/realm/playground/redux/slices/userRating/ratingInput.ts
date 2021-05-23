@@ -1,4 +1,5 @@
-import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {updateUI} from '../updateUI';
 
 // 1. INITIAL STATE
 
@@ -16,7 +17,7 @@ const initialRatingInputState: RatingInputState = {
 
 // 2. SLICE
 
-export const ratingInputSlice = createSlice({
+const ratingInputSlice = createSlice({
   name: 'ratingInput',
   initialState: initialRatingInputState,
   reducers: {
@@ -33,9 +34,27 @@ export const ratingInputSlice = createSlice({
   extraReducers: {},
 });
 
+// 3. THUNKS
+
+export const startRate = createAsyncThunk(
+  'daysTracker/rateDay',
+  async (args: RatingInputState, {dispatch, getState}): Promise<any> => {
+    try {
+      dispatch(ratingInputSlice.actions.rate(args));
+      dispatch(updateUI());
+
+      return args;
+    } catch (err) {
+      console.log(`Thunk ratingInput.rate error: ${err}`);
+
+      return [];
+    }
+  },
+);
+
 // EXPORT ACTIONS
 
-export const {rate} = ratingInputSlice.actions;
+// export const {rate} = ratingInputSlice.actions;
 
 // EXPORT REDUCER
 

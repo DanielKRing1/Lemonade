@@ -12,7 +12,7 @@ export const updateUISlice = createSlice({
   name: 'updateUI',
   initialState: initialUpdateUIState,
   reducers: {
-    updateUI(state, action: PayloadAction<string>) {
+    updateUI(state, action: PayloadAction) {
       state.updateUI = {};
     },
   },
