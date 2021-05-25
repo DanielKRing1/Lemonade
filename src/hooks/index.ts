@@ -5,3 +5,6 @@ export * from './useStateEnum';
 export * from './useStateRange';
 
 export * from './useIndexCycle';
+
+export * from './useActiveIndex';
+export * from './useActiveIndexWIdle';

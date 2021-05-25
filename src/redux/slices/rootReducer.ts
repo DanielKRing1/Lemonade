@@ -1,8 +1,6 @@
 import {combineReducers} from 'redux';
-import dayPartInputReducer from './dayPartInput';
-import daysTrackerReducer from './daysTracker';
+import updateUIReducer from './uiManagement/updateUI';
 
 export default combineReducers({
-  dayPart: dayPartInputReducer,
-  days: daysTrackerReducer,
+  updateUI: updateUIReducer,
 });

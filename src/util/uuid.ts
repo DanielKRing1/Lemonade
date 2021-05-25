@@ -2,9 +2,9 @@ const CHARACTERS = `ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567
 const CHARS_LENGTH = CHARACTERS.length;
 
 export const uuid = (length: number): string => {
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        result += CHARACTERS.charAt(Math.floor(Math.random() * CHARS_LENGTH));
-    }
-    return result;
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += CHARACTERS.charAt(Math.floor(Math.random() * CHARS_LENGTH));
+  }
+  return result;
 };
