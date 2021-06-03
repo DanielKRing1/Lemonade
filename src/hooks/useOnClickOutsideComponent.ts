@@ -1,40 +1,40 @@
-# Implementation
+import {useCallback, useContext, useEffect, useRef, useState} from 'react';
+import {GestureResponderEvent} from 'react-native';
 
-import {useContext, useEffect, useRef, useState} from 'react';
+import {ClickListenerContext} from '../components/Global/ClickListener';
 
-import {ClickListenerContext} from '../components/ClickListener';
-
-export const useOnClickOutsideComponent = (listenerId) => {
+export const useOnClickOutsideComponent = (listenerId: string) => {
   const [clickedInside, setClickedInside] = useState(false);
   const [clickedInsideCount, setClickedInsideCount] = useState(0);
 
-  const { addClickListener, rmClickListener } = useContext(ClickListenerContext);
-
   const ref = useRef();
+  const {addClickListener, rmClickListener} = useContext(ClickListenerContext);
 
-  const handleClick = (e) => {
-    if (ref.current && ref.current.contains(e.target)) {
-      setClickedInside(true);
-      setClickedInsideCount(clickedInsideCount + 1);
-    } else reset();
-  }
+  const handleClick = useCallback(
+    (e: GestureResponderEvent) => {
+      if (ref && ref.current && ref.current.contains(e.target)) {
+        setClickedInside(true);
+        setClickedInsideCount(clickedInsideCount + 1);
+      } else reset();
+    },
+    [clickedInsideCount],
+  );
+
+  useEffect(() => {
+    addClickListener(listenerId, handleClick);
+
+    return () => rmClickListener(listenerId);
+  }, [addClickListener, handleClick, listenerId, ref, rmClickListener]);
 
   const reset = () => {
     setClickedInside(false);
     setClickedInsideCount(0);
   };
 
-  useEffect(() => {
-    addClickListener(listenerId, handleClick);
-
-    rmClickListener(listenerId);
-  }, [ref, ref.current]);
-
   return {
     ref,
     clickedInside,
     clickedInsideCount,
-    reset
-  }
-
-}
+    reset,
+  };
+};

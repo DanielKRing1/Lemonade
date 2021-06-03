@@ -1,17 +1,17 @@
-// Init
-const [sizeLeft, onLayoutLeft] = useComponentSize();
-const [sizeRight, onLayoutRight] = useComponentSize();
-  
-// Use
-<LeftCard handlePress={() => handlePress(0)} w={getIndexValue(0).width} h={getIndexValue(0).height} x={sizeLeft.width / 2} onLayout={onLayoutLeft}>
+import {useCallback, useState} from 'react';
+import {LayoutChangeEvent} from 'react-native';
 
-  const useComponentSize = () => {
-  const [size, setSize] = React.useState({width: 0, height: 0});
+type Size = {
+  width: number;
+  height: number;
+};
 
-// Apply
-  const onLayout = React.useCallback(event => {
-    const { width, height } = event.nativeEvent.layout;
-    setSize({ width, height });
+export const useComponentSize = () => {
+  const [size, setSize] = useState<Size>({width: 0, height: 0});
+
+  const onLayout = useCallback((event: LayoutChangeEvent) => {
+    const {width, height} = event.nativeEvent.layout;
+    setSize({width, height});
   }, []);
 
   return [size, onLayout];
