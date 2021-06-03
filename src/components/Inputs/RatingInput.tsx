@@ -1,19 +1,22 @@
-import React, {FC} from 'react';
-import {Dimensions, Text, TouchableOpacity, View, StyleSheet} from 'react-native';
+import React from 'react';
+import {Dimensions, Text, View, StyleSheet} from 'react-native';
 
 // 3rd party libs
 import styled from 'styled-components/native';
 import Animated, {withTiming, Easing, useAnimatedStyle, useSharedValue} from 'react-native-reanimated';
 
 // Hooks
-import {useActiveIndexWIdle} from '../../hooks';
+import {useActiveIndexWIdle, useComponentSize} from '../../hooks';
 
 export default function App() {
-  console.log('abbbbc');
-  console.log(Dimensions.get('window').width);
+  // Init
+  console.log('calling');
+  const {size: sizeLeft, onLayout: onLayoutLeft} = useComponentSize();
+  const {size: sizeRight, onLayout: onLayoutRight} = useComponentSize();
+
   const ACTIVE_VAL_DIM = {
-    width: Dimensions.get('window').width / 100,
-    height: Dimensions.get('window').height / 100,
+    width: Dimensions.get('window').width / 200,
+    height: Dimensions.get('window').height / 200,
   };
   const INACTIVE_VAL_DIM = {
     width: 0.5,
@@ -25,28 +28,34 @@ export default function App() {
   };
   const ACTIVE_VAL_POS = [
     {
-      translateX: 10,
-      translateY: 10,
+      translateX: -sizeLeft.width / 2,
+      translateY: 0,
     },
     {
-      translateX: -10,
-      translateY: 10,
+      translateX: sizeRight.width / 2,
+      translateY: 0,
     },
   ];
   const INACTIVE_VAL_POS = [
     {
-      translateX: -20,
-      translateY: -20,
+      translateX: -sizeLeft.width / 2,
+      translateY: 0,
     },
     {
-      translateX: 20,
-      translateY: -20,
+      translateX: sizeRight.width / 2,
+      translateY: 0,
     },
   ];
-  const IDLE_VAL_POS = {
-    translateX: 0,
-    translateY: 0,
-  };
+  const IDLE_VAL_POS = [
+    {
+      translateX: -sizeLeft.width / 2,
+      translateY: 0,
+    },
+    {
+      translateX: sizeRight.width / 2,
+      translateY: 0,
+    },
+  ];
   const {activeIndex: activeIndexDim, updateIndex: updateIndexDim, getIndexValue: getIndexValueDim, setToIdle: setToIdleDim} = useActiveIndexWIdle(ACTIVE_VAL_DIM, INACTIVE_VAL_DIM, IDLE_VAL_DIM);
   const {activeIndex: activeIndexPos, updateIndex: updateIndexPos, getIndexValue: getIndexValuePos, setToIdle: setToIdlePos} = useActiveIndexWIdle(ACTIVE_VAL_POS, INACTIVE_VAL_POS, IDLE_VAL_POS);
 
@@ -62,62 +71,84 @@ export default function App() {
   const handlePress = (index) => {
     if (index === activeIndexDim) {
       setToIdle();
-    } else updateIndex(index);
+    } else {
+      updateIndex(index);
+    }
   };
 
-  console.log('this');
-  console.log(getIndexValueDim(1));
-
   return (
-    <View>
+    <CenterView>
       <FlexRow>
-        <Card handlePress={() => handlePress(0)} w={getIndexValue(0).width} h={getIndexValue(0).height}>
+        <Card
+          handlePress={() => handlePress(0)}
+          w={getIndexValueDim(0).width}
+          h={getIndexValueDim(0).height}
+          x={getIndexValuePos(0).translateX}
+          y={getIndexValuePos(0).translateY}
+          onLayout={onLayoutLeft}>
           <Text>Hi</Text>
         </Card>
-        <Card handlePress={() => handlePress(1)} w={getIndexValue(1).width} h={getIndexValue(1).height}>
+
+        <Card
+          handlePress={() => handlePress(1)}
+          w={getIndexValueDim(1).width}
+          h={getIndexValueDim(1).height}
+          x={getIndexValuePos(1).translateX}
+          y={getIndexValuePos(1).translateY}
+          onLayout={onLayoutRight}>
           <Text>Hi</Text>
         </Card>
       </FlexRow>
-    </View>
+    </CenterView>
   );
 }
 
-const Card = (props) => {
-  const {children, handlePress, w, h} = props;
+const CenterView = styled.View`
+  margin: 0 0 0 100px;
+`;
 
-  console.log(`Box width: ${w}, height: ${h}`);
+const Card = (props) => {
+  const {children, handlePress, w, h, x = 0, y = 0, onLayout} = props;
+
+  // console.log(`Box width: ${w}, height: ${h}`);
+  // console.log(`Box translate x: ${x}, translate y: ${y}`);
 
   const width = useSharedValue(w);
   const height = useSharedValue(h);
+  const widthReverse = useSharedValue(1 / w);
+  const heightReverse = useSharedValue(1 / h);
 
-  const width2 = useSharedValue(1 / w);
-  const height2 = useSharedValue(1 / h);
+  const translateX = useSharedValue(x);
+  const translateY = useSharedValue(y);
 
   React.useEffect(() => {
-    console.log('useEffect');
-    console.log(width);
-    console.log(height);
-
     width.value = withTiming(w, {
       duration: 250,
       easing: Easing.inOut(Easing.exp),
     });
-
     height.value = withTiming(h, {
       duration: 250,
       easing: Easing.inOut(Easing.exp),
     });
-
-    width2.value = withTiming(1 / w, {
+    widthReverse.value = withTiming(1 / w, {
+      duration: 250,
+      easing: Easing.inOut(Easing.exp),
+    });
+    heightReverse.value = withTiming(1 / h, {
       duration: 250,
       easing: Easing.inOut(Easing.exp),
     });
 
-    height2.value = withTiming(1 / h, {
+    translateX.value = withTiming(x, {
       duration: 250,
       easing: Easing.inOut(Easing.exp),
     });
-  }, [w, h]);
+    translateY.value = withTiming(y, {
+      duration: 250,
+      easing: Easing.inOut(Easing.exp),
+    });
+  }, [w, h, x, y, width, height, widthReverse.value, heightReverse.value, translateX.value, translateY.value]);
+
   const customSpringStyles = useAnimatedStyle(() => {
     return {
       transform: [
@@ -127,31 +158,45 @@ const Card = (props) => {
         {
           scaleY: height.value,
         },
+        {
+          translateX: translateX.value,
+        },
+        {
+          translateY: translateY.value,
+        },
       ],
     };
-  });
+  }, [w, h, x, y]);
 
   const customSpringStyles2 = useAnimatedStyle(() => {
     return {
       transform: [
         {
-          scaleX: width2.value,
+          scaleX: widthReverse.value,
         },
         {
-          scaleY: height2.value,
+          scaleY: heightReverse.value,
         },
       ],
     };
+  }, [w, h, x, y]);
+
+  var styles = StyleSheet.create({
+    negateTranslations: {
+      transform: [{translateX: -x}, {translateY: -y}],
+    },
   });
 
   return (
-    <StyledContainer style={[customSpringStyles]}>
-      <Animated.View style={[customSpringStyles2]}>
-        <StyledTouchableNativeFeedback onPress={handlePress}>
-          <View>{children}</View>
-        </StyledTouchableNativeFeedback>
-      </Animated.View>
-    </StyledContainer>
+    <View style={styles.negateTranslations}>
+      <StyledContainer style={[customSpringStyles]} onLayout={onLayout}>
+        <Animated.View style={[customSpringStyles2]}>
+          <StyledTouchableNativeFeedback onPress={handlePress}>
+            <View>{children}</View>
+          </StyledTouchableNativeFeedback>
+        </Animated.View>
+      </StyledContainer>
+    </View>
   );
 };
 
