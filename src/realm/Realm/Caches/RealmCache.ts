@@ -86,7 +86,7 @@ export class RealmCache extends Singleton(Cache)<Realm> implements Loadable {
     // TODO Make utility for this
     // Index SchemaBlueprints by realmPath
     // 2. Prepare Data Structure to organize all loaded SchemaBlueprints by realmPath
-    const schemasIndexedByRealmPath: Dict<Array<SchemaBlueprint>> = {};
+    const schemasIndexedByRealmPath: Dict<SchemaBlueprint[]> = {};
 
     // 3. Convert all loaded TrendBlueprints to SchemaBlueprints
     for (const trendBlueprint of loadedBlueprints[BlueprintNameEnum.Trend]) {

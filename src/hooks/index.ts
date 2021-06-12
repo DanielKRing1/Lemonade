@@ -8,3 +8,6 @@ export * from './useIndexCycle';
 
 export * from './useActiveIndex';
 export * from './useActiveIndexWIdle';
+
+export * from './useComponentSize';
+export * from './useOnClickOutsideComponent';

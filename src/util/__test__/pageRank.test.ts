@@ -188,6 +188,8 @@ describe('PageRank algorithm', () => {
     };
 
     // expect(weightedMap).toBe(expectedWeightedMap);
+
+    console.log(weightedMap);
   });
 });
 

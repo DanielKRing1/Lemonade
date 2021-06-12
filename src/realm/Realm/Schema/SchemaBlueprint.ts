@@ -67,6 +67,9 @@ export class SchemaBlueprint implements SchemaBlueprintObj {
     };
   }
 
+  //   GET EXISTING SCHEMAS FROM SOME KNOWN METADATA SCHEMA
+  public getSchemas(realm: Realm, schemaName: string): SchemaBlueprint[] {}
+
   //   SAVE
 
   static save(realm: Realm, schemaName: string, realmPath: string, schemaType: SchemaTypeEnum, schemaDef: Realm.ObjectSchema): SchemaBlueprint {

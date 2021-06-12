@@ -14,5 +14,5 @@ export const useComponentSize = () => {
     setSize({width, height});
   }, []);
 
-  return [size, onLayout];
+  return {size, onLayout};
 };

@@ -1,15 +1,18 @@
 import 'react-native-gesture-handler';
 
+import React from 'react';
+
 // Redux store
 import {Provider} from 'react-redux';
 import store from '../redux/store';
 
 // For registering app
 import {AppRegistry, Platform} from 'react-native';
-import {name as appName} from '../../../../app.json';
+import {name as appName} from '../../app.json';
 
 import AppNav from './AppNav';
 import {FC} from 'react';
+import {ClickListener} from '../components/Global/ClickListener';
 
 // Platform specific setup
 switch (Platform.OS) {
@@ -24,9 +27,11 @@ switch (Platform.OS) {
 
 // 1. Add Redux to React UI
 const App: FC = (props) => (
-  <Provider store={store}>
-    <AppNav />
-  </Provider>
+  <ClickListener>
+    <Provider store={store}>
+      <AppNav />
+    </Provider>
+  </ClickListener>
 );
 
 // 2. Register app
