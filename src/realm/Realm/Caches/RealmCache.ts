@@ -1,9 +1,7 @@
 import {Cache, Loadable, Loader, LoadParams, Singleton, Override, Implement} from '../../Base';
 import {SchemaBlueprint} from '../Schema/SchemaBlueprint';
 
-import {TrendCache} from './TrendCache';
-
-import {DEFAULT_PATH} from '../../../../../constants';
+import {DEFAULT_PATH} from '../../../constants';
 import {TrendBlueprint} from '../Trends/TrendBlueprint';
 
 /**
