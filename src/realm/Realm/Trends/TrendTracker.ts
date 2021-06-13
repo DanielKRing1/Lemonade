@@ -1,6 +1,6 @@
 import NodeQuerent from '../../Querents/Nodes/NodeQuerent';
 import DenseEdgeQuerent from '../../Querents/Edges/DenseEdgeQuerent';
-import {TrendBlueprint} from './TrendBlueprints';
+import {TrendBlueprint} from './TrendBlueprint';
 import DayQuerent from '../../Querents/Day/DayQuerent';
 // TODO Add Querent for Days
 // import DPSeqRelQuerent from '../../../../Querents/DayPartSeqRelQuerent';

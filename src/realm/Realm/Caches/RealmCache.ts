@@ -4,7 +4,7 @@ import {SchemaBlueprint} from '../Schema/SchemaBlueprint';
 import {TrendCache} from './TrendCache';
 
 import {DEFAULT_PATH} from '../../../../../constants';
-import {TrendBlueprint} from '../Trends/TrendBlueprints';
+import {TrendBlueprint} from '../Trends/TrendBlueprint';
 
 /**
  * A SINGLETON CACHE that caches all open Realm connections

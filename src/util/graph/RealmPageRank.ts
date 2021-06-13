@@ -1,4 +1,4 @@
-import {TrendBlueprint} from '../../realm/Realm/Trends/TrendBlueprints';
+import {TrendBlueprint} from '../../realm/Realm/Trends/TrendBlueprint';
 import * as DictUtil from '../dictionary/Operations';
 import {getInitialWeights, redistributeWeight, pageRank} from './pageRank';
 

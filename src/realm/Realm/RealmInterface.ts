@@ -4,7 +4,7 @@ import {RealmCache, SchemaCache, TrendCache} from './Caches';
 import {RealmUtils} from './Utility';
 
 import {SchemaBlueprint} from './Schema/SchemaBlueprint';
-import {TrendBlueprint} from './Trends/TrendBlueprints';
+import {TrendBlueprint} from './Trends/TrendBlueprint';
 import {TrendTracker} from './Trends';
 import NodeQuerent from '../Querents/Nodes/NodeQuerent';
 import EdgeQuerent from '../Querents/Base/EdgeQuerent';

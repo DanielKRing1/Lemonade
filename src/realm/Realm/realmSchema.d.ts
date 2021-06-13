@@ -60,7 +60,7 @@ declare enum SchemaTypeEnum {
 // Blueprint names
 // Only contains TrendBlueprint atm
 declare type LoadedBlueprints = {
-  [BlueprintNameEnum.Trend]: import('./Trends/TrendBlueprints').TrendBlueprint[];
+  [BlueprintNameEnum.Trend]: import('./Trends/TrendBlueprint').TrendBlueprint[];
 };
 
 declare enum BlueprintNameEnum {

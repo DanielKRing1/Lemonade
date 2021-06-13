@@ -1,7 +1,7 @@
 import {filterDict} from '../dictionary/Operations';
 import {getInitialWeights, pageRank, redistributeWeight} from '../graph/pageRank';
 import * as DictUtil from '../dictionary/Operations';
-import {TrendBlueprint} from '../../realm/Realm/Trends/TrendBlueprints';
+import {TrendBlueprint} from '../../realm/Realm/Trends/TrendBlueprint';
 
 describe('PageRank algorithm', () => {
   beforeAll(async () => {});

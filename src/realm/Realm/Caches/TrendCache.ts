@@ -1,7 +1,7 @@
 import {Cache, LoadParams, Singleton, Override, Implement} from '../../Base';
 
 import {TrendTracker} from '../Trends';
-import {TrendBlueprint} from '../Trends/TrendBlueprints';
+import {TrendBlueprint} from '../Trends/TrendBlueprint';
 
 /**
  * A SINGLETON CACHE that caches all TrendSchemas and their TrendTracker

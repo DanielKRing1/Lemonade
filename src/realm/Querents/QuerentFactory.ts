@@ -4,7 +4,7 @@
 // 3. Construct Node and Edge Querents for new TrendTracker, within TT
 
 import {SchemaBlueprint} from '../Realm/Schema/SchemaBlueprint';
-import {TrendBlueprint} from '../Realm/Trends/TrendBlueprints';
+import {TrendBlueprint} from '../Realm/Trends/TrendBlueprint';
 import EdgeQuerent from './Base/EdgeQuerent';
 
 export class QuerentFactory {
