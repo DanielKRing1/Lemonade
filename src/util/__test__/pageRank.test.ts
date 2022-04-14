@@ -25,7 +25,7 @@ describe('PageRank algorithm', () => {
       attrB: number;
     };
 
-    const nodes: Dict<Node> = {
+    const nodes1: Dict<Node> = {
       a: {
         name: 'a',
         rels: ['ab', 'ca', 'da', 'ae'],
@@ -58,8 +58,8 @@ describe('PageRank algorithm', () => {
       },
     };
 
-    const allNodes: Node[] = Object.values(nodes);
-    const edges: Dict<Edge> = {
+    const allNodes1: Node[] = Object.values(nodes1);
+    const edges1: Dict<Edge> = {
       ab: {
         id: 'ab',
         node1: 'a',
@@ -108,6 +108,71 @@ describe('PageRank algorithm', () => {
         node2: 'e',
         attrA: 3,
         attrB: 3,
+      },
+    };
+
+    const nodes: Dict<Node> = {
+      a: {
+        name: 'center',
+        rels: ['center1', 'center2', 'center3', 'center4'],
+        attrA: 0.1,
+        attrB: 0.1,
+      },
+      b: {
+        name: 'n1',
+        rels: ['center1'],
+        attrA: 100,
+        attrB: 100,
+      },
+      c: {
+        name: 'n2',
+        rels: ['center2'],
+        attrA: 100,
+        attrB: 100,
+      },
+      d: {
+        name: 'n3',
+        rels: ['center3'],
+        attrA: 100,
+        attrB: 100,
+      },
+      e: {
+        name: 'n4',
+        rels: ['center4'],
+        attrA: 100,
+        attrB: 100,
+      },
+    };
+
+    const allNodes: Node[] = Object.values(nodes);
+    const edges: Dict<Edge> = {
+      center1: {
+        id: 'center1',
+        node1: 'center',
+        node2: '1',
+        attrA: 0.6,
+        attrB: 0.6,
+      },
+      center2: {
+        id: 'center2',
+        node1: 'center',
+        node2: '2',
+        attrA: 0.8,
+        attrB: 0.8,
+      },
+      center3: {
+        id: 'center3',
+        node1: 'center',
+        node2: '3',
+        attrA: 1,
+        attrB: 1,
+      },
+      center4: {
+        id: 'center4',
+        node1: 'center',
+        node2: '4',
+        attrA: 1.2,
+        attrB: 1.2,
       },
     };
     const getNodeId = (node: Node) => node.name;
@@ -281,9 +346,9 @@ describe('PageRank algorithm', () => {
     const DAMPING_FACTOR: number = 0.8;
 
     const getNodeId = (node: TrendNode) => node.id;
-    const getNodeAttrs = (node: TrendNode): Dict<number> => (DictUtil.copyDictKeep(node, TREND_BLUEPRINT.getProperties()) as unknown) as Dict<number>;
+    const getNodeAttrs = (node: TrendNode): Dict<number> => DictUtil.copyDictKeep(node, TREND_BLUEPRINT.getProperties()) as unknown as Dict<number>;
     const getEdges = (node: TrendNode): TrendEdge[] => node.edges.map((edgeId: string) => TREND_EDGES_DICT[edgeId]);
-    const getEdgeAttrs = (edge: TrendEdge): Dict<number> => (DictUtil.copyDictKeep(edge, TREND_BLUEPRINT.getProperties()) as unknown) as Dict<number>;
+    const getEdgeAttrs = (edge: TrendEdge): Dict<number> => DictUtil.copyDictKeep(edge, TREND_BLUEPRINT.getProperties()) as unknown as Dict<number>;
     const getDestinationNode = (node: TrendNode, edge: TrendEdge): TrendNode => {
       const destinationNodeId: string = edge.nodes.filter((nodeId: string) => nodeId !== getNodeId(node))[0];
 
@@ -295,5 +360,7 @@ describe('PageRank algorithm', () => {
     const redistributedWeights = redistributeWeight(initialMap, TARGET_CENTRAL_WEIGHT, CENTRAL_NODE_IDS);
 
     const weightedMap: Dict<Dict<number>> = pageRank(redistributedWeights, TREND_NODES, getNodeId, getEdges, getEdgeAttrs, getDestinationNode, ITERATIONS, DAMPING_FACTOR);
+
+    console.log(weightedMap);
   });
 });

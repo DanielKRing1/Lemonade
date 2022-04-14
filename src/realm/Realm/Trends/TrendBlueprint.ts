@@ -1,22 +1,10 @@
-import {SchemaBlueprint} from '../Schema/SchemaBlueprint';
+import {MetaDataBlueprint} from '../Schema/MetaDataBlueprint';
 import {DEFAULT_PATH} from '../../../constants';
 import {ObjectBuilder} from '../../../util';
+import {Override} from '../../Base';
 
-export class TrendBlueprint {
-  // FOR SAVING/LOADING TRENDSCHEMABLUEPRINTS TO/FROM REALM
-
-  public static SCHEMA_BLUEPRINT_SCHEMA_DEF: Realm.ObjectSchema = {
-    name: BlueprintNameEnum.Trend,
-    primaryKey: 'trendName',
-    properties: {
-      trendName: 'string',
-      realmPath: 'string',
-      properties: 'string[]',
-    },
-  };
-  public static SCHEMA_BLUEPRINT: SchemaBlueprint = new SchemaBlueprint(BlueprintNameEnum.Trend, DEFAULT_PATH, SchemaTypeEnum.Blueprint, TrendBlueprint.SCHEMA_BLUEPRINT_SCHEMA_DEF);
-
-  // GENERATE PREDICTABLE NAMES FOR NEW SCHEMABLUEPRINTS
+export class TrendBlueprint extends MetaDataBlueprint {
+  // GENERATE PREDICTABLE NAMES FOR A NEW TREND'S SCHEMABLUEPRINTS
 
   public static genPropertyKey(propertyName: string): string {
     return `${propertyName}`;
@@ -25,21 +13,21 @@ export class TrendBlueprint {
     return `${propertyName}_${TrendPropertySuffix.Count}`;
   }
 
-  public static genSchemaName(trendName: string, schemaType: SchemaTypeEnum) {
-    switch (schemaType) {
-      case SchemaTypeEnum.TREND_NODE:
+  public static genSchemaName(trendName: string, trendSchemaType: TrendSchemaType) {
+    switch (trendSchemaType) {
+      case TrendSchemaType.TREND_NODE:
         return `${trendName}_${TrendNameSuffix.Node}`;
 
-      case SchemaTypeEnum.TREND_EDGE:
+      case TrendSchemaType.TREND_EDGE:
         return `${trendName}_${TrendNameSuffix.Edge}`;
 
-      case SchemaTypeEnum.TAG_NODE:
+      case TrendSchemaType.TAG_NODE:
         return `${trendName}_${TrendNameSuffix.Tag}_${TrendNameSuffix.Node}`;
 
-      case SchemaTypeEnum.TAG_EDGE:
+      case TrendSchemaType.TAG_EDGE:
         return `${trendName}_${TrendNameSuffix.Tag}_${TrendNameSuffix.Edge}`;
 
-      case SchemaTypeEnum.NODE_DAILY_SNAPSHOT:
+      case TrendSchemaType.NODE_DAILY_SNAPSHOT:
         return `${trendName}_${TrendNameSuffix.NodeDailySnapshot}`;
 
       // case SchemaTypeEnum.DAILY_SNAPSHOTS:
@@ -52,16 +40,18 @@ export class TrendBlueprint {
     return `${trendName}_Unknown`;
   }
 
-  private trendName: string;
-  private realmPath: string;
   private properties: string[];
 
   private existingTrendEntities: string[];
   private existingTrendTags: string[];
 
   constructor(trendName: string, realmPath: string, properties: string[], existingTrendEntities: string[] = [], existingTrendTags: string[] = []) {
-    this.trendName = trendName;
-    this.realmPath = realmPath;
+    super(trendName, realmPath, BlueprintTypeEnum.TREND, {
+      properties,
+      existingTrendEntities,
+      existingTrendTags,
+    });
+
     this.properties = properties;
 
     this.existingTrendEntities = existingTrendEntities;
@@ -173,14 +163,14 @@ export class TrendBlueprint {
 
   // SCHEMABLUEPRINT SERIALIZE UTILS
 
-  public toSchemaBlueprints(): CompleteTrendSB {
+  public toTrendSchemaBlueprints(): CompleteTrendOS {
     // // 1. Get NodeMoodSnapshot Schema
-    // const nodeMoodSnapshotName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.MOOD_SNAPSHOT);
-    // const nodeMoodSnapshotSB: SchemaBlueprint = new SchemaBlueprint(nodeMoodSnapshotName, this.realmPath, SchemaTypeEnum.DAILY_SNAPSHOTS, this.genTrendMoodSnapshotSchemaDef(nodeMoodSnapshotName));
+    // const nodeMoodSnapshotName: string = TrendBlueprint.genSchemaName(this.schemaName, SchemaTypeEnum.MOOD_SNAPSHOT);
+    // const nodeMoodSnapshotSB: MetaDataBlueprint = new MetaDataBlueprint(nodeMoodSnapshotName, this.realmPath, SchemaTypeEnum.DAILY_SNAPSHOTS, this.genTrendMoodSnapshotSchemaDef(nodeMoodSnapshotName));
 
     // // 2. Get NodeDailySnapshot Schema
-    // const nodeDailySnapshotName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.DAILY_SNAPSHOTS);
-    // const nodeDailySnapshotSB: SchemaBlueprint = new SchemaBlueprint(
+    // const nodeDailySnapshotName: string = TrendBlueprint.genSchemaName(this.schemaName, SchemaTypeEnum.DAILY_SNAPSHOTS);
+    // const nodeDailySnapshotSB: MetaDataBlueprint = new MetaDataBlueprint(
     //   nodeDailySnapshotName,
     //   this.realmPath,
     //   SchemaTypeEnum.DAILY_SNAPSHOTS,
@@ -188,38 +178,33 @@ export class TrendBlueprint {
     // );
 
     // 1. Get Trend Node Daily Snapshot Schema
-    const trendNodeDailySnapshotName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.NODE_DAILY_SNAPSHOT);
-    const trendNodeDailySnapshotSB: SchemaBlueprint = new SchemaBlueprint(
-      trendNodeDailySnapshotName,
-      this.realmPath,
-      SchemaTypeEnum.NODE_DAILY_SNAPSHOT,
-      this.genTrendNodeDailySnapshotSchemaDef(trendNodeDailySnapshotName),
-    );
+    const trendNodeDailySnapshotName: string = TrendBlueprint.genSchemaName(this.schemaName, TrendSchemaType.NODE_DAILY_SNAPSHOT);
+    const trendNodeDailySnapshotOS: Realm.ObjectSchema = this.genTrendNodeDailySnapshotSchemaDef(trendNodeDailySnapshotName);
 
     // 2. Get Trend Node Schema
-    const trendNodeName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.TREND_NODE);
-    const trendNodeSB: SchemaBlueprint = new SchemaBlueprint(trendNodeName, this.realmPath, SchemaTypeEnum.TREND_NODE, this.genTrendNodeSchemaDef(trendNodeName, trendNodeDailySnapshotName));
+    const trendNodeName: string = TrendBlueprint.genSchemaName(this.schemaName, TrendSchemaType.TREND_NODE);
+    const trendNodeOS: Realm.ObjectSchema = this.genTrendNodeSchemaDef(trendNodeName, trendNodeDailySnapshotName);
 
     // 3. Get Trend Edge Schema
-    const trendEdgeName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.TREND_EDGE);
-    const trendEdgeSB: SchemaBlueprint = new SchemaBlueprint(trendEdgeName, this.realmPath, SchemaTypeEnum.TREND_EDGE, this.genTrendEdgeSchemaDef(trendEdgeName));
+    const trendEdgeName: string = TrendBlueprint.genSchemaName(this.schemaName, TrendSchemaType.TREND_EDGE);
+    const trendEdgeOS: Realm.ObjectSchema = this.genTrendEdgeSchemaDef(trendEdgeName);
 
     // 4. Get Trend Tag Node Schema
-    const tagNodeName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.TAG_NODE);
-    const tagNodeSB: SchemaBlueprint = new SchemaBlueprint(tagNodeName, this.realmPath, SchemaTypeEnum.TAG_NODE, this.genTrendNodeSchemaDef(tagNodeName, trendNodeDailySnapshotName));
+    const tagNodeName: string = TrendBlueprint.genSchemaName(this.schemaName, TrendSchemaType.TAG_NODE);
+    const tagNodeOS: Realm.ObjectSchema = this.genTrendNodeSchemaDef(tagNodeName, trendNodeDailySnapshotName);
 
     // 5. Get Trend Tag Edge Schema
-    const tagEdgeName: string = TrendBlueprint.genSchemaName(this.trendName, SchemaTypeEnum.TAG_EDGE);
-    const tagEdgeSB: SchemaBlueprint = new SchemaBlueprint(tagEdgeName, this.realmPath, SchemaTypeEnum.TAG_EDGE, this.genTrendEdgeSchemaDef(tagEdgeName));
+    const tagEdgeName: string = TrendBlueprint.genSchemaName(this.schemaName, TrendSchemaType.TAG_EDGE);
+    const tagEdgeOS: Realm.ObjectSchema = this.genTrendEdgeSchemaDef(tagEdgeName);
 
     // 6. Compile and return
     return {
-      [SchemaTypeEnum.TREND_NODE]: trendNodeSB,
-      [SchemaTypeEnum.TAG_NODE]: trendEdgeSB,
-      [SchemaTypeEnum.TREND_EDGE]: tagNodeSB,
-      [SchemaTypeEnum.TAG_EDGE]: tagEdgeSB,
+      [TrendSchemaType.TREND_NODE]: trendNodeOS,
+      [TrendSchemaType.TAG_NODE]: trendEdgeOS,
+      [TrendSchemaType.TREND_EDGE]: tagNodeOS,
+      [TrendSchemaType.TAG_EDGE]: tagEdgeOS,
 
-      [SchemaTypeEnum.NODE_DAILY_SNAPSHOT]: trendNodeDailySnapshotSB,
+      [TrendSchemaType.NODE_DAILY_SNAPSHOT]: trendNodeDailySnapshotOS,
       // [SchemaTypeEnum.DAILY_SNAPSHOTS]: nodeDailySnapshotSB,
       // [SchemaTypeEnum.MOOD_SNAPSHOT]: nodeMoodSnapshotSB,
     };
@@ -228,11 +213,7 @@ export class TrendBlueprint {
   // GETTERS
 
   public getTrendName(): string {
-    return this.trendName;
-  }
-
-  public getRealmPath(): string {
-    return this.realmPath;
+    return this.schemaName;
   }
 
   public getProperties(): string[] {
@@ -249,71 +230,89 @@ export class TrendBlueprint {
 
   // JSON/OBJECT DE/SERIALIZATION
 
-  static fromObj(obj: TrendBlueprintObj): TrendBlueprint {
-    const {trendName, realmPath, properties, existingTrendEntities, exisitingTrendTags} = obj;
+  @Override('Blueprint')
+  static fromObj(obj: BlueprintObj): TrendBlueprint {
+    const {schemaName, realmPath, schemaMetadata} = obj;
+    const {properties, existingTrendEntities, exisitingTrendTags} = schemaMetadata as TrendSchemaMetadata;
 
-    return new TrendBlueprint(trendName, realmPath, properties, existingTrendEntities);
+    return new TrendBlueprint(schemaName, realmPath, properties, existingTrendEntities, exisitingTrendTags);
   }
 
-  static fromRow(rowObj: TrendBlueprintRow): TrendBlueprint {
-    const {trendName, realmPath, properties, existingTrendEntities, exisitingTrendTags} = rowObj;
+  @Override('Blueprint')
+  static fromRow(rowObj: BlueprintRow): TrendBlueprint {
+    const {schemaName, realmPath, blueprintType, schemaMetadataStr} = rowObj;
+    const {properties, existingTrendEntities, exisitingTrendTags} = JSON.parse(schemaMetadataStr) as TrendSchemaMetadata;
 
-    const obj = {
-      trendName,
+    const obj: BlueprintObj = {
+      schemaName,
       realmPath,
-      properties,
-      existingTrendEntities,
-      exisitingTrendTags,
+      blueprintType,
+      schemaMetadata: {
+        properties,
+        existingTrendEntities,
+        exisitingTrendTags,
+      },
     };
 
     return TrendBlueprint.fromObj(obj);
   }
 
-  toObj(): TrendBlueprintObj {
+  @Override('Blueprint')
+  toObj(): BlueprintObj {
     return {
-      trendName: this.trendName,
+      schemaName: this.getTrendName(),
       realmPath: this.realmPath,
-      properties: this.properties,
-      existingTrendEntities: this.existingTrendEntities,
-      exisitingTrendTags: this.existingTrendTags,
+      blueprintType: BlueprintTypeEnum.TREND,
+      schemaMetadata: {
+        properties: this.properties,
+        existingTrendEntities: this.existingTrendEntities,
+        exisitingTrendTags: this.existingTrendTags,
+      },
     };
   }
 
-  toRow(): TrendBlueprintRow {
-    return {
-      trendName: this.trendName,
-      realmPath: this.realmPath,
+  @Override('Blueprint')
+  toRow(): BlueprintRow {
+    const schemaMetadataStr: string = JSON.stringify({
       properties: this.properties,
       existingTrendEntities: this.existingTrendEntities,
       exisitingTrendTags: this.existingTrendTags,
+    });
+
+    return {
+      schemaName: this.getTrendName(),
+      realmPath: this.realmPath,
+      blueprintType: BlueprintTypeEnum.TREND,
+      schemaMetadataStr,
     };
   }
 
   // SAVE TO/ DELETE FROM DISK UTILS
 
-  static save(defaultRealm: Realm, trendName: string, realmPath: string, properties: string[], existingTrendEntities: string[] = []): TrendBlueprint {
-    const trendBlueprint = new TrendBlueprint(trendName, realmPath, properties, existingTrendEntities);
+  @Override('Blueprint')
+  static save(defaultRealm: Realm, trendName: string, realmPath: string, properties: string[], existingTrendEntities: string[] = [], existingTrendTags: string[] = []): TrendBlueprint {
+    const trendBlueprint = new TrendBlueprint(trendName, realmPath, properties, existingTrendEntities, existingTrendTags);
     trendBlueprint.save(defaultRealm);
 
     return trendBlueprint;
   }
 
-  save(defaultRealm: Realm): TrendBlueprintRow {
-    const trendBlueprintRow: TrendBlueprintRow = this.toRow();
+  @Override('Blueprint')
+  save(defaultRealm: Realm): void {
+    const trendBlueprintRow: BlueprintRow = this.toRow();
 
     defaultRealm.write(() => {
-      defaultRealm.create(BlueprintNameEnum.Trend, trendBlueprintRow);
+      defaultRealm.create(BlueprintNameEnum.TREND, trendBlueprintRow);
     });
-
-    return trendBlueprintRow;
   }
 
+  @Override('Blueprint')
   delete(defaultRealm: Realm): boolean {
-    const primaryKey: string = this.trendName;
+    const primaryKey: string = this.schemaName;
 
     if (primaryKey) {
       defaultRealm.write(() => {
-        const realmObj: Realm.Results<any> | undefined = defaultRealm.objectForPrimaryKey(BlueprintNameEnum.Trend, primaryKey);
+        const realmObj: Realm.Results<any> | undefined = defaultRealm.objectForPrimaryKey(BlueprintNameEnum.TREND, primaryKey);
 
         if (realmObj) {
           defaultRealm.delete(realmObj);
@@ -325,6 +324,15 @@ export class TrendBlueprint {
 
     // No primary key or no entry found in realm
     return false;
+  }
+
+  @Override('Blueprint')
+  public getBlueprintType(): BlueprintTypeEnum {
+    return BlueprintTypeEnum.METADATA;
+  }
+  @Override('Blueprint')
+  public getSchemaDefs(): Realm.ObjectSchema[] {
+    return Object.values(this.toTrendSchemaBlueprints());
   }
 
   // High level disk operations

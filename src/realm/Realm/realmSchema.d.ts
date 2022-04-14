@@ -2,30 +2,28 @@
 declare type RealmPath = string;
 declare type SchemaName = string;
 
-// User Defined Object Definitions
-declare interface SchemaBlueprintObj {
+declare interface BlueprintObj {
   schemaName: string;
   realmPath: string;
-  schemaType: SchemaTypeEnum;
-  schemaDef: Realm.ObjectSchema;
+  blueprintType: BlueprintTypeEnum;
+  schemaMetadata: Dict<any>;
 }
-declare interface TrendBlueprintObj {
-  trendName: string;
-  realmPath: string;
+
+// User Defined Object Definitions
+declare interface SchemaBlueprintObj extends BlueprintObj {}
+declare interface TrendSchemaMetadata {
   properties: string[];
   existingTrendEntities: string[];
   exisitingTrendTags: string[];
 }
 
 // User Defined Table Definitions
-declare type SchemaBlueprintRow = {
+declare type BlueprintRow = {
   schemaName: string;
   realmPath: string;
-  schemaType: SchemaTypeEnum;
-  schemaStr: string;
+  blueprintType: BlueprintTypeEnum;
+  schemaMetadataStr: string;
 };
-
-declare type TrendBlueprintRow = TrendBlueprintObj;
 
 // Static Schema Names
 declare enum StaticSchemaName {
@@ -38,34 +36,41 @@ declare enum StaticSchemaName {
   TrendEntry = 'trend entry',
 }
 
-// Schema Types
-declare enum SchemaTypeEnum {
+// Schema Metadata Types
+declare enum BlueprintTypeEnum {
   // Schema, Trend, etc Blueprints
-  Blueprint = 'blueprint',
+  METADATA = 'metadata',
+
+  SCHEMA = 'schema',
 
   // Trends
+  TREND = 'trend',
+
+  // Other
+  Unknown = 'unknown',
+}
+
+// Trend Schema Types
+declare enum TrendSchemaType {
   TREND_NODE = 'trend_node',
   TAG_NODE = 'tag_node',
   TREND_EDGE = 'trend_edge',
   TAG_EDGE = 'tag_edge',
 
   NODE_DAILY_SNAPSHOT = 'node_daily_snapshot',
-  // DAILY_SNAPSHOTS = 'daily_snapshots',
-  // MOOD_SNAPSHOT = 'mood_snapshot',
-
-  // Other
-  Unknown = 'unknown',
 }
 
 // Blueprint names
 // Only contains TrendBlueprint atm
 declare type LoadedBlueprints = {
-  [BlueprintNameEnum.Trend]: import('./Trends/TrendBlueprint').TrendBlueprint[];
+  [BlueprintNameEnum.TREND]: import('./Trends/TrendBlueprint').TrendBlueprint[];
 };
 
+declare const METADATA_SCHEMA_NAME = 'metadata_schema';
+
 declare enum BlueprintNameEnum {
-  Schema = 'SchemaBlueprint',
-  Trend = 'TrendBlueprint',
+  METADATA = 'MetaDataBlueprint',
+  TREND = 'TrendBlueprint',
 }
 
 // Node and Edge Properties

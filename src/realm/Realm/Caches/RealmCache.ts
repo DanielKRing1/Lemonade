@@ -1,5 +1,5 @@
 import {Cache, Loadable, Loader, LoadParams, Singleton, Override, Implement} from '../../Base';
-import {SchemaBlueprint} from '../Schema/SchemaBlueprint';
+import {MetaDataBlueprint} from '../Schema/MetaDataBlueprint';
 
 import {DEFAULT_PATH} from '../../../constants';
 import {TrendBlueprint} from '../Trends/TrendBlueprint';
@@ -47,7 +47,7 @@ export class RealmCache extends Singleton(Cache)<Realm> implements Loadable {
    * @param valueParams
    */
   @Override('Cache')
-  public add(realmPath: string, valueParams: {schemaBlueprints: Array<SchemaBlueprint>; options?: any}): void {
+  public add(realmPath: string, valueParams: {schemaBlueprints: Array<MetaDataBlueprint>; options?: any}): void {
     const {schemaBlueprints, options} = valueParams;
     const newRealm = this._open(realmPath, schemaBlueprints, options);
 
@@ -84,10 +84,10 @@ export class RealmCache extends Singleton(Cache)<Realm> implements Loadable {
     // TODO Make utility for this
     // Index SchemaBlueprints by realmPath
     // 2. Prepare Data Structure to organize all loaded SchemaBlueprints by realmPath
-    const schemasIndexedByRealmPath: Dict<SchemaBlueprint[]> = {};
+    const schemasIndexedByRealmPath: Dict<MetaDataBlueprint[]> = {};
 
     // 3. Convert all loaded TrendBlueprints to SchemaBlueprints
-    for (const trendBlueprint of loadedBlueprints[BlueprintNameEnum.Trend]) {
+    for (const trendBlueprint of loadedBlueprints[BlueprintNameEnum.TREND]) {
       // 3.1. Init realmPath
       const realmPath = trendBlueprint.getRealmPath();
       if (!schemasIndexedByRealmPath.hasOwnProperty(realmPath)) schemasIndexedByRealmPath[realmPath] = [];
@@ -115,7 +115,7 @@ export class RealmCache extends Singleton(Cache)<Realm> implements Loadable {
   /**
    * Same as this.add for now
    */
-  public _loadOne(realmPath: string, params: {schemaBlueprints: Array<SchemaBlueprint>; options?: Dict<string>}) {
+  public _loadOne(realmPath: string, params: {schemaBlueprints: Array<MetaDataBlueprint>; options?: Dict<string>}) {
     const {schemaBlueprints, options} = params;
 
     this.add(realmPath, {
@@ -124,7 +124,7 @@ export class RealmCache extends Singleton(Cache)<Realm> implements Loadable {
     });
   }
 
-  private _open(realmPath: string, schemaBlueprints: Array<SchemaBlueprint>, options: any): Realm {
+  private _open(realmPath: string, schemaBlueprints: Array<MetaDataBlueprint>, options: any): Realm {
     const schemaDefinitions = schemaBlueprints.map((blueprint) => blueprint.schemaDef);
 
     const newRealm = new Realm({
@@ -154,13 +154,13 @@ class SchemaLoader extends Loader {
     const {defaultRealm} = params;
 
     // 1. Load
-    const loadedTrendBlueprints: TrendBlueprint[] = Array.from(defaultRealm.objects(BlueprintNameEnum.Trend)).map(
+    const loadedTrendBlueprints: TrendBlueprint[] = Array.from(defaultRealm.objects(BlueprintNameEnum.TREND)).map(
       (row: TrendBlueprintRow) => new TrendBlueprint(row.trendName, row.realmPath, row.properties, row.existingTrendEntities, row.exisitingTrendTags),
     );
 
     // 2. Format and return
     return {
-      [BlueprintNameEnum.Trend]: loadedTrendBlueprints,
+      [BlueprintNameEnum.TREND]: loadedTrendBlueprints,
     };
   }
 }

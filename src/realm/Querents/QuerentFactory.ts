@@ -3,14 +3,16 @@
 // 2. Test Realm relationships on phone
 // 3. Construct Node and Edge Querents for new TrendTracker, within TT
 
-import {SchemaBlueprint} from '../Realm/Schema/SchemaBlueprint';
+import {MetaDataBlueprint} from '../Realm/Schema/MetaDataBlueprint';
 import {TrendBlueprint} from '../Realm/Trends/TrendBlueprint';
+import NodeQuerent from './Nodes/NodeQuerent';
+import DenseEdgeQuerent from './Edges/DenseEdgeQuerent';
 import EdgeQuerent from './Base/EdgeQuerent';
 
 export class QuerentFactory {
   public static buildForTrend(trendBlueprint: TrendBlueprint) {
-    const denseNodeQuerent: EdgeQuerent = new NodeQuerent(trendBlueprint.realmPath, trendBlueprint.schemaName, trendBlueprint.getAttributes());
-    const denseEdgeQuerent: EdgeQuerent = new DenseEdgeQuerent(trendBlueprint.realmPath, trendBlueprint.schemaName, trendBlueprint.getAttributes());
-    const seqEdgeQuerent: EdgeQuerent = new EdgeQuerent(trendBlueprint.realmPath, trendBlueprint.schemaName, trendBlueprint.getAttributes());
+    const denseNodeQuerent: NodeQuerent = new NodeQuerent(trendBlueprint.getRealmPath(), trendBlueprint.getTrendName());
+    const denseEdgeQuerent: DenseEdgeQuerent = new DenseEdgeQuerent(trendBlueprint.getRealmPath(), trendBlueprint.getTrendName());
+    const seqEdgeQuerent: DenseEdgeQuerent = new DenseEdgeQuerent(trendBlueprint.getRealmPath(), trendBlueprint.getTrendName());
   }
 }

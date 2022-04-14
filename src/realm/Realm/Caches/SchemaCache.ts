@@ -1,9 +1,9 @@
 import {ArrayCache, Cache, Singleton, Override} from '../../Base';
-import {SchemaBlueprint} from '../Schema/SchemaBlueprint';
+import {MetaDataBlueprint} from '../Schema/MetaDataBlueprint';
 
 import {TrendCache} from './TrendCache';
 
-export class SchemaCache extends Singleton(Cache)<SchemaBlueprint> {
+export class SchemaCache extends Singleton(Cache)<MetaDataBlueprint> {
   private _realmMap: RealmSchemaCache = new RealmSchemaCache();
   private _schemaTypeMap: SchemaTypeCache = new SchemaTypeCache();
 
@@ -14,7 +14,7 @@ export class SchemaCache extends Singleton(Cache)<SchemaBlueprint> {
   }
 
   @Override('Cache')
-  add(schemaName: string, valueParams: Record<string, any> & {schemaBlueprint: SchemaBlueprint}) {
+  add(schemaName: string, valueParams: Record<string, any> & {schemaBlueprint: MetaDataBlueprint}) {
     const {schemaBlueprint} = valueParams;
     const {realmPath, schemaType} = schemaBlueprint;
 
@@ -41,13 +41,13 @@ export class SchemaCache extends Singleton(Cache)<SchemaBlueprint> {
   public getRealmSchemaNames(realmPath: RealmPath): SchemaName[] | undefined {
     return this._realmMap.get(realmPath);
   }
-  public getRealmSchemas(realmPath: RealmPath): SchemaBlueprint[] | undefined {
+  public getRealmSchemas(realmPath: RealmPath): MetaDataBlueprint[] | undefined {
     const schemaNames: SchemaName[] | undefined = this.getRealmSchemaNames(realmPath);
 
     if (!!schemaNames) {
-      const schemaBlueprints: SchemaBlueprint[] = schemaNames
+      const schemaBlueprints: MetaDataBlueprint[] = schemaNames
         .map((schemaName: SchemaName) => this.get(schemaName))
-        .filter((schemaBlueprint: SchemaBlueprint | undefined) => schemaBlueprint == undefined) as SchemaBlueprint[];
+        .filter((schemaBlueprint: MetaDataBlueprint | undefined) => schemaBlueprint == undefined) as MetaDataBlueprint[];
 
       return schemaBlueprints;
     }
@@ -57,28 +57,28 @@ export class SchemaCache extends Singleton(Cache)<SchemaBlueprint> {
   public getSchemaTypeSchemaNames(schemaType: SchemaTypeEnum): SchemaName[] | undefined {
     return this._schemaTypeMap.get(schemaType);
   }
-  public getSchemaTypeSchemas(schemaType: SchemaTypeEnum): SchemaBlueprint[] | undefined {
+  public getSchemaTypeSchemas(schemaType: SchemaTypeEnum): MetaDataBlueprint[] | undefined {
     const schemaNames: SchemaName[] | undefined = this.getSchemaTypeSchemaNames(schemaType);
 
     if (!!schemaNames) {
-      const schemaBlueprints: SchemaBlueprint[] = schemaNames
+      const schemaBlueprints: MetaDataBlueprint[] = schemaNames
         .map((schemaName: SchemaName) => this.get(schemaName))
-        .filter((schemaBlueprint: SchemaBlueprint | undefined) => schemaBlueprint == undefined) as SchemaBlueprint[];
+        .filter((schemaBlueprint: MetaDataBlueprint | undefined) => schemaBlueprint == undefined) as MetaDataBlueprint[];
 
       return schemaBlueprints;
     }
   }
 
-  // SchemaBlueprint reverse look-up utils
+  // MetaDataBlueprint reverse look-up utils
   public getRealmPath(schemaName: SchemaName): RealmPath | undefined {
-    const schemaBlueprint: SchemaBlueprint | undefined = this.get(schemaName);
+    const schemaBlueprint: MetaDataBlueprint | undefined = this.get(schemaName);
     if (!!schemaBlueprint) {
       return schemaBlueprint.realmPath;
     }
   }
 
   public getSchemaType(schemaName: SchemaName): SchemaTypeEnum | undefined {
-    const schemaBlueprint: SchemaBlueprint | undefined = this.get(schemaName);
+    const schemaBlueprint: MetaDataBlueprint | undefined = this.get(schemaName);
     if (!!schemaBlueprint) {
       return schemaBlueprint.schemaType;
     }

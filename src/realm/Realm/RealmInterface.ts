@@ -3,7 +3,7 @@ import {Singleton} from '../Base';
 import {RealmCache, SchemaCache, TrendCache} from './Caches';
 import {RealmUtils} from './Utility';
 
-import {SchemaBlueprint} from './Schema/SchemaBlueprint';
+import {MetaDataBlueprint} from './Schema/MetaDataBlueprint';
 import {TrendBlueprint} from './Trends/TrendBlueprint';
 import {TrendTracker} from './Trends';
 import NodeQuerent from '../Querents/Nodes/NodeQuerent';
@@ -28,7 +28,7 @@ export class RealmInterface extends Singleton(Object) {
 
   // TREND API
 
-  public addTrend(trendName: string, trendProperties: string[], options?: Dict<string>): SchemaBlueprint[] | undefined {
+  public addTrend(trendName: string, trendProperties: string[], options?: Dict<string>): MetaDataBlueprint[] | undefined {
     const realmPath = DEFAULT_PATH;
 
     // 1. Add to TrendCache
@@ -40,14 +40,14 @@ export class RealmInterface extends Singleton(Object) {
 
     // 3. Get list of relevant SchemaBlueprints from TrendBlueprint
     const completeTrendSB: CompleteTrendSB = trendTracker.getTrendBlueprint().toSchemaBlueprints();
-    const schemaBlueprints: SchemaBlueprint[] = Object.values(completeTrendSB);
+    const schemaBlueprints: MetaDataBlueprint[] = Object.values(completeTrendSB);
 
     // 4. Add Schemas to SchemaCache, will reload Realm in RealmCache
-    const addedSchemas: SchemaBlueprint[] | undefined = this._addSchemas(realmPath, schemaBlueprints, options);
+    const addedSchemas: MetaDataBlueprint[] | undefined = this._addSchemas(realmPath, schemaBlueprints, options);
 
     return addedSchemas;
   }
-  public rmTrend(trendName: string, options?: Dict<string>): Array<SchemaBlueprint> | undefined {
+  public rmTrend(trendName: string, options?: Dict<string>): Array<MetaDataBlueprint> | undefined {
     const defaultRealmPath = DEFAULT_PATH;
 
     // 1. Rm from TrendCache
@@ -59,10 +59,10 @@ export class RealmInterface extends Singleton(Object) {
 
       // 3. Get Schema names to remove from SchemaCache
       const completeTrendSB: CompleteTrendSB = trendBlueprint.toSchemaBlueprints();
-      const schemaNamesToRm: string[] = Object.values(completeTrendSB).map((sb: SchemaBlueprint) => sb.schemaName);
+      const schemaNamesToRm: string[] = Object.values(completeTrendSB).map((sb: MetaDataBlueprint) => sb.schemaName);
 
       // 4. Rm from SchemaCache, will reload Realm in RealmCache
-      const remainingSchemas: SchemaBlueprint[] | undefined = this._rmSchemas(defaultRealmPath, schemaNamesToRm, options);
+      const remainingSchemas: MetaDataBlueprint[] | undefined = this._rmSchemas(defaultRealmPath, schemaNamesToRm, options);
 
       return remainingSchemas;
     }
@@ -139,12 +139,12 @@ export class RealmInterface extends Singleton(Object) {
     const loadedBlueprints: LoadedBlueprints = this._realmCache.load();
 
     // 2. Add the TrendBlueprints to the app the same way a new, user-added Trend would be added
-    loadedBlueprints[BlueprintNameEnum.Trend].forEach((trendBlueprint) => this.addTrend(trendBlueprint.getTrendName(), trendBlueprint.getProperties(), options));
+    loadedBlueprints[BlueprintNameEnum.TREND].forEach((trendBlueprint) => this.addTrend(trendBlueprint.getTrendName(), trendBlueprint.getProperties(), options));
 
     return loadedBlueprints;
   }
 
-  private addRealm(realmPath: string, valueParams: {schemaBlueprints: Array<SchemaBlueprint>; options?: any}) {
+  private addRealm(realmPath: string, valueParams: {schemaBlueprints: Array<MetaDataBlueprint>; options?: any}) {
     this._realmCache.add(realmPath, valueParams);
   }
   private rmRealm(realmPath: string, options?: any) {
@@ -153,17 +153,17 @@ export class RealmInterface extends Singleton(Object) {
 
   // SCHEMA API
 
-  private _addSchemas(realmPath: string, schemaBlueprints: SchemaBlueprint[], options?: Dict<string>): SchemaBlueprint[] | undefined {
+  private _addSchemas(realmPath: string, schemaBlueprints: MetaDataBlueprint[], options?: Dict<string>): MetaDataBlueprint[] | undefined {
     // 1. Get Realm
     const realm = this._realmCache.get(realmPath);
 
     if (!!realm) {
       // SAVE (TREND) SCHEMABLUEPRINTS BEFORE CALLING THIS METHOD
-      // 2. Save SchemaBlueprint to Realm
-      // schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprint) => schemaBlueprint.save(realm));
+      // 2. Save MetaDataBlueprint to Realm
+      // schemaBlueprints.forEach((schemaBlueprint: MetaDataBlueprint) => schemaBlueprint.save(realm));
 
       // 3. Reload Realm with added SchemaBlueprints
-      const allSchemas: Array<SchemaBlueprint> = RealmUtils.mergeSchemasFromRealm(realm, schemaBlueprints);
+      const allSchemas: Array<MetaDataBlueprint> = RealmUtils.mergeSchemasFromRealm(realm, schemaBlueprints);
       // NOTE: Adding also reloads the Realm
       this.addRealm(realmPath, {
         schemaBlueprints: allSchemas,
@@ -177,22 +177,22 @@ export class RealmInterface extends Singleton(Object) {
     }
   }
 
-  private _rmSchemas(realmPath: string, schemaNames: string[], options?: Dict<string>): SchemaBlueprint[] | undefined {
+  private _rmSchemas(realmPath: string, schemaNames: string[], options?: Dict<string>): MetaDataBlueprint[] | undefined {
     // 1. Get Realm
     const realm: Realm | undefined = this._realmCache.get(realmPath);
 
     // 2. Get SchemaBlueprints to remove
-    const schemaBlueprints: SchemaBlueprint[] = schemaNames
+    const schemaBlueprints: MetaDataBlueprint[] = schemaNames
       .map((schemaName: string) => this._schemaCache.get(schemaName))
-      .filter((schemaBlueprint: SchemaBlueprint | undefined) => schemaBlueprint !== undefined) as SchemaBlueprint[];
+      .filter((schemaBlueprint: MetaDataBlueprint | undefined) => schemaBlueprint !== undefined) as MetaDataBlueprint[];
 
     if (!!realm) {
       // 3. Remove SchemaBlueprints from Realm
-      // schemaBlueprints.forEach((schemaBlueprint: SchemaBlueprint) => schemaBlueprint.delete(realm));
+      // schemaBlueprints.forEach((schemaBlueprint: MetaDataBlueprint) => schemaBlueprint.delete(realm));
 
       // 4. Reload Realm without Schemas
       const schemaNamesToRm: string[] = schemaBlueprints.map((sb) => sb.schemaName);
-      const remainingSchemas: Array<SchemaBlueprint> = RealmUtils.filterSchemasfromRealm(realm, schemaNamesToRm);
+      const remainingSchemas: Array<MetaDataBlueprint> = RealmUtils.filterSchemasfromRealm(realm, schemaNamesToRm);
       // NOTE: Adding also reloads the Realm
       this.addRealm(realmPath, {
         schemaBlueprints: remainingSchemas,

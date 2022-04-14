@@ -1,106 +1,21 @@
-import {DEFAULT_PATH} from '../../../../../constants';
+import {Override} from '../../Base';
+import {MetaDataBlueprint} from './MetaDataBlueprint';
 
-export class SchemaBlueprint implements SchemaBlueprintObj {
-  schemaName: string;
-  realmPath: string;
-  schemaType: SchemaTypeEnum;
-  schemaDef: Realm.ObjectSchema;
-
-  // STATIC UTILITIES
-
-  // static BLUEPRINT_SCHEMA_DEF: Realm.ObjectSchema = {
-  //   name: SchemaNameEnum.SchemaBlueprint,
-  //   primaryKey: 'schemaName',
-  //   properties: {
-  //     schemaName: 'string',
-  //     realmPath: 'string',
-  //     schemaType: 'string',
-  //     schemaStr: 'string',
-  //   },
-  // };
-  // static BLUEPRINT_SCHEMA: SchemaBlueprint = new SchemaBlueprint(SchemaNameEnum.SchemaBlueprint, DEFAULT_PATH, SchemaTypeEnum.Blueprint, SchemaBlueprint.BLUEPRINT_SCHEMA_DEF);
-
-  constructor(schemaName: string, realmPath: string, schemaType: SchemaTypeEnum, schemaDef: Realm.ObjectSchema) {
-    this.schemaName = schemaName;
-    this.realmPath = realmPath;
-    this.schemaType = schemaType;
-    this.schemaDef = schemaDef;
+export class SchemaBlueprint extends MetaDataBlueprint {
+  constructor(schemaName: string, realmPath: string, schemaDef: Dict<any>) {
+    super(schemaName, realmPath, BlueprintTypeEnum.SCHEMA, schemaDef);
   }
 
-  //   CONVERSION
-
-  static fromObj(obj: SchemaBlueprintObj): SchemaBlueprint {
-    const {schemaName, realmPath, schemaType, schemaDef} = obj;
-
-    return new SchemaBlueprint(schemaName, realmPath, schemaType, schemaDef);
-  }
-
-  static fromRow(rowObj: SchemaBlueprintRow): SchemaBlueprint {
-    const {schemaName, realmPath, schemaType, schemaStr} = rowObj;
-    const schemaDef = JSON.parse(schemaStr);
-
-    const obj = {
-      schemaName,
-      realmPath,
-      schemaType,
-      schemaDef,
-    };
-
-    return SchemaBlueprint.fromObj(obj);
-  }
-
-  toObj(): SchemaBlueprintObj {
-    return {
-      schemaName: this.schemaName,
-      realmPath: this.realmPath,
-      schemaType: this.schemaType,
-      schemaDef: this.schemaDef,
-    };
-  }
-
-  toRow(): SchemaBlueprintRow {
-    return {
-      schemaName: this.schemaName,
-      realmPath: this.realmPath,
-      schemaType: this.schemaType,
-      schemaStr: JSON.stringify(this.schemaDef),
-    };
-  }
-
-  //   GET EXISTING SCHEMAS FROM SOME KNOWN METADATA SCHEMA
-  public getSchemas(realm: Realm, schemaName: string): SchemaBlueprint[] {}
-
-  //   SAVE
-
-  static save(realm: Realm, schemaName: string, realmPath: string, schemaType: SchemaTypeEnum, schemaDef: Realm.ObjectSchema): SchemaBlueprint {
-    const schemaBlueprint = new SchemaBlueprint(schemaName, realmPath, schemaType, schemaDef);
+  @Override('Blueprint')
+  public static save(realm: Realm, schemaName: string, realmPath: string, blueprintType: BlueprintTypeEnum, schemaDef: Realm.ObjectSchema): MetaDataBlueprint {
+    const schemaBlueprint = new (<any>this.constructor)(schemaName, realmPath, blueprintType, schemaDef);
     schemaBlueprint.save(realm);
 
     return schemaBlueprint;
   }
 
-  save(defaultRealm: Realm): SchemaBlueprintRow {
-    const schemaBlueprintRow: SchemaBlueprintRow = this.toRow();
-
-    defaultRealm.write(() => {
-      defaultRealm.create(BlueprintNameEnum.Schema, schemaBlueprintRow);
-    });
-
-    return schemaBlueprintRow;
-  }
-
-  delete(defaultRealm: Realm): boolean {
-    const primaryKey: string | undefined = this.schemaDef.primaryKey;
-
-    if (primaryKey) {
-      defaultRealm.write(() => {
-        const realmObj: Realm.Results<any> | undefined = defaultRealm.objectForPrimaryKey(BlueprintNameEnum.Schema, primaryKey);
-
-        if (realmObj) defaultRealm.delete(realmObj);
-      });
-    }
-
-    // No primary key or no entry found in realm
-    return false;
+  @Override('Blueprint')
+  public getSchemaDefs(): Realm.ObjectSchema[] {
+    return [this.schemaMetadata as Realm.ObjectSchema];
   }
 }
